@@ -1,3 +1,7 @@
+// ============================================
+// src/components/dashboard/AdminDashboard.jsx
+// ============================================
+
 import React, { useState, useEffect } from 'react';
 import { getAdminStats, getUsers, blockUser, deleteUser, getCategories, createCategory, deleteCategory } from '../../services/api';
 import Loading from '../common/Loading';

@@ -1,3 +1,7 @@
+// ============================================
+// src/components/messaging/ConversationList.jsx
+// ============================================
+
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../contexts/AuthContext';
 import { getConversations } from '../../services/api';

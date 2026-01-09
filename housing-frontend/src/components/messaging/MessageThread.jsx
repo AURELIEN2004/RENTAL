@@ -1,3 +1,8 @@
+// ============================================
+// src/components/messaging/MessageThread.jsx
+// ============================================
+
+
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import { AuthContext } from '../../contexts/AuthContext';
 import { getMessages, markAsRead } from '../../services/api';

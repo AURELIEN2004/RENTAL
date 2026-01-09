@@ -1,3 +1,7 @@
+// ============================================
+// src/components/messaging/MessageInput.jsx
+// ============================================
+
 import React, { useState, useRef } from 'react';
 import { sendMessage } from '../../services/api';
 import './MessageInput.css';
