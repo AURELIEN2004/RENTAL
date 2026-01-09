@@ -1,0 +1,155 @@
+/* ============================================
+   Footer.css
+   ============================================ */
+
+.footer {
+  background: #111827;
+  color: #e5e7eb;
+  margin-top: 60px;
+  font-size: 14px;
+}
+
+.footer-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 50px 20px 30px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 40px;
+}
+
+/* ================= Sections ================= */
+
+.footer-section h3,
+.footer-section h4 {
+  color: #ffffff;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.footer-section p {
+  line-height: 1.7;
+  color: #d1d5db;
+}
+
+/* ================= Social ================= */
+
+.social-links {
+  display: flex;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.social-links a {
+  color: #9ca3af;
+  font-size: 18px;
+  transition: color 0.3s ease;
+}
+
+.social-links a:hover {
+  color: #2563eb;
+}
+
+/* ================= Links ================= */
+
+.footer-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-section ul li {
+  margin-bottom: 10px;
+}
+
+.footer-section ul li a {
+  color: #d1d5db;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-section ul li a:hover {
+  color: #2563eb;
+}
+
+/* ================= Contact ================= */
+
+.contact-info p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: #d1d5db;
+}
+
+/* ================= App Downloads ================= */
+
+.app-downloads {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.app-badge img {
+  height: 42px;
+  object-fit: contain;
+}
+
+/* ================= Bottom Bar ================= */
+
+.footer-bottom {
+  border-top: 1px solid #1f2937;
+  margin-top: 30px;
+}
+
+.footer-bottom .footer-container {
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-bottom p {
+  color: #9ca3af;
+  margin: 0;
+}
+
+.footer-links {
+  display: flex;
+  gap: 20px;
+}
+
+.footer-links a {
+  color: #9ca3af;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  color: #2563eb;
+}
+
+/* ================= Responsive ================= */
+
+@media (max-width: 900px) {
+  .footer-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .footer-bottom .footer-container {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 500px) {
+  .footer-container {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  .app-downloads {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

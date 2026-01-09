@@ -1,0 +1,308 @@
+.conversation-list {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  border-right: 1px solid #ecf0f1;
+}
+
+/* Header */
+.conversations-header {
+  padding: 20px;
+  border-bottom: 2px solid #ecf0f1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.conversations-header h2 {
+  margin: 0;
+  font-size: 1.3em;
+}
+
+.conv-count {
+  background: rgba(255,255,255,0.3);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* Recherche */
+.search-conversations {
+  padding: 15px;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.search-conversations input {
+  width: 100%;
+  padding: 10px 15px;
+  border: 2px solid #ddd;
+  border-radius: 25px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+.search-conversations input:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+/* Liste scrollable */
+.conversations-scroll {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Item de conversation */
+.conversation-item {
+  display: flex;
+  gap: 12px;
+  padding: 15px;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-bottom: 1px solid #f0f0f0;
+  position: relative;
+}
+
+.conversation-item:hover {
+  background: #f8f9fa;
+}
+
+.conversation-item.selected {
+  background: #e8f4f8;
+  border-left: 4px solid #3498db;
+}
+
+.conversation-item.unread {
+  background: #f0f8ff;
+}
+
+/* Avatar */
+.conv-avatar {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.conv-avatar img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #3498db;
+}
+
+.online-indicator {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  background: #27ae60;
+  border: 2px solid white;
+  border-radius: 50%;
+}
+
+/* Contenu */
+.conv-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.conv-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.conv-name {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #2c3e50;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.conv-time {
+  font-size: 12px;
+  color: #95a5a6;
+  white-space: nowrap;
+}
+
+/* Logement */
+.conv-housing {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 5px;
+  padding: 3px 8px;
+  background: #e8f4f8;
+  border-radius: 12px;
+  width: fit-content;
+}
+
+.housing-tag {
+  font-size: 12px;
+}
+
+.housing-title {
+  font-size: 12px;
+  color: #3498db;
+  font-weight: 500;
+}
+
+/* Dernier message */
+.conv-last-message {
+  font-size: 14px;
+  color: #7f8c8d;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.conversation-item.unread .conv-last-message {
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.you-prefix {
+  font-weight: 600;
+  color: #3498db;
+}
+
+.no-message {
+  font-style: italic;
+  color: #bdc3c7;
+}
+
+/* Badge non lus */
+.unread-badge {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: #e74c3c;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 2px 8px;
+  border-radius: 12px;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* État vide */
+.empty-conversations {
+  text-align: center;
+  padding: 60px 20px;
+  color: #7f8c8d;
+}
+
+.empty-icon {
+  font-size: 4em;
+  margin-bottom: 15px;
+  opacity: 0.5;
+}
+
+.empty-conversations p {
+  margin: 0;
+  font-size: 15px;
+}
+
+/* Scrollbar */
+.conversations-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.conversations-scroll::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.conversations-scroll::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
+}
+
+.conversations-scroll::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Dark mode */
+.dark .conversation-list {
+  background: #34495e;
+  border-right-color: #2c3e50;
+}
+
+.dark .conversations-header {
+  border-bottom-color: #2c3e50;
+}
+
+.dark .search-conversations {
+  border-bottom-color: #2c3e50;
+}
+
+.dark .search-conversations input {
+  background: #2c3e50;
+  border-color: #455a64;
+  color: #ecf0f1;
+}
+
+.dark .conversation-item {
+  border-bottom-color: #2c3e50;
+}
+
+.dark .conversation-item:hover {
+  background: #2c3e50;
+}
+
+.dark .conversation-item.selected {
+  background: #2c3e50;
+}
+
+.dark .conversation-item.unread {
+  background: #2c3e50;
+}
+
+.dark .conv-name {
+  color: #ecf0f1;
+}
+
+.dark .conv-housing {
+  background: #2c3e50;
+}
+
+.dark .conv-last-message {
+  color: #95a5a6;
+}
+
+.dark .conversation-item.unread .conv-last-message {
+  color: #ecf0f1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .conversations-header {
+    padding: 15px;
+  }
+  
+  .conversations-header h2 {
+    font-size: 1.1em;
+  }
+  
+  .conv-avatar img {
+    width: 45px;
+    height: 45px;
+  }
+  
+  .conv-name {
+    font-size: 14px;
+  }
+  
+  .conv-last-message {
+    font-size: 13px;
+  }
+}

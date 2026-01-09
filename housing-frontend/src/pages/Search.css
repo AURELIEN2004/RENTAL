@@ -1,0 +1,29 @@
+.search-page {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.search-results {
+  flex: 1;
+}
+
+.view-toggle {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.view-toggle button {
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  background: #eee;
+  border-radius: 4px;
+}
+
+.view-toggle button.active {
+  background: #007bff;
+  color: #fff;
+}

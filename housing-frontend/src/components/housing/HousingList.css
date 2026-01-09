@@ -1,0 +1,178 @@
+:root {
+  --primary-color: #2563eb;
+  --success-color: #059669;
+  --warning-color: #d97706;
+  --danger-color: #dc2626;
+  --bg-card: #ffffff;
+  --text-main: #1f2937;
+  --border-color: #e5e7eb;
+}
+
+/* Support du Mode Sombre via une classe parente ou media query */
+[data-theme='dark'] {
+  --bg-card: #1f2937;
+  --text-main: #f9fafb;
+  --border-color: #374151;
+}
+
+.housing-list-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* --- Barre de Statistiques --- */
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+.stat-item {
+  background: var(--bg-card);
+  padding: 15px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  transition: transform 0.2s;
+}
+
+.stat-item:hover {
+  transform: translateY(-3px);
+  border-color: var(--primary-color);
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+/* --- Contrôles (Filtres et Tris) --- */
+.list-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--bg-card);
+  padding: 15px 20px;
+  border-radius: 10px;
+  margin-bottom: 25px;
+  gap: 15px;
+  border: 1px solid var(--border-color);
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filter-group label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.filter-group select {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-main);
+  outline: none;
+}
+
+.result-count {
+  font-weight: 500;
+  color: #6b7280;
+}
+
+/* --- Grille de Logements --- */
+.housings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 25px;
+}
+
+.housing-item {
+  background: var(--bg-card);
+  border-radius: 15px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+}
+
+/* --- Section Actions (Dashboard) --- */
+.housing-actions {
+  padding: 15px;
+  border-top: 1px solid var(--border-color);
+  background: rgba(0,0,0,0.02);
+}
+
+.status-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.status-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.status-available { background: #d1fae5; color: #065f46; }
+.status-reserved { background: #fef3c7; color: #92400e; }
+.status-occupied { background: #fee2e2; color: #991b1b; }
+
+.action-buttons {
+  display: flex;
+  justify-content: space-around;
+  gap: 5px;
+}
+
+.action-btn {
+  border: none;
+  background: none;
+  font-size: 1.2rem;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.action-btn:hover { background: rgba(0,0,0,0.05); }
+.delete-btn:hover { background: #fee2e2; }
+
+/* --- État Vide --- */
+.empty-state {
+  text-align: center;
+  padding: 50px 20px;
+  background: var(--bg-card);
+  border-radius: 15px;
+}
+
+.empty-icon { font-size: 4rem; margin-bottom: 15px; }
+
+.add-btn {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 25px;
+  background: var(--primary-color);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: bold;
+}
