@@ -1,5 +1,5 @@
 # ============================================
-# 📁 apps/housing/views.py - COMPLET  mmùffl
+# 📁 apps/housing/views.py - COMPLET  mmùff
 # ============================================
 
 from rest_framework import viewsets, status, filters
