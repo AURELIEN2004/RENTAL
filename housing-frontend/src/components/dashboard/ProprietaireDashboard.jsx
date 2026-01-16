@@ -9,14 +9,22 @@ import { housingService } from '../../services/housingService';
 import HousingCard from '../housing/HousingCard';
 import ProfileEdit from '../profile/ProfileEdit';
 import ChangePassword from '../profile/ChangePassword';
+import MessagingPage from '../messaging/MessagingPage';
+import VisibilityManagement from '../../pages/VisibilityManagement';
+import HousingForm from '../housing/HousingForm'
+
 import {
   FaHome, FaPlus, FaEye, FaCalendar, FaEnvelope,
-  FaBell, FaCog, FaUser, FaTrash, FaChartLine,
+  FaBell, FaCog, FaUser, FaTrash, FaChartLine,FaEdit,
 } from 'react-icons/fa';
+import NotificationsList from '../notifications/NotificationsList';
+import VisitsList from '../visits/VisitsList';
 
 import { toast } from 'react-toastify';
 import './Dashboard.css';
 import api from '../../services/api';
+
+
 
 const ProprietaireDashboard = () => {
   const { user, logout, updateUser } = useAuth();
@@ -137,6 +145,9 @@ const loadDashboardData = async () => {
       toast.error('Erreur lors de la suppression');
     }
   };
+  const handleUpdateHousing = async (id) => {
+    // Placeholder for update logic
+  }
 
   const handleConfirmVisit = async (id) => {
     try {
@@ -305,6 +316,12 @@ const loadDashboardData = async () => {
                       >
                         <FaTrash /> Supprimer
                       </button>
+                      <button
+                        className="btn btn-sm btn-danger"
+                        onClick={() => handleUpdateHousing(housing.id)}
+                      >
+                        <FaEdit /> Modifier
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -319,29 +336,66 @@ const loadDashboardData = async () => {
   // ===============================
       
         
-        case 'HousingForm':
+  case 'AddHousing':
+    return (
+      <div className="dashboard-section">
+        <HousingForm />
+      </div>
+    );
+
+  // ===============================
+  // NOTIFICATIONS 
+  // ===============================
+      
+case 'notifications':
+  return (
+    <div className="dashboard-section">
+      <NotificationsList />
+    </div>
+  );
+        
+
+  // ===============================
+  // RESERVATIONS 
+  // ===============================
+      // Dans renderContent()
+      case 'reservations':
         return (
           <div className="dashboard-section">
-            <h2>Ajouter un Logement</h2>
-            <p>Pour ajouter un nouveau logement, veuillez remplir le formulaire ci-dessous.</p>
-            <button
-              className="btn btn-primary"
-              onClick={() => window.location.href = '/HousingForm'}
-            >
-              Aller au formulaire d'ajout de logement
-            </button>
+            <VisitsList userRole="proprietaire" />
           </div>
         );
+
+  // ===============================
+  // MESSAGERIE 
+  // ===============================
+      case 'messages':
+        return (
+          <div className="dashboard-section full-height">
+            <MessagingPage />
+          </div>
+        );
+
+
+  // ===============================
+  // visibility 
+  // ===============================
+  
+        case 'visibility':
+          return (
+            <div className="dashboard-section full-width">
+              <VisibilityManagement />
+            </div>
+          );
+
+
 
       // ===============================
       // AUTRES CASES (INCHANGÉS)
       // ===============================
       case 'stats':
-      case 'reservations':
-      case 'messages':
-      case 'notifications':
       case 'settings':
-      case 'visibility':  
+      // case 'visibility':  
         return null;
         
 
@@ -358,6 +412,7 @@ const loadDashboardData = async () => {
         </div>
 
         <nav className="sidebar-nav">
+
           <button className={activeTab === 'profile' ? 'active' : ''}
                   onClick={() => setActiveTab('profile')}>
             <FaUser /> Mon Profil
@@ -368,18 +423,21 @@ const loadDashboardData = async () => {
             <FaHome /> Mes Logements
           </button>
 
-          <button className="btn btn-primary"
-                   onClick={() => setActiveTab('HousingForm')}>
-            <FaPlus /> Ajouter un logement
-         </button>
+           <button className={activeTab === 'AddHousing' ? 'active' : ''}
+              onClick={() => window.location.href = '/HousingForm'}>
+               <FaPlus /> Ajouter un logement
+            </button>
         
           <button className={activeTab === 'stats' ? 'active' : ''}
                   onClick={() => setActiveTab('stats')}>
             <FaChartLine /> Statistiques
           </button>
 
-          <button className={activeTab === 'visibility' ? 'active' : ''}
-                onClick={() => window.location.href = '/visibility'}>
+         
+          <button 
+            className={activeTab === 'visibility' ? 'active' : ''}
+            onClick={() => setActiveTab('visibility')}
+          >
             <FaEye /> Visibilité
           </button>
 

@@ -1,6 +1,7 @@
+
+// ============================================
 // src/services/api.js
-
-
+// ============================================
 
 import axios from 'axios';
 
@@ -108,5 +109,25 @@ export const createCategory = (data) =>
 
 export const deleteCategory = (id) =>
   api.delete(`/housing/categories/${id}/`);
+
+/* ===============================
+   MESSAGES & CONVERSATIONS
+================================ */
+
+export const sendMessage = async (formData) => {
+  const res = await api.post('/messages/', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data', // Indispensable pour les images/vidéos
+    },
+  });
+  return res.data;
+};
+
+export const getConversations = async () => {
+  const res = await api.get('/conversations/');
+  return res.data;
+};
+
+//
 
 export default api;

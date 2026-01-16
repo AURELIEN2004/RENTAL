@@ -1,42 +1,37 @@
 
-// ============================================
-// src/services/housingService.js
-// ============================================
+// src/services/housingService.js - VERSION COMPLÈTE
 
-import axios from 'axios';
 import api from './api';
 
 export const housingService = {
-  // Liste des logements
+  // ===============================
+  // HOUSINGS
+  // ===============================
+  
   async getHousings(params = {}) {
     const response = await api.get('/housings/', { params });
     return response.data;
   },
 
-  // Logements recommandés (avec algorithme génétique)
   async getRecommendedHousings() {
     const response = await api.get('/housings/recommended/');
     return response.data;
   },
 
-  // Détail d'un logement
   async getHousing(id) {
     const response = await api.get(`/housings/${id}/`);
     return response.data;
   },
 
-  // Créer un logement
   async createHousing(housingData) {
     const formData = new FormData();
     
-    // Ajouter les champs simples
     Object.keys(housingData).forEach(key => {
       if (key !== 'images' && housingData[key] !== null && housingData[key] !== undefined) {
         formData.append(key, housingData[key]);
       }
     });
 
-    // Ajouter les images
     if (housingData.images && housingData.images.length > 0) {
       housingData.images.forEach((image, index) => {
         formData.append(`images[${index}]`, image);
@@ -49,36 +44,55 @@ export const housingService = {
     return response.data;
   },
 
-  // Mettre à jour un logement
   async updateHousing(id, housingData) {
     const response = await api.patch(`/housings/${id}/`, housingData);
     return response.data;
   },
 
-  // Supprimer un logement
   async deleteHousing(id) {
     await api.delete(`/housings/${id}/`);
   },
 
-  // Mes logements (propriétaire)
-  async getMyHousings() {
-    const response = await api.get('/housings/my_housings/');
+  async getMyHousings(params = {}) {
+    const response = await api.get('/housings/my_housings/', { params });
     return response.data;
   },
 
-  // Incrémenter les vues
   async incrementViews(id) {
     const response = await api.post(`/housings/${id}/increment_views/`);
     return response.data;
   },
 
-  // Toggle like
+  // ===============================
+  // FAVORIS & ENREGISTRÉS - AJOUTÉ
+  // ===============================
+
   async toggleLike(id) {
     const response = await api.post(`/housings/${id}/toggle_like/`);
     return response.data;
   },
 
-  // Visites
+  async toggleSave(id) {
+    const response = await api.post(`/housings/${id}/toggle_save/`);
+    return response.data;
+  },
+
+  // 🆕 Récupérer les favoris du locataire
+  async getFavorites() {
+    const response = await api.get('/housings/favorites/');
+    return response.data;
+  },
+
+  // 🆕 Récupérer les enregistrés du locataire
+  async getSavedHousings() {
+    const response = await api.get('/housings/saved/');
+    return response.data;
+  },
+
+  // ===============================
+  // VISITES
+  // ===============================
+
   async getVisits() {
     const response = await api.get('/visits/');
     return response.data;
@@ -99,7 +113,10 @@ export const housingService = {
     return response.data;
   },
 
-  // Conversations
+  // ===============================
+  // MESSAGERIE
+  // ===============================
+
   async getConversations() {
     const response = await api.get('/conversations/');
     return response.data;
@@ -116,11 +133,19 @@ export const housingService = {
   },
 
   async sendMessage(messageData) {
-    const response = await api.post('/messages/', messageData);
+    // messageData peut être un FormData (avec images/vidéos) ou un objet JSON
+    const response = await api.post('/messages/', messageData, {
+      headers: messageData instanceof FormData 
+        ? { 'Content-Type': 'multipart/form-data' }
+        : { 'Content-Type': 'application/json' }
+    });
     return response.data;
   },
 
-  // Notifications
+  // ===============================
+  // NOTIFICATIONS
+  // ===============================
+
   async getNotifications() {
     const response = await api.get('/notifications/');
     return response.data;
@@ -131,9 +156,38 @@ export const housingService = {
     return response.data;
   },
 
-  async getHousingCategories() {
-  const res = await axios.get('/api/categories/');
-  return res.data;
-},
+  // ===============================
+  // CATÉGORIES & TYPES
+  // ===============================
 
+  async getCategories() {
+    const response = await api.get('/categories/');
+    return response.data;
+  },
+
+  async getHousingTypes() {
+    const response = await api.get('/types/');
+    return response.data;
+  },
+
+  // ===============================
+  // LOCALISATION
+  // ===============================
+
+  async getRegions() {
+    const response = await api.get('/regions/');
+    return response.data;
+  },
+
+  async getCities(regionId = null) {
+    const params = regionId ? { region: regionId } : {};
+    const response = await api.get('/cities/', { params });
+    return response.data;
+  },
+
+  async getDistricts(cityId = null) {
+    const params = cityId ? { city: cityId } : {};
+    const response = await api.get('/districts/', { params });
+    return response.data;
+  },
 };

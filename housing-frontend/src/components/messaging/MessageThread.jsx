@@ -1,26 +1,25 @@
-// ============================================
-// src/components/messaging/MessageThread.jsx
-// ============================================
 
+// src/components/messaging/MessageThread.jsx - VERSION AMÉLIORÉE
 
-import React, { useState, useEffect, useRef, useContext } from 'react';
-import { AuthContext } from '../../contexts/AuthContext';
-import { getMessages, markAsRead } from '../../services/api';
+import React, { useState, useEffect, useRef } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+import { housingService } from '../../services/housingService';
 import MessageInput from './MessageInput';
-import Loading from '../common/Loading';
+import { FaPhone, FaVideo, FaEllipsisV, FaHome } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 import './MessageThread.css';
 
-const MessageThread = ({ conversation }) => {
-  const { user } = useContext(AuthContext);
+const MessageThread = ({ conversation, onNewMessage }) => {
+  const { user } = useAuth();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef(null);
-  const messagesContainerRef = useRef(null);
 
   useEffect(() => {
     if (conversation) {
-      fetchMessages();
-      markConversationAsRead();
+      loadMessages();
+      // Marquer comme lu
+      markAsRead();
     }
   }, [conversation]);
 
@@ -28,21 +27,24 @@ const MessageThread = ({ conversation }) => {
     scrollToBottom();
   }, [messages]);
 
-  const fetchMessages = async () => {
+  const loadMessages = async () => {
     try {
       setLoading(true);
-      const data = await getMessages(conversation.id);
-      setMessages(data);
+      const data = await housingService.getMessages(conversation.id);
+      const msgs = Array.isArray(data) ? data : data.results || [];
+      setMessages(msgs);
     } catch (error) {
       console.error('Erreur chargement messages:', error);
+      toast.error('Erreur lors du chargement des messages');
     } finally {
       setLoading(false);
     }
   };
 
-  const markConversationAsRead = async () => {
+  const markAsRead = async () => {
     try {
-      await markAsRead(conversation.id);
+      // Endpoint à implémenter côté backend si nécessaire
+      // await housingService.markConversationAsRead(conversation.id);
     } catch (error) {
       console.error('Erreur marquage lu:', error);
     }
@@ -54,10 +56,13 @@ const MessageThread = ({ conversation }) => {
 
   const handleSendMessage = (newMessage) => {
     setMessages(prev => [...prev, newMessage]);
+    if (onNewMessage) {
+      onNewMessage();
+    }
   };
 
   const getOtherParticipant = () => {
-    return conversation.participants.find(p => p.id !== user.id);
+    return conversation.participants?.find(p => p.id !== user.id) || {};
   };
 
   const formatMessageTime = (timestamp) => {
@@ -96,29 +101,19 @@ const MessageThread = ({ conversation }) => {
 
   const otherUser = getOtherParticipant();
 
-  if (!conversation) {
-    return (
-      <div className="message-thread empty">
-        <div className="empty-thread">
-          <div className="empty-icon">💬</div>
-          <h3>Sélectionnez une conversation</h3>
-          <p>Choisissez une conversation dans la liste pour commencer à échanger</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="message-thread">
+      {/* Header */}
       <div className="thread-header">
         <div className="header-user-info">
           <img 
             src={otherUser?.photo || '/default-avatar.png'} 
-            alt={otherUser?.username}
+            alt={otherUser?.username || 'Utilisateur'}
             className="header-avatar"
+            onError={(e) => e.target.src = '/default-avatar.png'}
           />
           <div>
-            <h3>{otherUser?.username}</h3>
+            <h3>{otherUser?.username || 'Utilisateur'}</h3>
             {conversation.housing && (
               <div className="header-housing">
                 🏠 {conversation.housing.title}
@@ -127,41 +122,53 @@ const MessageThread = ({ conversation }) => {
           </div>
         </div>
         <div className="header-actions">
+          {conversation.housing && (
+            <button 
+              className="action-icon-btn"
+              onClick={() => window.open(`/housing/${conversation.housing.id}`, '_blank')}
+              title="Voir le logement"
+            >
+              <FaHome />
+            </button>
+          )}
+          {otherUser?.phone && (
+            <button 
+              className="action-icon-btn"
+              onClick={() => window.open(`tel:${otherUser.phone}`)}
+              title="Appeler"
+            >
+              <FaPhone />
+            </button>
+          )}
           <button 
             className="action-icon-btn"
-            onClick={() => window.open(`/logement/${conversation.housing?.id}`, '_blank')}
-            title="Voir le logement"
+            title="Plus d'options"
           >
-            🏠
-          </button>
-          <button 
-            className="action-icon-btn"
-            onClick={() => window.open(`tel:${otherUser?.phone}`, '_blank')}
-            title="Appeler"
-          >
-            📞
+            <FaEllipsisV />
           </button>
         </div>
       </div>
 
+      {/* Contexte logement */}
       {conversation.housing && (
         <div className="housing-context">
           <div className="context-image">
             <img 
-              src={conversation.housing.images?.[0]?.image || '/placeholder.png'} 
+              src={conversation.housing.main_image || '/placeholder.jpg'} 
               alt={conversation.housing.title}
+              onError={(e) => e.target.src = '/placeholder.jpg'}
             />
           </div>
           <div className="context-info">
             <h4>{conversation.housing.title}</h4>
             <p className="context-category">
-              {conversation.housing.category?.name} • {conversation.housing.housing_type?.name}
+              {conversation.housing.category_name} • {conversation.housing.type_name}
             </p>
             <p className="context-price">
-              {conversation.housing.price.toLocaleString()} FCFA/mois
+              {conversation.housing.price?.toLocaleString()} FCFA/mois
             </p>
             <a 
-              href={`/logement/${conversation.housing.id}`}
+              href={`/housing/${conversation.housing.id}`}
               target="_blank"
               rel="noopener noreferrer"
               className="view-details-btn"
@@ -172,14 +179,24 @@ const MessageThread = ({ conversation }) => {
         </div>
       )}
 
-      <div className="messages-container" ref={messagesContainerRef}>
+      {/* Messages */}
+      <div className="messages-container">
         {loading ? (
-          <Loading message="Chargement des messages..." />
+          <div className="messages-loading">
+            <div className="spinner"></div>
+            <p>Chargement des messages...</p>
+          </div>
+        ) : messages.length === 0 ? (
+          <div className="no-messages">
+            <div className="empty-icon">💬</div>
+            <p>Aucun message pour le moment</p>
+            <p className="text-muted">Envoyez le premier message pour commencer la conversation</p>
+          </div>
         ) : (
           <>
             {messages.map((message, index) => {
               const showDate = shouldShowDateSeparator(message, messages[index - 1]);
-              const isMine = message.sender.id === user.id;
+              const isMine = message.sender === user.id || message.sender?.id === user.id;
 
               return (
                 <React.Fragment key={message.id}>
@@ -192,9 +209,10 @@ const MessageThread = ({ conversation }) => {
                   <div className={`message-bubble ${isMine ? 'mine' : 'theirs'}`}>
                     {!isMine && (
                       <img 
-                        src={message.sender.photo || '/default-avatar.png'}
-                        alt={message.sender.username}
+                        src={otherUser?.photo || '/default-avatar.png'}
+                        alt={otherUser?.username || 'Utilisateur'}
                         className="message-avatar"
+                        onError={(e) => e.target.src = '/default-avatar.png'}
                       />
                     )}
                     
@@ -238,6 +256,7 @@ const MessageThread = ({ conversation }) => {
                         src={user.photo || '/default-avatar.png'}
                         alt="Vous"
                         className="message-avatar"
+                        onError={(e) => e.target.src = '/default-avatar.png'}
                       />
                     )}
                   </div>
@@ -249,6 +268,7 @@ const MessageThread = ({ conversation }) => {
         )}
       </div>
 
+      {/* Input */}
       <MessageInput 
         conversationId={conversation.id} 
         onSendMessage={handleSendMessage}

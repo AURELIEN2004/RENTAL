@@ -1,40 +1,27 @@
-// ============================================
-// src/components/messaging/ConversationList.jsx
-// ============================================
 
-import React, { useState, useEffect, useContext } from 'react';
-import { AuthContext } from '../../contexts/AuthContext';
-import { getConversations } from '../../services/api';
-import Loading from '../common/Loading';
+// src/components/messaging/ConversationList.jsx - VERSION AMÉLIORÉE
+
+import React, { useState } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+import { FaSearch, FaCircle } from 'react-icons/fa';
 import './ConversationList.css';
 
-const ConversationList = ({ onSelectConversation, selectedConversationId }) => {
-  const { user } = useContext(AuthContext);
-  const [conversations, setConversations] = useState([]);
-  const [loading, setLoading] = useState(true);
+const ConversationList = ({ 
+  conversations = [], 
+  onSelectConversation, 
+  selectedConversationId,
+  unreadCount = 0 
+}) => {
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    fetchConversations();
-  }, []);
-
-  const fetchConversations = async () => {
-    try {
-      setLoading(true);
-      const data = await getConversations();
-      setConversations(data);
-    } catch (error) {
-      console.error('Erreur chargement conversations:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const getOtherParticipant = (conversation) => {
-    return conversation.participants.find(p => p.id !== user.id);
+    return conversation.participants?.find(p => p.id !== user.id) || {};
   };
 
   const formatLastMessageTime = (timestamp) => {
+    if (!timestamp) return '';
+    
     const date = new Date(timestamp);
     const now = new Date();
     const diffMs = now - date;
@@ -42,10 +29,10 @@ const ConversationList = ({ onSelectConversation, selectedConversationId }) => {
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return 'À l\'instant';
-    if (diffMins < 60) return `Il y a ${diffMins}min`;
-    if (diffHours < 24) return `Il y a ${diffHours}h`;
-    if (diffDays < 7) return `Il y a ${diffDays}j`;
+    if (diffMins < 1) return "À l'instant";
+    if (diffMins < 60) return `${diffMins}min`;
+    if (diffHours < 24) return `${diffHours}h`;
+    if (diffDays < 7) return `${diffDays}j`;
     return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
   };
 
@@ -59,27 +46,22 @@ const ConversationList = ({ onSelectConversation, selectedConversationId }) => {
     const otherUser = getOtherParticipant(conv);
     const housingTitle = conv.housing?.title || '';
     return (
-      otherUser?.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      otherUser?.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       housingTitle.toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
-
-  if (loading) {
-    return (
-      <div className="conversation-list">
-        <Loading message="Chargement des conversations..." />
-      </div>
-    );
-  }
 
   return (
     <div className="conversation-list">
       <div className="conversations-header">
         <h2>💬 Messages</h2>
-        <span className="conv-count">{conversations.length}</span>
+        {unreadCount > 0 && (
+          <span className="unread-badge">{unreadCount}</span>
+        )}
       </div>
 
       <div className="search-conversations">
+        <FaSearch className="search-icon" />
         <input
           type="text"
           placeholder="🔍 Rechercher une conversation..."
@@ -102,30 +84,32 @@ const ConversationList = ({ onSelectConversation, selectedConversationId }) => {
           filteredConversations.map(conversation => {
             const otherUser = getOtherParticipant(conversation);
             const isSelected = conversation.id === selectedConversationId;
+            const hasUnread = (conversation.unread_count || 0) > 0;
             
             return (
               <div
                 key={conversation.id}
-                className={`conversation-item ${isSelected ? 'selected' : ''} ${conversation.unread_count > 0 ? 'unread' : ''}`}
+                className={`conversation-item ${isSelected ? 'selected' : ''} ${hasUnread ? 'unread' : ''}`}
                 onClick={() => onSelectConversation(conversation)}
               >
                 {/* Avatar */}
                 <div className="conv-avatar">
                   <img 
                     src={otherUser?.photo || '/default-avatar.png'} 
-                    alt={otherUser?.username}
+                    alt={otherUser?.username || 'Utilisateur'}
+                    onError={(e) => e.target.src = '/default-avatar.png'}
                   />
                   {conversation.is_online && (
-                    <span className="online-indicator"></span>
+                    <FaCircle className="online-indicator" />
                   )}
                 </div>
 
                 {/* Contenu */}
                 <div className="conv-content">
                   <div className="conv-header">
-                    <h3 className="conv-name">{otherUser?.username}</h3>
+                    <h3 className="conv-name">{otherUser?.username || 'Utilisateur'}</h3>
                     <span className="conv-time">
-                      {formatLastMessageTime(conversation.last_message_at)}
+                      {formatLastMessageTime(conversation.updated_at)}
                     </span>
                   </div>
 
@@ -141,20 +125,24 @@ const ConversationList = ({ onSelectConversation, selectedConversationId }) => {
 
                   {/* Dernier message */}
                   <div className="conv-last-message">
-                    {conversation.last_message?.sender_id === user.id && (
+                    {conversation.last_message?.sender === user.id && (
                       <span className="you-prefix">Vous: </span>
                     )}
                     {conversation.last_message?.content ? (
                       truncateMessage(conversation.last_message.content)
+                    ) : conversation.last_message?.image ? (
+                      <span className="media-indicator">📷 Photo</span>
+                    ) : conversation.last_message?.video ? (
+                      <span className="media-indicator">🎥 Vidéo</span>
                     ) : (
-                      <span className="no-message">Pas de messages</span>
+                      <span className="no-message">Commencer la conversation</span>
                     )}
                   </div>
                 </div>
 
                 {/* Badge non lus */}
-                {conversation.unread_count > 0 && (
-                  <div className="unread-badge">
+                {hasUnread && (
+                  <div className="unread-count-badge">
                     {conversation.unread_count}
                   </div>
                 )}

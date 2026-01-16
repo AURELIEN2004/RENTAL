@@ -1,7 +1,3 @@
-// ============================================
-// src/components/housing/HousingList.jsx - CORRECTION
-// ============================================
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import HousingCard from './HousingCard';

@@ -1,7 +1,3 @@
-// ============================================
-// src/components/dashboard/AdminDashboard.jsx
-// ============================================
-
 import React, { useState, useEffect } from 'react';
 import { getAdminStats, getUsers, blockUser, deleteUser, getCategories, createCategory, deleteCategory } from '../../services/api';
 import Loading from '../common/Loading';
@@ -387,3 +383,144 @@ const AdminDashboard = () => {
 
 export default AdminDashboard;
 
+
+
+// import React, { useEffect, useState } from "react";
+// import { getUsers, blockUser, unblockUser } from "../../services/api";
+// import "./AdminDashboard.css";
+
+// const AdminDashboard = () => {
+//   const [users, setUsers] = useState([]);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState(null);
+
+//   /* ===========================
+//      LOAD USERS
+//   =========================== */
+
+//   const fetchUsers = async () => {
+//     try {
+//       setLoading(true);
+//       const response = await getUsers();
+//       setUsers(response.data);
+//     } catch (err) {
+//       console.error(err);
+//       setError("Impossible de charger les utilisateurs");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+  
+//     fetchUsers();
+//   }, []);
+
+//   /* ===========================
+//      ACTIONS
+//   =========================== */
+
+//   const handleBlock = async (userId) => {
+//     try {
+//       await blockUser(userId);
+//       fetchUsers();
+//     } catch (err) {
+//       console.error(err);
+//       alert("Erreur lors du blocage de l'utilisateur");
+//     }
+//   };
+
+//   const handleUnblock = async (userId) => {
+//     try {
+//       await unblockUser(userId);
+//       fetchUsers();
+//     } catch (err) {
+//       console.error(err);
+//       alert("Erreur lors du déblocage de l'utilisateur");
+//     }
+//   };
+
+//   /* ===========================
+//      RENDER
+//   =========================== */
+
+//   if (loading) {
+//     return <div className="admin-loading">Chargement...</div>;
+//   }
+
+//   if (error) {
+//     return <div className="admin-error">{error}</div>;
+//   }
+
+//   return (
+//     <div className="admin-dashboard">
+//       <h1>Administration — Utilisateurs</h1>
+
+//       <div className="admin-table-wrapper">
+//         <table className="admin-table">
+//           <thead>
+//             <tr>
+//               <th>ID</th>
+//               <th>Nom</th>
+//               <th>Email</th>
+//               <th>Rôle</th>
+//               <th>Statut</th>
+//               <th>Actions</th>
+//             </tr>
+//           </thead>
+
+//           <tbody>
+//             {users.length === 0 && (
+//               <tr>
+//                 <td colSpan="6" className="empty">
+//                   Aucun utilisateur trouvé
+//                 </td>
+//               </tr>
+//             )}
+
+//             {users.map((user) => (
+//               <tr key={user.id}>
+//                 <td>{user.id}</td>
+//                 <td>{user.username || user.name}</td>
+//                 <td>{user.email}</td>
+//                 <td>
+//                   {user.is_superuser
+//                     ? "Admin"
+//                     : user.is_staff
+//                     ? "Staff"
+//                     : "Utilisateur"}
+//                 </td>
+//                 <td>
+//                   {user.is_active ? (
+//                     <span className="status active">Actif</span>
+//                   ) : (
+//                     <span className="status blocked">Bloqué</span>
+//                   )}
+//                 </td>
+//                 <td className="actions">
+//                   {user.is_active ? (
+//                     <button
+//                       className="btn danger"
+//                       onClick={() => handleBlock(user.id)}
+//                     >
+//                       Bloquer
+//                     </button>
+//                   ) : (
+//                     <button
+//                       className="btn success"
+//                       onClick={() => handleUnblock(user.id)}
+//                     >
+//                       Débloquer
+//                     </button>
+//                   )}
+//                 </td>
+//               </tr>
+//             ))}
+//           </tbody>
+//         </table>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default AdminDashboard;

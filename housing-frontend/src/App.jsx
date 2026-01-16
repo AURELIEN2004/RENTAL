@@ -23,6 +23,8 @@ import Contact from './pages/Contact';
 import Testimonials from './pages/Testimonials';
 import Dashboard from './pages/Dashboard';
 import HousingForm from './components/housing/HousingForm';
+import VisibilityManagement from './pages/VisibilityManagement';
+
 
 // Components
 import Navbar from './components/common/Navbar';
@@ -61,9 +63,9 @@ function App() {
                 <Route path="/testimonials" element={<Testimonials />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                <Route path="/HousingForm" element={<HousingForm />} />
-                <Route path="/reset-password/:token" element={<ResetPassword />} />
-                {/* Routes protégées */}
+                {/* <Route path="/HousingForm" element={<HousingForm />} /> */}
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password/:token" element={<ResetPassword />} />                {/* Routes protégées */}
                 <Route
                   path="/dashboard/*"
                   element={
@@ -72,6 +74,16 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+                <Route 
+                      path="/HousingForm" 
+                      element={
+                        <ProtectedRoute>
+                          <HousingForm />
+                        </ProtectedRoute>
+                      } 
+                    />
+                    
+                <Route   path="/visibility"   element={ <ProtectedRoute> <VisibilityManagement />  </ProtectedRoute> } />
 
                 {/* 404 */}
                 <Route path="*" element={<div>Page non trouvée</div>} />

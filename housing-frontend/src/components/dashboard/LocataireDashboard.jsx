@@ -1,15 +1,15 @@
-
-
 // ============================================
 // src/components/dashboard/LocataireDashboard.jsx
 // ============================================
-
 import React, { useState, useEffect } from 'react';
 import { housingService } from '../../services/housingService';
 import { useAuth } from '../../contexts/AuthContext';
 
 import ProfileEdit from '../profile/ProfileEdit';
 import ChangePassword from '../profile/ChangePassword';
+import NotificationsList from '../notifications/NotificationsList';
+import VisitsList from '../visits/VisitsList';
+import MessagingPage from '../messaging/MessagingPage';
 
 import {
   FaHeart, FaBookmark, FaCalendar, FaEnvelope,
@@ -18,6 +18,7 @@ import {
 
 import HousingCard from '../housing/HousingCard';
 import './Dashboard.css';
+import { toast } from 'react-toastify';
 
 const LocataireDashboard = () => {
   const { user, logout, updateUser } = useAuth();
@@ -27,26 +28,84 @@ const LocataireDashboard = () => {
   const [saved, setSaved] = useState([]);
   const [visits, setVisits] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // 🔹 AJOUT : états modales (même logique que Propriétaire)
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
-  }, []);
+  }, [activeTab]);
 
   const loadDashboardData = async () => {
     try {
-      const [visitsData, notificationsData] = await Promise.all([
-        housingService.getVisits(),
-        housingService.getNotifications(),
-      ]);
-
-      setVisits(visitsData);
-      setNotifications(notificationsData);
+      setLoading(true);
+      
+      // Charger selon l'onglet actif
+      if (activeTab === 'favorites') {
+        await loadFavorites();
+      } else if (activeTab === 'saved') {
+        await loadSaved();
+      } else if (activeTab === 'visits') {
+        const visitsData = await housingService.getVisits();
+        setVisits(visitsData);
+      } else if (activeTab === 'notifications') {
+        const notificationsData = await housingService.getNotifications();
+        setNotifications(notificationsData);
+      }
     } catch (error) {
       console.error('Error loading dashboard data:', error);
+      toast.error('Erreur de chargement des données');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 🔧 CORRECTION : Charger les favoris
+  const loadFavorites = async () => {
+    try {
+      const data = await housingService.getFavorites();
+      // La réponse contient des objets Favorite avec housing nested
+      const favHousings = data.map(fav => fav.housing);
+      setFavorites(favHousings);
+    } catch (error) {
+      console.error('Erreur favoris:', error);
+      toast.error('Erreur lors du chargement des favoris');
+    }
+  };
+
+  // 🔧 CORRECTION : Charger les enregistrés
+  const loadSaved = async () => {
+    try {
+      const data = await housingService.getSavedHousings();
+      // La réponse contient des objets SavedHousing avec housing nested
+      const savedHousings = data.map(saved => saved.housing);
+      setSaved(savedHousings);
+    } catch (error) {
+      console.error('Erreur enregistrés:', error);
+      toast.error('Erreur lors du chargement des enregistrés');
+    }
+  };
+
+  // 🔧 CORRECTION : Gérer le retrait des favoris
+  const handleRemoveFavorite = async (housingId) => {
+    try {
+      await housingService.toggleLike(housingId);
+      toast.success('Retiré des favoris');
+      loadFavorites(); // Recharger
+    } catch (error) {
+      toast.error('Erreur lors du retrait');
+    }
+  };
+
+  // 🔧 CORRECTION : Gérer le retrait des enregistrés
+  const handleRemoveSaved = async (housingId) => {
+    try {
+      await housingService.toggleSave(housingId);
+      toast.success('Retiré des enregistrés');
+      loadSaved(); // Recharger
+    } catch (error) {
+      toast.error('Erreur lors du retrait');
     }
   };
 
@@ -88,7 +147,6 @@ const LocataireDashboard = () => {
                 </div>
               </div>
 
-              {/* 🔹 Actions profil */}
               <div className="profile-actions">
                 <button
                   className="btn btn-primary"
@@ -106,7 +164,6 @@ const LocataireDashboard = () => {
               </div>
             </div>
 
-            {/* 🔹 Modales */}
             {showEditProfile && (
               <ProfileEdit
                 onClose={() => setShowEditProfile(false)}
@@ -128,42 +185,80 @@ const LocataireDashboard = () => {
         );
 
       // ===============================
-      // FAVORIS
+      // FAVORIS - CORRIGÉ
       // ===============================
       case 'favorites':
         return (
           <div className="dashboard-section">
-            <h2>Mes Favoris</h2>
-            <div className="housing-grid">
-              {favorites.length === 0 ? (
-                <p className="empty-state">Vous n'avez pas encore de favoris</p>
-              ) : (
-                favorites.map(housing => (
-                  <HousingCard key={housing.id} housing={housing} />
-                ))
-              )}
-            </div>
+            <h2>Mes Favoris ({favorites.length})</h2>
+            
+            {loading ? (
+              <div className="loading">Chargement...</div>
+            ) : favorites.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-icon">❤️</div>
+                <p>Vous n'avez pas encore de favoris</p>
+                <button 
+                  className="btn btn-primary"
+                  onClick={() => window.location.href = '/search'}
+                >
+                  Parcourir les logements
+                </button>
+              </div>
+            ) : (
+              <div className="housing-grid">
+                {favorites.map(housing => (
+                  <div key={housing.id} className="housing-item-with-actions">
+                    <HousingCard housing={housing} />
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={() => handleRemoveFavorite(housing.id)}
+                    >
+                      <FaTrash /> Retirer
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         );
 
       // ===============================
-      // ENREGISTRÉS
+      // ENREGISTRÉS - CORRIGÉ
       // ===============================
       case 'saved':
         return (
           <div className="dashboard-section">
-            <h2>Logements Enregistrés</h2>
-            <div className="housing-grid">
-              {saved.length === 0 ? (
-                <p className="empty-state">
-                  Vous n'avez pas encore enregistré de logements
-                </p>
-              ) : (
-                saved.map(housing => (
-                  <HousingCard key={housing.id} housing={housing} />
-                ))
-              )}
-            </div>
+            <h2>Logements Enregistrés ({saved.length})</h2>
+            
+            {loading ? (
+              <div className="loading">Chargement...</div>
+            ) : saved.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-icon">💾</div>
+                <p>Vous n'avez pas encore enregistré de logements</p>
+                <button 
+                  className="btn btn-primary"
+                  onClick={() => window.location.href = '/search'}
+                >
+                  Parcourir les logements
+                </button>
+              </div>
+            ) : (
+              <div className="housing-grid">
+                {saved.map(housing => (
+                  <div key={housing.id} className="housing-item-with-actions">
+                    <HousingCard housing={housing} />
+                    <button
+                      className="btn btn-danger btn-sm"
+                      onClick={() => handleRemoveSaved(housing.id)}
+                    >
+                      <FaTrash /> Retirer
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         );
 
@@ -173,38 +268,7 @@ const LocataireDashboard = () => {
       case 'visits':
         return (
           <div className="dashboard-section">
-            <h2>Visites Planifiées</h2>
-            <div className="visits-list">
-              {visits.length === 0 ? (
-                <p className="empty-state">Aucune visite planifiée</p>
-              ) : (
-                visits.map(visit => (
-                  <div key={visit.id} className="visit-card">
-                    <img
-                      src={visit.housing_image}
-                      alt={visit.housing_title}
-                    />
-                    <div className="visit-info">
-                      <h3>{visit.housing_title}</h3>
-                      <p>
-                        📅 {new Date(visit.date).toLocaleDateString()} à {visit.time}
-                      </p>
-                      <span className={`status-badge status-${visit.status}`}>
-                        {visit.status}
-                      </span>
-                    </div>
-                    <div className="visit-actions">
-                      <button className="btn btn-sm btn-outline">
-                        Modifier
-                      </button>
-                      <button className="btn btn-sm btn-danger">
-                        Annuler
-                      </button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
+            <VisitsList userRole="locataire" />
           </div>
         );
 
@@ -213,11 +277,8 @@ const LocataireDashboard = () => {
       // ===============================
       case 'messages':
         return (
-          <div className="dashboard-section">
-            <h2>Messages</h2>
-            <p className="info-message">
-              Fonctionnalité de messagerie à venir
-            </p>
+          <div className="dashboard-section full-height">
+            <MessagingPage />
           </div>
         );
 
@@ -227,30 +288,7 @@ const LocataireDashboard = () => {
       case 'notifications':
         return (
           <div className="dashboard-section">
-            <h2>Notifications</h2>
-            <div className="notifications-list">
-              {notifications.length === 0 ? (
-                <p className="empty-state">Aucune notification</p>
-              ) : (
-                notifications.map(notif => (
-                  <div
-                    key={notif.id}
-                    className={`notification-item ${notif.is_read ? '' : 'unread'}`}
-                  >
-                    <div className="notif-icon">
-                      <FaBell />
-                    </div>
-                    <div className="notif-content">
-                      <h4>{notif.title}</h4>
-                      <p>{notif.message}</p>
-                      <span className="notif-time">
-                        {new Date(notif.created_at).toLocaleString()}
-                      </span>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
+            <NotificationsList />
           </div>
         );
 
@@ -359,4 +397,3 @@ const LocataireDashboard = () => {
 };
 
 export default LocataireDashboard;
-

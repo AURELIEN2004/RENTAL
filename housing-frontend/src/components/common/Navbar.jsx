@@ -12,6 +12,7 @@ import {
   FaUser, FaSignOutAlt, FaTachometerAlt 
 } from 'react-icons/fa';
 import './Navbar.css';
+import NotificationBell from '../notifications/NotificationBell';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -59,6 +60,8 @@ const Navbar = () => {
           <button onClick={toggleLanguage} className="icon-btn" title="Changer la langue">
             <FaGlobe /> <span className="lang-text">{language.toUpperCase()}</span>
           </button>
+
+         {user && <NotificationBell />}
 
           {/* User Menu */}
           {user ? (

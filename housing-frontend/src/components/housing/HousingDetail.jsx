@@ -10,12 +10,14 @@ import { getHousingDetail, housingService, likeHousing, saveHousing } from '../.
 import { createConversation } from '../../services/api';
 import Loading from '../common/Loading';
 import './HousingDetail.css';
+import VisitFormModal from '../components/visits/VisitFormModal';
 
 const HousingDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
-  
+  const [showVisitModal, setShowVisitModal] = useState(false);
+
   const [housing, setHousing] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -217,15 +219,24 @@ const HousingDetail = () => {
           >
             💾 {isSaved ? 'Enregistré' : 'Enregistrer'}
           </button>
-          <button 
+          {/* <button 
             className="action-btn primary"
             onClick={() => setShowVisitForm(!showVisitForm)}
           >
             📅 Planifier une visite
-          </button>
+          </button> */}
+           {/* Bouton Planifier une visite */}
+      <div className="action-buttons">
+        <button 
+          className="btn btn-primary"
+          onClick={() => setShowVisitModal(true)}
+        >
+          📅 Planifier une visite
+        </button>
+      </div>
         </div>
 
-        {/* Formulaire de visite */}
+        {/* Formulaire de visite
         {showVisitForm && (
           <form className="visit-form" onSubmit={handlePlanVisit}>
             <h3>Planifier une visite</h3>
@@ -246,7 +257,20 @@ const HousingDetail = () => {
             </div>
             <button type="submit" className="submit-visit-btn">Envoyer la demande</button>
           </form>
-        )}
+        )} */}
+
+         {/* Modal de planification */}
+      {showVisitModal && (
+        <VisitFormModal
+          housing={housing}
+          onClose={() => setShowVisitModal(false)}
+          onSuccess={() => {
+            alert('Demande de visite envoyée avec succès !');
+            // Optionnel : rediriger vers les visites
+            // navigate('/dashboard/visites');
+          }}
+        />
+      )}
 
         {/* Description */}
         <div className="description-section">
