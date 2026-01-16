@@ -29,3 +29,13 @@ class NotificationViewSet(viewsets.ReadOnlyModelViewSet):
         notification.is_read = True
         notification.save()
         return Response({'status': 'read'})
+
+    @action(detail=False, methods=['post'])
+    def mark_all_read(self, request):
+        """Marquer toutes les notifications comme lues"""
+        Notification.objects.filter(
+            user=request.user, 
+            is_read=False
+        ).update(is_read=True)
+        
+        return Response({'status': 'all_marked_read'})    

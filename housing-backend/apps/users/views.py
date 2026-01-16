@@ -20,6 +20,157 @@ from .serializers import (
 User = get_user_model()
 
 
+# ============================================
+# 🔧 BACKEND - apps/users/views.py - AJOUTER CES ENDPOINTS ✅
+# ============================================
+
+from rest_framework import viewsets, status
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
+from rest_framework.views import APIView
+from django.contrib.auth import get_user_model
+from apps.housing.models import Housing
+
+User = get_user_model()
+
+
+# ✅ NOUVEAU : Endpoint pour les statistiques admin
+class AdminStatsView(APIView):
+    """Statistiques globales pour l'admin"""
+    permission_classes = [IsAdminUser]
+    
+    def get(self, request):
+        """Retourner les stats globales"""
+        
+        # Vérifier que l'utilisateur est superuser
+        if not request.user.is_superuser:
+            return Response(
+                {'error': 'Accès refusé. Vous devez être administrateur.'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        # Calculer les statistiques
+        total_users = User.objects.count()
+        locataires_count = User.objects.filter(is_locataire=True).count()
+        proprietaires_count = User.objects.filter(is_proprietaire=True).count()
+        
+        total_housings = Housing.objects.count()
+        available_housings = Housing.objects.filter(status='disponible').count()
+        reserved_housings = Housing.objects.filter(status='reserve').count()
+        occupied_housings = Housing.objects.filter(status='occupe').count()
+        
+        # Statistiques mensuelles (exemple simplifié)
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        last_month = timezone.now() - timedelta(days=30)
+        new_users_this_month = User.objects.filter(date_joined__gte=last_month).count()
+        new_housings_this_month = Housing.objects.filter(created_at__gte=last_month).count()
+        
+        # Calculer le nombre total de messages (si vous avez le modèle)
+        from apps.messaging.models import Message
+        total_messages = Message.objects.count()
+        
+        return Response({
+            'total_users': total_users,
+            'locataires_count': locataires_count,
+            'proprietaires_count': proprietaires_count,
+            'total_housings': total_housings,
+            'available_housings': available_housings,
+            'reserved_housings': reserved_housings,
+            'occupied_housings': occupied_housings,
+            'new_users_this_month': new_users_this_month,
+            'new_housings_this_month': new_housings_this_month,
+            'total_messages': total_messages,
+        })
+
+
+# ✅ NOUVEAU : Endpoint pour gérer les utilisateurs (admin)
+class AdminUsersView(APIView):
+    """Gestion des utilisateurs par l'admin"""
+    permission_classes = [IsAdminUser]
+    
+    def get(self, request):
+        """Liste de tous les utilisateurs"""
+        if not request.user.is_superuser:
+            return Response(
+                {'error': 'Accès refusé'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        from apps.users.serializers import UserSerializer
+        users = User.objects.all().order_by('-date_joined')
+        serializer = UserSerializer(users, many=True)
+        return Response(serializer.data)
+
+
+# ✅ NOUVEAU : Bloquer/Débloquer un utilisateur
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def block_user(request, user_id):
+    """Bloquer un utilisateur"""
+    if not request.user.is_superuser:
+        return Response({'error': 'Accès refusé'}, status=403)
+    
+    try:
+        user = User.objects.get(id=user_id)
+        duration = request.data.get('duration')  # 7, 30, ou 'permanent'
+        
+        user.is_blocked = True
+        
+        if duration and duration != 'permanent':
+            from django.utils import timezone
+            from datetime import timedelta
+            user.blocked_until = timezone.now() + timedelta(days=int(duration))
+        else:
+            user.blocked_until = None  # Blocage permanent
+        
+        user.save()
+        
+        return Response({
+            'message': f'Utilisateur {user.username} bloqué',
+            'blocked_until': user.blocked_until
+        })
+    except User.DoesNotExist:
+        return Response({'error': 'Utilisateur non trouvé'}, status=404)
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def unblock_user(request, user_id):
+    """Débloquer un utilisateur"""
+    if not request.user.is_superuser:
+        return Response({'error': 'Accès refusé'}, status=403)
+    
+    try:
+        user = User.objects.get(id=user_id)
+        user.is_blocked = False
+        user.blocked_until = None
+        user.save()
+        
+        return Response({'message': f'Utilisateur {user.username} débloqué'})
+    except User.DoesNotExist:
+        return Response({'error': 'Utilisateur non trouvé'}, status=404)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAdminUser])
+def delete_user_admin(request, user_id):
+    """Supprimer un utilisateur (admin)"""
+    if not request.user.is_superuser:
+        return Response({'error': 'Accès refusé'}, status=403)
+    
+    try:
+        user = User.objects.get(id=user_id)
+        username = user.username
+        user.delete()
+        
+        return Response({'message': f'Utilisateur {username} supprimé'})
+    except User.DoesNotExist:
+        return Response({'error': 'Utilisateur non trouvé'}, status=404)
+
+
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer

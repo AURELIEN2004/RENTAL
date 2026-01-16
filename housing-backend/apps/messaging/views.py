@@ -61,4 +61,19 @@ class MessageViewSet(viewsets.ModelViewSet):
         return Message.objects.none()
     
     def perform_create(self, serializer):
-        serializer.save(sender=self.request.user)
+        message = serializer.save(sender=self.request.user)
+        
+        # Créer notification pour le destinataire
+        conversation = message.conversation
+        recipient = conversation.participants.exclude(
+            id=self.request.user.id
+        ).first()
+        
+        if recipient:
+            Notification.objects.create(
+                user=recipient,
+                type='message',
+                title='Nouveau message',
+                message=f'{self.request.user.username} vous a envoyé un message',
+                link=f'/dashboard/messages?conversation={conversation.id}'
+            )
