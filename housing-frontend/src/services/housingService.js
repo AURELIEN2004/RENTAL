@@ -2,6 +2,7 @@
 // src/services/housingService.js - VERSION COMPLÈTE
 
 import api from './api';
+import { searchService } from './searchService';
 
 export const housingService = {
   // ===============================
@@ -190,4 +191,20 @@ export const housingService = {
     const response = await api.get('/districts/', { params });
     return response.data;
   },
+
+  // ===============================
+  // Recherche avec filtres
+  // ===============================
+
+  async searchHousings(filters) {
+    return await searchService.searchHousings(filters);
+  },
+
+  // ===============================
+  // Recommandations
+  // ===============================
+    async getRecommendedHousings(filters = {}) {
+    return await searchService.getRecommendations(filters);
+    }
+  
 };
