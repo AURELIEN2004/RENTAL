@@ -37,7 +37,10 @@ const Navbar = () => {
         {/* Logo */}
         <Link to="/" className="navbar-logo">
           <img src="/logo.png" alt="Logo" className="logo-img" />
-          <span className="logo-text">Housing Platform</span>
+            <span className="logo-text">
+              Rent<span className="accent">AL</span>
+            </span>
+          {/* <span className="logo-text">RentAL</span> */}
         </Link>
 
         {/* Desktop Menu */}

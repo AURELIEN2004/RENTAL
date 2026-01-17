@@ -157,6 +157,7 @@ const ProprietaireDashboard = () => {
 
   const renderContent = () => {
     switch (activeTab) {
+      
       case 'profile':
         return (
           <div className="dashboard-section">

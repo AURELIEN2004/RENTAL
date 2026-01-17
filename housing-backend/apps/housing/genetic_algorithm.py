@@ -1,7 +1,8 @@
 
-# ============================================
-# GENETIC_ALGORITHM.PY - Algorithme Génétique
-# ============================================
+# # ============================================
+# # GENETIC_ALGORITHM.PY - 
+# # ============================================
+
 
 import math
 import random
@@ -19,7 +20,7 @@ class GeneticAlgorithm:
         self.user = user
         self.housings = list(housings)
         self.generations = generations
-        self.elite_size = int(len(housings) * elite_size)
+        self.elite_size = int(len(housings) * elite_size) if len(housings) > 0 else 0
         self.mutation_rate = mutation_rate
     
     def calculate_fitness(self, housing):
@@ -35,6 +36,7 @@ class GeneticAlgorithm:
         """
         
         # 1. Adéquation prix (30%)
+        # ✅ CORRECTION : Vérification sécurisée de l'attribut
         if hasattr(self.user, 'preferred_max_price') and self.user.preferred_max_price:
             if housing.price <= self.user.preferred_max_price:
                 price_score = 1.0
@@ -45,9 +47,11 @@ class GeneticAlgorithm:
             price_score = 0.5
         
         # 2. Proximité (25%)
+        # ✅ CORRECTION : Vérification sécurisée des coordonnées
         if (hasattr(self.user, 'preferred_location_lat') and 
             self.user.preferred_location_lat and 
-            housing.latitude):
+            housing.latitude and housing.longitude):
+            
             distance = self.haversine_distance(
                 self.user.preferred_location_lat,
                 self.user.preferred_location_lng,
@@ -60,13 +64,20 @@ class GeneticAlgorithm:
             proximity_score = 0.5
         
         # 3. Popularité (20%)
-        # Normalisation basée sur les vues et likes
-        max_engagement = max(
-            h.views_count + (h.likes_count * 2) 
-            for h in self.housings
-        ) or 1
-        engagement = housing.views_count + (housing.likes_count * 2)
-        popularity_score = min(1.0, engagement / max_engagement)
+        # ✅ CORRECTION : Protection contre division par zéro
+        if not self.housings:
+            popularity_score = 0.5
+        else:
+            max_engagement = max(
+                (h.views_count or 0) + ((h.likes_count or 0) * 2) 
+                for h in self.housings
+            )
+            
+            if max_engagement == 0:
+                popularity_score = 0.5
+            else:
+                engagement = (housing.views_count or 0) + ((housing.likes_count or 0) * 2)
+                popularity_score = min(1.0, engagement / max_engagement)
         
         # 4. Préférence utilisateur (15%)
         try:
@@ -125,6 +136,9 @@ class GeneticAlgorithm:
     
     def select_elites(self, scored_population):
         """Sélectionne les meilleurs logements (élites)"""
+        if not scored_population:
+            return []
+        
         sorted_population = sorted(scored_population, key=lambda x: x[1], reverse=True)
         return [h for h, score in sorted_population[:self.elite_size]]
     
@@ -133,12 +147,13 @@ class GeneticAlgorithm:
         Croisement génétique
         Combine les caractéristiques des meilleurs logements
         """
+        if not elites or len(self.housings) <= self.elite_size:
+            return []
+        
         children = []
         for _ in range(len(self.housings) - self.elite_size):
             parent1 = random.choice(elites)
             parent2 = random.choice(elites)
-            # Le "croisement" ici est symbolique
-            # On favorise les logements similaires aux parents
             children.append(random.choice([parent1, parent2]))
         return children
     
@@ -147,6 +162,9 @@ class GeneticAlgorithm:
         Mutation génétique
         Introduit de la diversité en ajoutant des logements aléatoires
         """
+        if not population or not self.housings:
+            return population
+        
         for i in range(len(population)):
             if random.random() < self.mutation_rate:
                 population[i] = random.choice(self.housings)
@@ -157,6 +175,10 @@ class GeneticAlgorithm:
         Exécute l'algorithme génétique
         Retourne les logements classés par pertinence
         """
+        # ✅ CORRECTION : Gérer le cas où il n'y a pas de logements
+        if not self.housings:
+            return []
+        
         population = self.housings.copy()
         
         for generation in range(self.generations):
@@ -165,6 +187,12 @@ class GeneticAlgorithm:
             
             # Sélection des élites
             elites = self.select_elites(scored)
+            
+            # Si pas assez d'élites, retourner directement
+            if len(elites) < 2:
+                final_scored = [(h, self.calculate_fitness(h)) for h in population]
+                sorted_housings = sorted(final_scored, key=lambda x: x[1], reverse=True)
+                return [h for h, score in sorted_housings]
             
             # Croisement
             children = self.crossover(elites)
@@ -190,7 +218,8 @@ def apply_genetic_algorithm(user, housings_queryset):
         housings = Housing.objects.filter(status='disponible', is_visible=True)
         ranked_housings = apply_genetic_algorithm(user, housings)
     """
-    if not housings_queryset.exists():
+    # ✅ CORRECTION : Vérifier que le queryset n'est pas vide
+    if not housings_queryset or not housings_queryset.exists():
         return []
     
     ga = GeneticAlgorithm(user, housings_queryset)

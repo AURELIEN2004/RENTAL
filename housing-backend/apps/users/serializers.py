@@ -1,28 +1,24 @@
-
-# # ============================================
-# # 📁 apps/users/serializers.py
-# # ============================================
-
-
 # apps/users/serializers.py
+
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
-from django.contrib.auth.password_validation import validate_password
-from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """Sérialiseur pour le modèle User"""
+    """Sérialiseur pour le modèle User - AVEC is_superuser"""
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 
-                  'phone', 'photo', 'is_locataire', 'is_proprietaire',
-                  'preferred_max_price', 'preferred_location_lat', 
-                  'preferred_location_lng', 'date_joined']
-        read_only_fields = ['id', 'date_joined', 'username']  # username non modifiable
+        fields = [
+            'id', 'username', 'email', 'first_name', 'last_name', 
+            'phone', 'photo', 'is_locataire', 'is_proprietaire',
+            'preferred_max_price', 'preferred_location_lat', 
+            'preferred_location_lng', 'date_joined',
+            'is_superuser', 'is_staff'  # ✅ AJOUTÉ pour admin
+        ]
+        read_only_fields = ['id', 'date_joined', 'username', 'is_superuser', 'is_staff']
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -82,18 +78,15 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         # Gestion spéciale pour la photo
         if 'photo' in validated_data:
             if validated_data['photo'] is None:
-                # Supprimer l'ancienne photo si elle existe
                 if instance.photo:
                     instance.photo.delete(save=False)
                 instance.photo = None
             else:
-                # Remplacer la photo
                 if instance.photo:
                     instance.photo.delete(save=False)
                 instance.photo = validated_data['photo']
             validated_data.pop('photo', None)
         
-        # Mettre à jour les autres champs
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         
@@ -108,20 +101,17 @@ class ChangePasswordSerializer(serializers.Serializer):
     new_password_confirm = serializers.CharField(required=True, write_only=True)
     
     def validate_old_password(self, value):
-        """Vérifier que l'ancien mot de passe est correct"""
         user = self.context['request'].user
         if not user.check_password(value):
             raise serializers.ValidationError("L'ancien mot de passe est incorrect")
         return value
     
     def validate(self, data):
-        """Vérifier que les nouveaux mots de passe correspondent"""
         if data['new_password'] != data['new_password_confirm']:
             raise serializers.ValidationError({
                 "new_password": "Les nouveaux mots de passe ne correspondent pas"
             })
         
-        # Valider la complexité du mot de passe
         try:
             validate_password(data['new_password'], self.context['request'].user)
         except Exception as e:
@@ -132,7 +122,6 @@ class ChangePasswordSerializer(serializers.Serializer):
         return data
     
     def save(self):
-        """Sauvegarder le nouveau mot de passe"""
         user = self.context['request'].user
         user.set_password(self.validated_data['new_password'])
         user.save()
@@ -145,20 +134,17 @@ class DeleteAccountSerializer(serializers.Serializer):
     confirmation = serializers.CharField(required=True, write_only=True)
     
     def validate_password(self, value):
-        """Vérifier le mot de passe"""
         user = self.context['request'].user
         if not user.check_password(value):
             raise serializers.ValidationError("Mot de passe incorrect")
         return value
     
     def validate_confirmation(self, value):
-        """Vérifier la confirmation de suppression"""
         if value.upper() != "SUPPRIMER":
             raise serializers.ValidationError(
                 'Vous devez taper "SUPPRIMER" pour confirmer'
             )
         return value
-    
 
 
 class PasswordResetRequestSerializer(serializers.Serializer):
@@ -166,7 +152,6 @@ class PasswordResetRequestSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     
     def validate_email(self, value):
-        """Vérifier que l'email existe"""
         if not User.objects.filter(email=value).exists():
             raise serializers.ValidationError(
                 "Aucun compte n'est associé à cet email"
@@ -181,13 +166,11 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
     new_password_confirm = serializers.CharField(required=True, write_only=True)
     
     def validate(self, data):
-        """Valider les mots de passe"""
         if data['new_password'] != data['new_password_confirm']:
             raise serializers.ValidationError({
                 "new_password": "Les mots de passe ne correspondent pas"
             })
         
-        # Valider la complexité du mot de passe
         try:
             validate_password(data['new_password'])
         except Exception as e:
@@ -201,8 +184,6 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
 class PasswordResetVerifySerializer(serializers.Serializer):
     """Sérialiseur pour vérifier la validité du token"""
     token = serializers.UUIDField(required=True)
-
-
 
 
 
