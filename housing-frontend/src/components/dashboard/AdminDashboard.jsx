@@ -1,4 +1,5 @@
-// src/components/dashboard/AdminDashboard.jsx - VERSION AVEC ICÔNES PRO
+
+// src/components/dashboard/AdminDashboard.jsx - VERSION CORRIGÉE
 
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
@@ -10,24 +11,9 @@ import ProfileEdit from '../profile/ProfileEdit';
 import ChangePassword from '../profile/ChangePassword';
 import { toast } from 'react-toastify';
 import {
-  FaUsers,
-  FaHome,
-  FaEye,
-  FaEyeSlash,
-  FaBell,
-  FaTrash,
-  FaBan,
-  FaCheck,
-  FaCog,
-  FaChartBar,
-  FaUser,
-  FaEnvelope,
-  FaTrophy,
-  FaSearch,
-  FaArrowLeft,
-  FaLock,
-  FaCheckCircle,
-  FaComments
+  FaUsers, FaHome, FaEye, FaEyeSlash, FaBell, FaTrash, FaBan,
+  FaCheck, FaCog, FaChartBar, FaUser, FaEnvelope, FaTrophy,
+  FaSearch, FaArrowLeft, FaLock, FaCheckCircle, FaComments
 } from 'react-icons/fa';
 import './AdminDashboard.css';
 
@@ -37,6 +23,7 @@ const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
   const [housings, setHousings] = useState([]);
+  const [proprietaires, setProprietaires] = useState([]); // 🆕 NOUVEAU
   const [selectedUser, setSelectedUser] = useState(null);
   const [filterOwner, setFilterOwner] = useState('');
   const [filterVisibility, setFilterVisibility] = useState('all');
@@ -46,6 +33,11 @@ const AdminDashboard = () => {
   useEffect(() => {
     loadData();
   }, [activeTab, filterOwner, filterVisibility]);
+
+  // 🆕 Charger la liste des propriétaires au montage
+  useEffect(() => {
+    loadProprietaires();
+  }, []);
 
   const loadData = async () => {
     try {
@@ -70,6 +62,16 @@ const AdminDashboard = () => {
       toast.error('Erreur lors du chargement des données');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 🆕 NOUVEAU: Charger uniquement les propriétaires
+  const loadProprietaires = async () => {
+    try {
+      const response = await api.get('/admin/proprietaires/');
+      setProprietaires(response.data);
+    } catch (error) {
+      console.error('Erreur chargement propriétaires:', error);
     }
   };
 
@@ -213,7 +215,11 @@ const AdminDashboard = () => {
                     {stats.users.top_owners.map((owner, idx) => (
                       <div key={owner.id} className="top-user-item">
                         <div className="rank">#{idx + 1}</div>
-                        <img src={owner.photo || '/default-avatar.png'} alt={owner.username} />
+                        <img 
+                          src={owner.photo || '/default-avatar.png'} 
+                          alt={owner.username}
+                          onError={(e) => { e.target.src = '/default-avatar.png'; }}
+                        />
                         <div className="user-info">
                           <h4>{owner.username}</h4>
                           <p>{owner.email}</p>
@@ -258,6 +264,7 @@ const AdminDashboard = () => {
                             src={user.photo || '/default-avatar.png'} 
                             alt={user.username}
                             className="user-avatar-sm"
+                            onError={(e) => { e.target.src = '/default-avatar.png'; }}
                           />
                         </td>
                         <td>{user.username}</td>
@@ -344,10 +351,11 @@ const AdminDashboard = () => {
                 src={selectedUser.photo || '/default-avatar.png'} 
                 alt={selectedUser.username}
                 className="user-avatar-large"
+                onError={(e) => { e.target.src = '/default-avatar.png'; }}
               />
               <div className="user-info">
                 <p><strong><FaEnvelope /> Email:</strong> {selectedUser.email}</p>
-                <p><strong> Téléphone:</strong> {selectedUser.phone || 'Non renseigné'}</p>
+                <p><strong>Téléphone:</strong> {selectedUser.phone || 'Non renseigné'}</p>
                 <p><strong><FaUser /> Rôle:</strong> {selectedUser.is_proprietaire ? 'Propriétaire' : 'Locataire'}</p>
               </div>
             </div>
@@ -367,19 +375,18 @@ const AdminDashboard = () => {
             <h1><FaHome /> Gestion des Logements</h1>
             
             <div className="filters-bar">
+              {/* 🔧 FIX: Filtre uniquement sur les propriétaires */}
               <select 
                 value={filterOwner}
                 onChange={(e) => setFilterOwner(e.target.value)}
               >
                 <option value="">Tous les propriétaires</option>
-                {users.map(user => (
-                  <option key={user.id} value={user.id}>
-                    {user.username}
+                {proprietaires.map(proprio => (
+                  <option key={proprio.id} value={proprio.id}>
+                    {proprio.username} ({proprio.housings_count} logements)
                   </option>
                 ))}
               </select>
-
-              
 
               <select 
                 value={filterVisibility}
@@ -500,12 +507,11 @@ const AdminDashboard = () => {
             <FaComments /> Support
           </button>
           
-          
           <button 
             className={activeTab === 'notifications' ? 'active' : ''}
             onClick={() => setActiveTab('notifications')}
           >
-            <FaBell/> Notifications
+            <FaBell /> Notifications
           </button>
         </nav>
       </aside>

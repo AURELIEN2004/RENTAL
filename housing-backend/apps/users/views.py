@@ -674,6 +674,12 @@ def admin_users_list(request):
     return Response(serializer.data)
 
 
+
+
+# ========================================
+# 🆕 ADMIN: GESTION UTILISATEURS AMÉLIORÉE
+# ========================================
+
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def admin_users_list_enhanced(request):
@@ -681,13 +687,16 @@ def admin_users_list_enhanced(request):
     from apps.housing.models import Housing
     
     users = User.objects.all().annotate(
-        housings_count=Count('housings')  # Nombre de logements par user
+        housings_count=Count('housings')
     ).order_by('-date_joined')
     
     users_data = []
     for user in users:
         user_data = UserSerializer(user).data
         user_data['housings_count'] = user.housings_count
+        # 🔧 FIX: Ajouter l'URL complète de la photo
+        if user.photo:
+            user_data['photo'] = request.build_absolute_uri(user.photo.url)
         users_data.append(user_data)
     
     return Response(users_data)
@@ -767,6 +776,7 @@ def admin_delete_user(request, user_id):
 
 
 
+
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def admin_user_detail(request, user_id):
@@ -777,6 +787,10 @@ def admin_user_detail(request, user_id):
         
         user = User.objects.get(id=user_id)
         user_data = UserSerializer(user).data
+        
+        # 🔧 FIX: Photo complète
+        if user.photo:
+            user_data['photo'] = request.build_absolute_uri(user.photo.url)
         
         # Récupérer les logements de l'utilisateur
         housings = Housing.objects.filter(owner=user).select_related(
@@ -799,14 +813,11 @@ def admin_user_detail(request, user_id):
 
 
 
-
-
 # ========================================
 # 🆕 ADMIN: GESTION LOGEMENTS
 # ========================================
 
 @api_view(['GET'])
-# @permission_calls([IsAdminUser])
 @permission_classes([IsAdminUser])
 
 def admin_housings_list(request):
@@ -844,6 +855,28 @@ def admin_housings_list(request):
         'results': serializer.data
     })
 
+
+
+# 🆕 NOUVEAU: Liste des propriétaires uniquement pour le filtre
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def admin_proprietaires_list(request):
+    """Liste des propriétaires uniquement (pour le filtre)"""
+    proprietaires = User.objects.filter(
+        is_proprietaire=True
+    ).annotate(
+        housings_count=Count('housings')
+    ).order_by('username')
+    
+    data = [{
+        'id': p.id,
+        'username': p.username,
+        'email': p.email,
+        'housings_count': p.housings_count,
+        'photo': request.build_absolute_uri(p.photo.url) if p.photo else None
+    } for p in proprietaires]
+    
+    return Response(data)
 
 @api_view(['POST'])
 @permission_classes([IsAdminUser])
@@ -914,17 +947,78 @@ def admin_delete_housing(request, housing_id):
 
 
 # ========================================
-# 🆕 ADMIN: SUPPORT CHAT
+# 🆕 ADMIN: SUPPORT CHAT - CRÉER CONVERSATION
 # ========================================
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_support_conversation(request):
+    """Créer une conversation avec le support (admin)"""
+    from apps.messaging.models import Conversation, Message
+    
+    try:
+        # Récupérer tous les admins
+        admins = User.objects.filter(is_staff=True, is_superuser=True)
+        
+        if not admins.exists():
+            return Response(
+                {'error': 'Aucun administrateur disponible'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Prendre le premier admin disponible
+        admin = admins.first()
+        
+        # Vérifier si une conversation existe déjà entre l'utilisateur et cet admin
+        existing_conversation = Conversation.objects.filter(
+            participants=request.user
+        ).filter(
+            participants=admin
+        ).first()
+        
+        if existing_conversation:
+            return Response({
+                'conversation_id': existing_conversation.id,
+                'admin': {
+                    'id': admin.id,
+                    'username': admin.username,
+                    'photo': request.build_absolute_uri(admin.photo.url) if admin.photo else None
+                }
+            })
+        
+        # Créer une nouvelle conversation
+        conversation = Conversation.objects.create()
+        conversation.participants.add(request.user, admin)
+        
+        # Message initial automatique
+        Message.objects.create(
+            conversation=conversation,
+            sender=admin,
+            content=f"Bonjour {request.user.username}! Je suis l'équipe support. Comment puis-je vous aider?"
+        )
+        
+        return Response({
+            'conversation_id': conversation.id,
+            'admin': {
+                'id': admin.id,
+                'username': admin.username,
+                'photo': request.build_absolute_uri(admin.photo.url) if admin.photo else None
+            }
+        }, status=status.HTTP_201_CREATED)
+        
+    except Exception as e:
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
 
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def admin_support_messages(request):
     """Messages support pour admin"""
-    from apps.messaging.models import Conversation, Message
+    from apps.messaging.models import Conversation
     
-    # Conversations de support (à implémenter selon votre logique)
-    # Pour l'instant, toutes les conversations où l'admin est participant
     conversations = Conversation.objects.filter(
         participants=request.user
     ).order_by('-updated_at')
@@ -937,8 +1031,6 @@ def admin_support_messages(request):
     )
     
     return Response(serializer.data)
-
-
 
 
 

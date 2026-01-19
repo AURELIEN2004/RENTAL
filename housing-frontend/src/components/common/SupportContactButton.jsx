@@ -4,14 +4,13 @@ import React, { useState } from 'react';
 import { FaQuestionCircle, FaTimes, FaEnvelope, FaPhone, FaWhatsapp, FaComment } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import api from '../../services/api';
 import './SupportContactButton.css';
 
-/**
- * Bouton flottant pour contacter le support
- * Options: WhatsApp, Email, Appel, Messagerie intégrée
- */
 const SupportContactButton = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isCreatingChat, setIsCreatingChat] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -39,14 +38,33 @@ const SupportContactButton = () => {
     setIsOpen(false);
   };
 
-  const handleMessaging = () => {
+  // 🆕 NOUVEAU: Créer conversation avec admin et rediriger
+  const handleMessaging = async () => {
     if (!user) {
+      toast.info('Veuillez vous connecter pour accéder au chat en direct');
       navigate('/login');
+      setIsOpen(false);
       return;
     }
-    // Rediriger vers la messagerie intégrée du dashboard
-    navigate('/dashboard?tab=messages');
-    setIsOpen(false);
+
+    try {
+      setIsCreatingChat(true);
+      
+      // Créer ou récupérer la conversation avec l'admin
+      const response = await api.post('/users/create-support-conversation/');
+      
+      // Rediriger vers le dashboard messages avec l'ID de la conversation
+      navigate(`/dashboard?tab=messages&conversation=${response.data.conversation_id}`);
+      
+      toast.success('Chat avec le support ouvert !');
+      setIsOpen(false);
+      
+    } catch (error) {
+      console.error('Erreur création conversation:', error);
+      toast.error('Impossible d\'ouvrir le chat. Réessayez plus tard.');
+    } finally {
+      setIsCreatingChat(false);
+    }
   };
 
   return (
@@ -69,6 +87,28 @@ const SupportContactButton = () => {
           </div>
 
           <div className="support-options">
+            {/* Messagerie intégrée - EN PREMIER */}
+            <button 
+              className="support-option messaging"
+              onClick={handleMessaging}
+              disabled={isCreatingChat}
+            >
+              <div className="option-icon">
+                <FaComment />
+              </div>
+              <div className="option-content">
+                <h4>Chat en direct</h4>
+                <p>
+                  {isCreatingChat 
+                    ? 'Ouverture...' 
+                    : user 
+                      ? 'Réponse instantanée' 
+                      : 'Connexion requise'
+                  }
+                </p>
+              </div>
+            </button>
+
             {/* WhatsApp */}
             <button 
               className="support-option whatsapp"
@@ -108,20 +148,6 @@ const SupportContactButton = () => {
               <div className="option-content">
                 <h4>Appel</h4>
                 <p>{SUPPORT_INFO.phone}</p>
-              </div>
-            </button>
-
-            {/* Messagerie intégrée */}
-            <button 
-              className="support-option messaging"
-              onClick={handleMessaging}
-            >
-              <div className="option-icon">
-                <FaComment />
-              </div>
-              <div className="option-content">
-                <h4>Messagerie</h4>
-                <p>{user ? 'Chat en direct' : 'Connexion requise'}</p>
               </div>
             </button>
           </div>

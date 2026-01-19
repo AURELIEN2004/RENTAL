@@ -28,7 +28,11 @@ urlpatterns = [
     path('admin/users/<int:user_id>/block/', views.admin_block_user, name='block-user'),
     path('admin/users/<int:user_id>/unblock/', views.admin_unblock_user, name='unblock-user'),
     path('admin/users/<int:user_id>/delete/', views.admin_delete_user, name='delete-user'),
-    
+
+        # 🆕 NOUVEAU: Liste des propriétaires uniquement
+    path('admin/proprietaires/', views.admin_proprietaires_list, name='admin_proprietaires_list'),
+
+
     # Logements
     path('admin/housings/', views.admin_housings_list, name='admin-housings'),
     path('admin/housings/<int:housing_id>/toggle-visibility/', views.admin_toggle_housing_visibility, name='admin-toggle-housing'),
@@ -36,4 +40,9 @@ urlpatterns = [
     
     # Support
     path('admin/support/messages/', views.admin_support_messages, name='admin-support'),
+
+    #  🆕 NOUVEAU: Créer conversation support (pour tous les utilisateurs)
+    path('users/create-support-conversation/', 
+         views.create_support_conversation, 
+         name='create_support_conversation'),
 ]
