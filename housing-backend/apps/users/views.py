@@ -548,6 +548,117 @@ def admin_stats_view(request):
     })
 
 
+
+
+
+# ========================================
+# 🆕 ADMIN: STATISTIQUES GLOBALES DÉTAILLÉES
+# ========================================
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def admin_stats_detailed(request):
+    """Statistiques détaillées pour le dashboard admin"""
+    from apps.housing.models import Housing, Comment
+    from apps.messaging.models import Conversation, Message
+    from apps.visits.models import Visit
+    from apps.notifications.models import Notification
+    
+    # Périodes d'analyse
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+    seven_days_ago = timezone.now() - timedelta(days=7)
+    today = timezone.now().date()
+    
+    # ==================== UTILISATEURS ====================
+    total_users = User.objects.count()
+    locataires = User.objects.filter(is_locataire=True).count()
+    proprietaires = User.objects.filter(is_proprietaire=True).count()
+    blocked = User.objects.filter(is_blocked=True).count()
+    active_today = User.objects.filter(last_login__date=today).count()
+    
+    new_users_30d = User.objects.filter(date_joined__gte=thirty_days_ago).count()
+    new_users_7d = User.objects.filter(date_joined__gte=seven_days_ago).count()
+    
+    # Top propriétaires
+    top_owners = User.objects.filter(is_proprietaire=True).annotate(
+        housings_count=Count('housings')
+    ).order_by('-housings_count')[:5]
+    
+    top_owners_data = [{
+        'id': owner.id,
+        'username': owner.username,
+        'email': owner.email,
+        'housings_count': owner.housings_count,
+        'photo': owner.photo.url if owner.photo else None
+    } for owner in top_owners]
+    
+    # ==================== LOGEMENTS ====================
+    total_housings = Housing.objects.count()
+    visible_housings = Housing.objects.filter(is_visible=True).count()
+    hidden_housings = Housing.objects.filter(is_visible=False).count()
+    
+    disponible = Housing.objects.filter(status='disponible').count()
+    reserve = Housing.objects.filter(status='reserve').count()
+    occupe = Housing.objects.filter(status='occupe').count()
+    
+    new_housings_30d = Housing.objects.filter(created_at__gte=thirty_days_ago).count()
+    new_housings_7d = Housing.objects.filter(created_at__gte=seven_days_ago).count()
+    
+    # Par catégorie
+    by_category = Housing.objects.values('category__name').annotate(
+        count=Count('id')
+    ).order_by('-count')
+    
+    # ==================== ACTIVITÉ ====================
+    total_views = Housing.objects.aggregate(
+        total=Count('views_count')
+    )['total'] or 0
+    
+    total_likes = Housing.objects.aggregate(
+        total=Count('likes_count')
+    )['total'] or 0
+    
+    total_messages = Message.objects.count()
+    messages_30d = Message.objects.filter(created_at__gte=thirty_days_ago).count()
+    
+    total_visits = Visit.objects.count()
+    pending_visits = Visit.objects.filter(status='attente').count()
+    confirmed_visits = Visit.objects.filter(status='confirme').count()
+    
+    # ==================== RESPONSE ====================
+    return Response({
+        'users': {
+            'total': total_users,
+            'locataires': locataires,
+            'proprietaires': proprietaires,
+            'blocked': blocked,
+            'active_today': active_today,
+            'new_30d': new_users_30d,
+            'new_7d': new_users_7d,
+            'top_owners': top_owners_data
+        },
+        'housings': {
+            'total': total_housings,
+            'visible': visible_housings,
+            'hidden': hidden_housings,
+            'disponible': disponible,
+            'reserve': reserve,
+            'occupe': occupe,
+            'new_30d': new_housings_30d,
+            'new_7d': new_housings_7d,
+            'by_category': list(by_category)
+        },
+        'activity': {
+            'total_views': total_views,
+            'total_likes': total_likes,
+            'total_messages': total_messages,
+            'messages_30d': messages_30d,
+            'total_visits': total_visits,
+            'pending_visits': pending_visits,
+            'confirmed_visits': confirmed_visits
+        }
+    })
+
 # ========================================
 # 🆕 ADMIN: LISTE UTILISATEURS
 # ========================================
@@ -562,6 +673,24 @@ def admin_users_list(request):
     serializer = UserSerializer(users, many=True)
     return Response(serializer.data)
 
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def admin_users_list_enhanced(request):
+    """Liste améliorée des utilisateurs avec nombre de logements"""
+    from apps.housing.models import Housing
+    
+    users = User.objects.all().annotate(
+        housings_count=Count('housings')  # Nombre de logements par user
+    ).order_by('-date_joined')
+    
+    users_data = []
+    for user in users:
+        user_data = UserSerializer(user).data
+        user_data['housings_count'] = user.housings_count
+        users_data.append(user_data)
+    
+    return Response(users_data)
 
 # ========================================
 # 🆕 ADMIN: BLOQUER/DÉBLOQUER UTILISATEUR
@@ -637,6 +766,177 @@ def admin_delete_user(request, user_id):
 
 
 
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def admin_user_detail(request, user_id):
+    """Détails d'un utilisateur avec ses logements"""
+    try:
+        from apps.housing.models import Housing
+        from apps.housing.serializers import HousingListSerializer
+        
+        user = User.objects.get(id=user_id)
+        user_data = UserSerializer(user).data
+        
+        # Récupérer les logements de l'utilisateur
+        housings = Housing.objects.filter(owner=user).select_related(
+            'category', 'housing_type', 'city', 'district'
+        ).prefetch_related('images')
+        
+        user_data['housings'] = HousingListSerializer(
+            housings, 
+            many=True,
+            context={'request': request}
+        ).data
+        user_data['housings_count'] = housings.count()
+        
+        return Response(user_data)
+    except User.DoesNotExist:
+        return Response(
+            {'error': 'Utilisateur introuvable'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+
+
+
+
+# ========================================
+# 🆕 ADMIN: GESTION LOGEMENTS
+# ========================================
+
+@api_view(['GET'])
+# @permission_calls([IsAdminUser])
+@permission_classes([IsAdminUser])
+
+def admin_housings_list(request):
+    """Liste des logements avec filtrage par utilisateur"""
+    from apps.housing.models import Housing
+    from apps.housing.serializers import HousingListSerializer
+    
+    # Filtrage par utilisateur si spécifié
+    owner_id = request.query_params.get('owner')
+    visibility = request.query_params.get('visibility')  # 'visible', 'hidden', 'all'
+    
+    housings = Housing.objects.select_related(
+        'owner', 'category', 'housing_type', 'city', 'district'
+    ).prefetch_related('images')
+    
+    if owner_id:
+        housings = housings.filter(owner_id=owner_id)
+    
+    if visibility == 'visible':
+        housings = housings.filter(is_visible=True)
+    elif visibility == 'hidden':
+        housings = housings.filter(is_visible=False)
+    # 'all' = pas de filtre
+    
+    housings = housings.order_by('-created_at')
+    
+    serializer = HousingListSerializer(
+        housings, 
+        many=True,
+        context={'request': request}
+    )
+    
+    return Response({
+        'count': housings.count(),
+        'results': serializer.data
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def admin_toggle_housing_visibility(request, housing_id):
+    """Activer/désactiver la visibilité d'un logement"""
+    try:
+        from apps.housing.models import Housing
+        from apps.notifications.models import Notification
+        
+        housing = Housing.objects.get(id=housing_id)
+        housing.is_visible = not housing.is_visible
+        housing.save()
+        
+        # Notifier le propriétaire
+        action = "activé" if housing.is_visible else "désactivé"
+        Notification.objects.create(
+            user=housing.owner,
+            type='admin',
+            title='Modification de visibilité',
+            message=f'Votre logement "{housing.title}" a été {action} par l\'administrateur',
+            link=f'/dashboard/housings'
+        )
+        
+        return Response({
+            'message': f'Visibilité {action}e avec succès',
+            'is_visible': housing.is_visible
+        })
+    except Housing.DoesNotExist:
+        return Response(
+            {'error': 'Logement introuvable'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAdminUser])
+def admin_delete_housing(request, housing_id):
+    """Supprimer un logement (admin only)"""
+    try:
+        from apps.housing.models import Housing
+        from apps.notifications.models import Notification
+        
+        housing = Housing.objects.get(id=housing_id)
+        owner = housing.owner
+        title = housing.title
+        
+        housing.delete()
+        
+        # Notifier le propriétaire
+        Notification.objects.create(
+            user=owner,
+            type='admin',
+            title='Logement supprimé',
+            message=f'Votre logement "{title}" a été supprimé par l\'administrateur',
+            link=f'/dashboard/housings'
+        )
+        
+        return Response({
+            'message': 'Logement supprimé avec succès'
+        })
+    except Housing.DoesNotExist:
+        return Response(
+            {'error': 'Logement introuvable'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+
+
+
+# ========================================
+# 🆕 ADMIN: SUPPORT CHAT
+# ========================================
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def admin_support_messages(request):
+    """Messages support pour admin"""
+    from apps.messaging.models import Conversation, Message
+    
+    # Conversations de support (à implémenter selon votre logique)
+    # Pour l'instant, toutes les conversations où l'admin est participant
+    conversations = Conversation.objects.filter(
+        participants=request.user
+    ).order_by('-updated_at')
+    
+    from apps.messaging.serializers import ConversationSerializer
+    serializer = ConversationSerializer(
+        conversations, 
+        many=True,
+        context={'request': request}
+    )
+    
+    return Response(serializer.data)
 
 
 

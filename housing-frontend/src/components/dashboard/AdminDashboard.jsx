@@ -1,46 +1,69 @@
-// // ============================================
-// // src/components/dashboard/AdminDashboard.jsx
-// // ============================================
+// src/components/dashboard/AdminDashboard.jsx - VERSION AVEC ICÔNES PRO
 
 import React, { useState, useEffect } from 'react';
-import { 
-  getAdminStats, 
-  getAdminUsers, 
-  blockUser, 
-  unblockUser, 
-  deleteUserAdmin 
-} from '../../services/api';
+import api from '../../services/api';
 import Loading from '../common/Loading';
+import HousingCard from '../housing/HousingCard';
+import MessagingPage from '../messaging/MessagingPage';
+import NotificationsList from '../notifications/NotificationsList';
+import ProfileEdit from '../profile/ProfileEdit';
+import ChangePassword from '../profile/ChangePassword';
 import { toast } from 'react-toastify';
-import './AdminDashboard.css';
 import {
-  FaHeart, FaBookmark, FaCalendar, FaEnvelope,
-  FaBell, FaCog, FaUser, FaTrash
+  FaUsers,
+  FaHome,
+  FaEye,
+  FaEyeSlash,
+  FaBell,
+  FaTrash,
+  FaBan,
+  FaCheck,
+  FaCog,
+  FaChartBar,
+  FaUser,
+  FaEnvelope,
+  FaTrophy,
+  FaSearch,
+  FaArrowLeft,
+  FaLock,
+  FaCheckCircle,
+  FaComments
 } from 'react-icons/fa';
-
+import './AdminDashboard.css';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [housings, setHousings] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [filterOwner, setFilterOwner] = useState('');
+  const [filterVisibility, setFilterVisibility] = useState('all');
+  const [showProfileEdit, setShowProfileEdit] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
   useEffect(() => {
-    fetchData();
-  }, [activeTab]);
+    loadData();
+  }, [activeTab, filterOwner, filterVisibility]);
 
-  // ✅ CORRECTION: Appels API fonctionnels
-  const fetchData = async () => {
+  const loadData = async () => {
     try {
       setLoading(true);
       
       if (activeTab === 'overview') {
-        const statsData = await getAdminStats();
-        setStats(statsData);
+        const response = await api.get('/admin/stats/detailed/');
+        setStats(response.data);
       } else if (activeTab === 'users') {
-        const usersData = await getAdminUsers();
-        setUsers(usersData);
+        const response = await api.get('/admin/users/enhanced/');
+        setUsers(response.data);
+      } else if (activeTab === 'housings') {
+        const params = {};
+        if (filterOwner) params.owner = filterOwner;
+        if (filterVisibility !== 'all') params.visibility = filterVisibility;
+        
+        const response = await api.get('/admin/housings/', { params });
+        setHousings(response.data.results || response.data);
       }
     } catch (error) {
       console.error('Erreur chargement:', error);
@@ -50,234 +73,446 @@ const AdminDashboard = () => {
     }
   };
 
-  // ✅ CORRECTION: Blocage utilisateur
-  const handleBlockUser = async (userId) => {
-    const duration = prompt('Durée du blocage (jours) ou "permanent" :', '7');
-    if (!duration) return;
-
+  // ==================== GESTION UTILISATEURS ====================
+  
+  const handleViewUserDetail = async (userId) => {
     try {
-      await blockUser(userId, duration);
-      toast.success('Utilisateur bloqué avec succès');
-      fetchData();
+      const response = await api.get(`/admin/users/${userId}/`);
+      setSelectedUser(response.data);
+      setActiveTab('user-detail');
+    } catch (error) {
+      toast.error('Erreur lors du chargement');
+    }
+  };
+
+  const handleBlockUser = async (userId, duration) => {
+    try {
+      await api.post(`/admin/users/${userId}/block/`, { duration });
+      toast.success('Utilisateur bloqué');
+      loadData();
     } catch (error) {
       toast.error('Erreur lors du blocage');
     }
   };
 
-  // ✅ CORRECTION: Déblocage utilisateur
   const handleUnblockUser = async (userId) => {
     try {
-      await unblockUser(userId);
+      await api.post(`/admin/users/${userId}/unblock/`);
       toast.success('Utilisateur débloqué');
-      fetchData();
+      loadData();
     } catch (error) {
       toast.error('Erreur lors du déblocage');
     }
   };
 
-  // ✅ CORRECTION: Suppression utilisateur
   const handleDeleteUser = async (userId) => {
-    if (!window.confirm('⚠️ ATTENTION: Supprimer définitivement cet utilisateur et TOUTES ses données ?')) {
-      return;
-    }
-
+    if (!window.confirm('Attention: Supprimer cet utilisateur et tous ses logements ?')) return;
+    
     try {
-      await deleteUserAdmin(userId);
+      await api.delete(`/admin/users/${userId}/delete/`);
       toast.success('Utilisateur supprimé');
-      fetchData();
+      loadData();
     } catch (error) {
       toast.error('Erreur lors de la suppression');
     }
   };
 
-  // Filtrage utilisateurs
-  const filteredUsers = users.filter(user =>
-    user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // ==================== GESTION LOGEMENTS ====================
+  
+  const handleToggleVisibility = async (housingId) => {
+    try {
+      const response = await api.post(`/admin/housings/${housingId}/toggle-visibility/`);
+      toast.success(response.data.message);
+      loadData();
+    } catch (error) {
+      toast.error('Erreur lors de la modification');
+    }
+  };
 
-  if (loading) {
-    return <Loading fullScreen message="Chargement du dashboard admin..." />;
-  }
+  const handleDeleteHousing = async (housingId) => {
+    if (!window.confirm('Supprimer ce logement ?')) return;
+    
+    try {
+      await api.delete(`/admin/housings/${housingId}/delete/`);
+      toast.success('Logement supprimé');
+      loadData();
+    } catch (error) {
+      toast.error('Erreur lors de la suppression');
+    }
+  };
+
+  // ==================== RENDER ====================
+  
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'overview':
+        return (
+          <div className="overview-section">
+            <h1><FaChartBar /> Vue d'ensemble</h1>
+            
+            {loading ? <Loading /> : stats && (
+              <>
+                {/* Statistiques Utilisateurs */}
+                <section className="stats-section">
+                  <h2><FaUsers /> Utilisateurs</h2>
+                  <div className="stats-grid">
+                    <div className="stat-card blue">
+                      <div className="stat-icon"><FaUsers /></div>
+                      <div className="stat-number">{stats.users.total}</div>
+                      <div className="stat-label">Total</div>
+                    </div>
+                    <div className="stat-card green">
+                      <div className="stat-icon"><FaHome /></div>
+                      <div className="stat-number">{stats.users.proprietaires}</div>
+                      <div className="stat-label">Propriétaires</div>
+                    </div>
+                    <div className="stat-card purple">
+                      <div className="stat-icon"><FaSearch /></div>
+                      <div className="stat-number">{stats.users.locataires}</div>
+                      <div className="stat-label">Locataires</div>
+                    </div>
+                    <div className="stat-card orange">
+                      <div className="stat-icon"><FaBan /></div>
+                      <div className="stat-number">{stats.users.blocked}</div>
+                      <div className="stat-label">Bloqués</div>
+                    </div>
+                  </div>
+                </section>
+
+                {/* Statistiques Logements */}
+                <section className="stats-section">
+                  <h2><FaHome /> Logements</h2>
+                  <div className="stats-grid">
+                    <div className="stat-card blue">
+                      <div className="stat-icon"><FaChartBar /></div>
+                      <div className="stat-number">{stats.housings.total}</div>
+                      <div className="stat-label">Total</div>
+                    </div>
+                    <div className="stat-card green">
+                      <div className="stat-icon"><FaEye /></div>
+                      <div className="stat-number">{stats.housings.visible}</div>
+                      <div className="stat-label">Visibles</div>
+                    </div>
+                    <div className="stat-card orange">
+                      <div className="stat-icon"><FaLock /></div>
+                      <div className="stat-number">{stats.housings.hidden}</div>
+                      <div className="stat-label">Masqués</div>
+                    </div>
+                    <div className="stat-card purple">
+                      <div className="stat-icon"><FaCheckCircle /></div>
+                      <div className="stat-number">{stats.housings.disponible}</div>
+                      <div className="stat-label">Disponibles</div>
+                    </div>
+                  </div>
+                </section>
+
+                {/* Top Propriétaires */}
+                <section className="stats-section">
+                  <h2><FaTrophy /> Top Propriétaires</h2>
+                  <div className="top-users-list">
+                    {stats.users.top_owners.map((owner, idx) => (
+                      <div key={owner.id} className="top-user-item">
+                        <div className="rank">#{idx + 1}</div>
+                        <img src={owner.photo || '/default-avatar.png'} alt={owner.username} />
+                        <div className="user-info">
+                          <h4>{owner.username}</h4>
+                          <p>{owner.email}</p>
+                        </div>
+                        <div className="user-stats">
+                          <span><FaHome /> {owner.housings_count}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              </>
+            )}
+          </div>
+        );
+
+      case 'users':
+        return (
+          <div className="users-section">
+            <h1><FaUsers /> Gestion des Utilisateurs</h1>
+            
+            {loading ? <Loading /> : (
+              <div className="users-table-container">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Photo</th>
+                      <th>Nom</th>
+                      <th>Email</th>
+                      <th>Rôle</th>
+                      <th>Logements</th>
+                      <th>Statut</th>
+                      <th>Inscrit le</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {users.map(user => (
+                      <tr key={user.id}>
+                        <td>
+                          <img 
+                            src={user.photo || '/default-avatar.png'} 
+                            alt={user.username}
+                            className="user-avatar-sm"
+                          />
+                        </td>
+                        <td>{user.username}</td>
+                        <td>{user.email}</td>
+                        <td>
+                          <span className={`role-badge ${user.is_proprietaire ? 'proprietaire' : 'locataire'}`}>
+                            {user.is_proprietaire ? 'Propriétaire' : 'Locataire'}
+                          </span>
+                        </td>
+                        <td>
+                          <button 
+                            className="btn-link"
+                            onClick={() => handleViewUserDetail(user.id)}
+                          >
+                            <FaHome /> {user.housings_count || 0}
+                          </button>
+                        </td>
+                        <td>
+                          <span className={`status-badge ${user.is_blocked ? 'blocked' : 'active'}`}>
+                            {user.is_blocked ? 'Bloqué' : 'Actif'}
+                          </span>
+                        </td>
+                        <td>{new Date(user.date_joined).toLocaleDateString('fr-FR')}</td>
+                        <td>
+                          <div className="action-buttons">
+                            <button 
+                              className="btn-icon"
+                              onClick={() => handleViewUserDetail(user.id)}
+                              title="Voir détails"
+                            >
+                              <FaEye />
+                            </button>
+                            
+                            {!user.is_blocked ? (
+                              <button 
+                                className="btn-icon danger"
+                                onClick={() => handleBlockUser(user.id, 'permanent')}
+                                title="Bloquer"
+                              >
+                                <FaBan />
+                              </button>
+                            ) : (
+                              <button 
+                                className="btn-icon success"
+                                onClick={() => handleUnblockUser(user.id)}
+                                title="Débloquer"
+                              >
+                                <FaCheck />
+                              </button>
+                            )}
+                            
+                            <button 
+                              className="btn-icon danger"
+                              onClick={() => handleDeleteUser(user.id)}
+                              title="Supprimer"
+                            >
+                              <FaTrash />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        );
+
+      case 'user-detail':
+        return selectedUser && (
+          <div className="user-detail-section">
+            <button 
+              className="btn btn-outline"
+              onClick={() => setActiveTab('users')}
+            >
+              <FaArrowLeft /> Retour
+            </button>
+            
+            <h1>Détails: {selectedUser.username}</h1>
+            
+            <div className="user-detail-card">
+              <img 
+                src={selectedUser.photo || '/default-avatar.png'} 
+                alt={selectedUser.username}
+                className="user-avatar-large"
+              />
+              <div className="user-info">
+                <p><strong><FaEnvelope /> Email:</strong> {selectedUser.email}</p>
+                <p><strong> Téléphone:</strong> {selectedUser.phone || 'Non renseigné'}</p>
+                <p><strong><FaUser /> Rôle:</strong> {selectedUser.is_proprietaire ? 'Propriétaire' : 'Locataire'}</p>
+              </div>
+            </div>
+
+            <h2><FaHome /> Logements ({selectedUser.housings_count})</h2>
+            <div className="housing-grid">
+              {selectedUser.housings && selectedUser.housings.map(housing => (
+                <HousingCard key={housing.id} housing={housing} />
+              ))}
+            </div>
+          </div>
+        );
+
+      case 'housings':
+        return (
+          <div className="housings-section">
+            <h1><FaHome /> Gestion des Logements</h1>
+            
+            <div className="filters-bar">
+              <select 
+                value={filterOwner}
+                onChange={(e) => setFilterOwner(e.target.value)}
+              >
+                <option value="">Tous les propriétaires</option>
+                {users.map(user => (
+                  <option key={user.id} value={user.id}>
+                    {user.username}
+                  </option>
+                ))}
+              </select>
+
+              
+
+              <select 
+                value={filterVisibility}
+                onChange={(e) => setFilterVisibility(e.target.value)}
+              >
+                <option value="all">Tous</option>
+                <option value="visible">Visibles</option>
+                <option value="hidden">Masqués</option>
+              </select>
+            </div>
+
+            {loading ? <Loading /> : (
+              <div className="housings-list">
+                {housings.map(housing => (
+                  <div key={housing.id} className="housing-admin-item">
+                    <HousingCard housing={housing} />
+                    
+                    <div className="housing-admin-actions">
+                      <button 
+                        className={`btn btn-sm ${housing.is_visible ? 'btn-warning' : 'btn-success'}`}
+                        onClick={() => handleToggleVisibility(housing.id)}
+                      >
+                        {housing.is_visible ? (
+                          <><FaEyeSlash /> Masquer</>
+                        ) : (
+                          <><FaEye /> Activer</>
+                        )}
+                      </button>
+                      
+                      <button 
+                        className="btn btn-sm btn-danger"
+                        onClick={() => handleDeleteHousing(housing.id)}
+                      >
+                        <FaTrash /> Supprimer
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+
+      case 'profile':
+        return (
+          <div className="profile-section">
+            <h1><FaUser /> Mon Profil Admin</h1>
+            
+            {showProfileEdit && (
+              <ProfileEdit onClose={() => setShowProfileEdit(false)} />
+            )}
+            
+            {showChangePassword && (
+              <ChangePassword onClose={() => setShowChangePassword(false)} />
+            )}
+          </div>
+        );
+
+      case 'messages':
+        return (
+          <div className="messages-section">
+            <MessagingPage />
+          </div>
+        );
+
+      case 'notifications':
+        return (
+          <div className="notifications-section">
+            <NotificationsList />
+          </div>
+        );
+
+      default:
+        return <div>Section en développement</div>;
+    }
+  };
 
   return (
-    <div className="admin-dashboard">
-      {/* Sidebar */}
-      <div className="admin-sidebar">
+    <div className="dashboard-layout">
+      <aside className="dashboard-sidebar">
         <div className="sidebar-header">
-          <h2>⚙️ Administration</h2>
+          <h2><FaCog /> Admin</h2>
         </div>
+
         <nav className="sidebar-nav">
           <button 
-            className={`nav-item ${activeTab === 'overview' ? 'active' : ''}`}
+            className={activeTab === 'overview' ? 'active' : ''}
             onClick={() => setActiveTab('overview')}
           >
-            📊 Vue d'ensemble
+            <FaChartBar /> Vue d'ensemble
           </button>
+          
           <button 
-            className={`nav-item ${activeTab === 'users' ? 'active' : ''}`}
+            className={activeTab === 'users' ? 'active' : ''}
             onClick={() => setActiveTab('users')}
           >
-            👥 Utilisateurs
+            <FaUsers /> Utilisateurs
           </button>
+          
           <button 
-            className={`nav-item ${activeTab === 'housings' ? 'active' : ''}`}
+            className={activeTab === 'housings' ? 'active' : ''}
             onClick={() => setActiveTab('housings')}
           >
-            🏠 Logements
+            <FaHome /> Logements
           </button>
+          
           <button 
-            className={`nav-item ${activeTab === 'support' ? 'active' : ''}`}
-            onClick={() => setActiveTab('support')}
+            className={activeTab === 'profile' ? 'active' : ''}
+            onClick={() => setActiveTab('profile')}
           >
-            💬 Support
+            <FaUser /> Profil
           </button>
-
-            <button
-                className={activeTab === 'notifications' ? 'active' : ''}
-                onClick={() => setActiveTab('notifications')}
-                  >
-              <FaBell /> Notifications
-            </button>
+          
+          <button 
+            className={activeTab === 'messages' ? 'active' : ''}
+            onClick={() => setActiveTab('messages')}
+          >
+            <FaComments /> Support
+          </button>
+          
+          
+          <button 
+            className={activeTab === 'notifications' ? 'active' : ''}
+            onClick={() => setActiveTab('notifications')}
+          >
+            <FaBell/> Notifications
+          </button>
         </nav>
-      </div>
+      </aside>
 
-      {/* Main Content */}
-      <div className="admin-content">
-        {/* Overview */}
-        {activeTab === 'overview' && stats && (
-          <div className="overview-section">
-            <h1>📊 Vue d'ensemble</h1>
-            
-            <div className="stats-grid">
-              <div className="stat-card blue">
-                <div className="stat-icon">👥</div>
-                <div className="stat-info">
-                  <div className="stat-value">{stats.users.total}</div>
-                  <div className="stat-label">Utilisateurs</div>
-                </div>
-              </div>
-              
-              <div className="stat-card green">
-                <div className="stat-icon">🏠</div>
-                <div className="stat-info">
-                  <div className="stat-value">{stats.housings.total}</div>
-                  <div className="stat-label">Logements</div>
-                </div>
-              </div>
-              
-              <div className="stat-card orange">
-                <div className="stat-icon">💬</div>
-                <div className="stat-info">
-                  <div className="stat-value">{stats.activity.total_messages}</div>
-                  <div className="stat-label">Messages</div>
-                </div>
-              </div>
-              
-              <div className="stat-card purple">
-                <div className="stat-icon">📅</div>
-                <div className="stat-info">
-                  <div className="stat-value">{stats.activity.pending_visits}</div>
-                  <div className="stat-label">Visites en attente</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Users Management */}
-        {activeTab === 'users' && (
-          <div className="users-section">
-            <div className="section-header">
-              <h1>👥 Gestion des Utilisateurs</h1>
-              <input
-                type="text"
-                placeholder="🔍 Rechercher un utilisateur..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="search-input"
-              />
-            </div>
-
-            <div className="users-table-container">
-              <table className="users-table">
-                <thead>
-                  <tr>
-                    <th>Photo</th>
-                    <th>Nom</th>
-                    <th>Email</th>
-                    <th>Rôle</th>
-                    <th>Statut</th>
-                    <th>Inscrit le</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredUsers.map(user => (
-                    <tr key={user.id}>
-                      <td>
-                        <img 
-                          src={user.photo || '/default-avatar.png'} 
-                          alt={user.username}
-                          className="user-avatar-small"
-                        />
-                      </td>
-                      <td>{user.username}</td>
-                      <td>{user.email}</td>
-                      <td>
-                        <span className={`role-badge ${user.is_proprietaire ? 'proprietaire' : 'locataire'}`}>
-                          {user.is_proprietaire ? 'Propriétaire' : 'Locataire'}
-                        </span>
-                      </td>
-                      <td>
-                        <span className={`status-badge ${user.is_blocked ? 'blocked' : 'active'}`}>
-                          {user.is_blocked ? 'Bloqué' : 'Actif'}
-                        </span>
-                      </td>
-                      <td>{new Date(user.date_joined).toLocaleDateString('fr-FR')}</td>
-                      <td>
-                        <div className="action-buttons">
-                          {!user.is_blocked ? (
-                            <button 
-                              className="btn btn-warning btn-sm"
-                              onClick={() => handleBlockUser(user.id)}
-                            >
-                              🚫 Bloquer
-                            </button>
-                          ) : (
-                            <button 
-                              className="btn btn-success btn-sm"
-                              onClick={() => handleUnblockUser(user.id)}
-                            >
-                              ✅ Débloquer
-                            </button>
-                          )}
-                          
-                          <button 
-                            className="btn btn-danger btn-sm"
-                            onClick={() => handleDeleteUser(user.id)}
-                          >
-                            🗑️ Supprimer
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* Placeholder autres sections */}
-        {(activeTab === 'housings' || activeTab === 'support') && (
-          <div className="placeholder-section">
-            <div className="placeholder-icon">🚧</div>
-            <h2>Section en développement</h2>
-            <p>Cette fonctionnalité sera disponible prochainement</p>
-          </div>
-        )}
-      </div>
+      <main className="dashboard-main">
+        {renderContent()}
+      </main>
     </div>
   );
 };

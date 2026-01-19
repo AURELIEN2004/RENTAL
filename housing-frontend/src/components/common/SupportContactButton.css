@@ -1,0 +1,251 @@
+/* src/components/common/SupportContactButton.css */
+
+/* ==================== BOUTON PRINCIPAL ==================== */
+
+.support-button {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+  animation: pulse-support 2s infinite;
+}
+
+.support-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 25px rgba(37, 99, 235, 0.6);
+}
+
+.support-button.open {
+  background: #ef4444;
+  transform: rotate(90deg);
+}
+
+@keyframes pulse-support {
+  0%, 100% {
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
+  }
+  50% {
+    box-shadow: 0 4px 30px rgba(37, 99, 235, 0.7);
+  }
+}
+
+/* ==================== MENU ==================== */
+
+.support-menu {
+  position: fixed;
+  bottom: 100px;
+  right: 24px;
+  width: 320px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  z-index: 999;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.support-menu-header {
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: center;
+}
+
+.support-menu-header h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.support-menu-header p {
+  margin: 0;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* ==================== OPTIONS ==================== */
+
+.support-options {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.support-option {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 12px;
+  border: none;
+  background: #f9fafb;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  width: 100%;
+}
+
+.support-option:hover {
+  background: #f3f4f6;
+  transform: translateX(4px);
+}
+
+.option-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.option-content h4 {
+  margin: 0 0 4px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.option-content p {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+/* Couleurs spécifiques */
+
+.support-option.whatsapp .option-icon {
+  background: #e7f5ee;
+  color: #25d366;
+}
+
+.support-option.email .option-icon {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.support-option.phone .option-icon {
+  background: #dbeafe;
+  color: #3b82f6;
+}
+
+.support-option.messaging .option-icon {
+  background: #ede9fe;
+  color: #8b5cf6;
+}
+
+/* ==================== FOOTER ==================== */
+
+.support-menu-footer {
+  padding: 16px;
+  border-top: 1px solid #e5e7eb;
+  text-align: center;
+}
+
+.support-menu-footer p {
+  margin: 0;
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+/* ==================== OVERLAY ==================== */
+
+.support-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 998;
+  animation: fadeIn 0.2s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ==================== RESPONSIVE ==================== */
+
+@media (max-width: 768px) {
+  .support-button {
+    bottom: 16px;
+    right: 16px;
+    width: 56px;
+    height: 56px;
+    font-size: 22px;
+  }
+
+  .support-menu {
+    bottom: 88px;
+    right: 16px;
+    left: 16px;
+    width: auto;
+  }
+}
+
+/* ==================== MODE SOMBRE ==================== */
+
+[data-theme="dark"] .support-menu {
+  background: #1f2937;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .support-menu-header {
+  border-bottom-color: #374151;
+}
+
+[data-theme="dark"] .support-menu-header h3 {
+  color: #f9fafb;
+}
+
+[data-theme="dark"] .support-menu-header p {
+  color: #d1d5db;
+}
+
+[data-theme="dark"] .support-option {
+  background: #374151;
+}
+
+[data-theme="dark"] .support-option:hover {
+  background: #4b5563;
+}
+
+[data-theme="dark"] .option-content h4 {
+  color: #f9fafb;
+}
+
+[data-theme="dark"] .option-content p {
+  color: #d1d5db;
+}
+
+[data-theme="dark"] .support-menu-footer {
+  border-top-color: #374151;
+}

@@ -254,8 +254,8 @@ const IntelligentChatbot = ({ onSearch }) => {
   return (
     <div style={{
       position: 'fixed',
-      bottom: '24px',
-      right: '24px',
+      bottom: '20px',
+      right: '124px',
       zIndex: 1000
     }}>
       {/* Bouton d'ouverture */}

@@ -1,6 +1,4 @@
-// ============================================
-// src/App.jsx - Application principale
-// ============================================
+// src/App.jsx - AVEC BOUTON SUPPORT INTÉGRÉ
 
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
@@ -9,8 +7,6 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
 // Pages
 import Home from './pages/Home';
 import Search from './pages/Search';
@@ -24,11 +20,13 @@ import Testimonials from './pages/Testimonials';
 import Dashboard from './pages/Dashboard';
 import HousingForm from './components/housing/HousingForm';
 import VisibilityManagement from './pages/VisibilityManagement';
-
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 // Components
 import Navbar from './components/common/Navbar';
 import Footer from './components/common/Footer';
+import SupportContactButton from './components/common/SupportContactButton';
 
 // Styles
 import './styles/global.css';
@@ -63,9 +61,10 @@ function App() {
                 <Route path="/testimonials" element={<Testimonials />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
-                {/* <Route path="/HousingForm" element={<HousingForm />} /> */}
                 <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/reset-password/:token" element={<ResetPassword />} />                {/* Routes protégées */}
+                <Route path="/reset-password/:token" element={<ResetPassword />} />
+                
+                {/* Routes protégées */}
                 <Route
                   path="/dashboard/*"
                   element={
@@ -75,21 +74,31 @@ function App() {
                   }
                 />
                 <Route 
-                      path="/HousingForm" 
-                      element={
-                        <ProtectedRoute>
-                          <HousingForm />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    
-                <Route   path="/visibility"   element={ <ProtectedRoute> <VisibilityManagement />  </ProtectedRoute> } />
+                  path="/HousingForm" 
+                  element={
+                    <ProtectedRoute>
+                      <HousingForm />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/visibility"   
+                  element={
+                    <ProtectedRoute>
+                      <VisibilityManagement />
+                    </ProtectedRoute>
+                  } 
+                />
 
                 {/* 404 */}
                 <Route path="*" element={<div>Page non trouvée</div>} />
               </Routes>
             </main>
             <Footer />
+            
+            {/* ✨ NOUVEAU: Bouton Support Flottant */}
+            <SupportContactButton />
+            
             <ToastContainer position="top-right" autoClose={3000} />
           </div>
         </AuthProvider>
