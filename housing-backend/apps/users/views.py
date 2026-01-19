@@ -478,6 +478,162 @@ def password_reset_confirm(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# apps/users/views.py - AJOUTER CES MÉTHODES
+
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAdminUser
+from rest_framework.response import Response
+from rest_framework import status
+from django.utils import timezone
+from datetime import timedelta
+
+# ========================================
+# 🆕 ADMIN: STATISTIQUES GLOBALES
+# ========================================
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def admin_stats_view(request):
+    """Dashboard admin - Statistiques complètes"""
+    from apps.housing.models import Housing, Comment
+    from apps.messaging.models import Conversation, Message
+    from apps.visits.models import Visit
+    from apps.notifications.models import Notification
+    
+    # Période d'analyse
+    thirty_days_ago = timezone.now() - timedelta(days=30)
+    seven_days_ago = timezone.now() - timedelta(days=7)
+    
+    # Utilisateurs
+    total_users = User.objects.count()
+    locataires_count = User.objects.filter(is_locataire=True).count()
+    proprietaires_count = User.objects.filter(is_proprietaire=True).count()
+    blocked_users = User.objects.filter(is_blocked=True).count()
+    new_users_30d = User.objects.filter(date_joined__gte=thirty_days_ago).count()
+    new_users_7d = User.objects.filter(date_joined__gte=seven_days_ago).count()
+    
+    # Logements
+    total_housings = Housing.objects.count()
+    available_housings = Housing.objects.filter(status='disponible').count()
+    reserved_housings = Housing.objects.filter(status='reserve').count()
+    occupied_housings = Housing.objects.filter(status='occupe').count()
+    new_housings_30d = Housing.objects.filter(created_at__gte=thirty_days_ago).count()
+    
+    # Activité
+    total_messages = Message.objects.count()
+    total_visits = Visit.objects.count()
+    pending_visits = Visit.objects.filter(status='attente').count()
+    
+    return Response({
+        'users': {
+            'total': total_users,
+            'locataires': locataires_count,
+            'proprietaires': proprietaires_count,
+            'blocked': blocked_users,
+            'new_30d': new_users_30d,
+            'new_7d': new_users_7d,
+        },
+        'housings': {
+            'total': total_housings,
+            'available': available_housings,
+            'reserved': reserved_housings,
+            'occupied': occupied_housings,
+            'new_30d': new_housings_30d,
+        },
+        'activity': {
+            'total_messages': total_messages,
+            'total_visits': total_visits,
+            'pending_visits': pending_visits,
+        }
+    })
+
+
+# ========================================
+# 🆕 ADMIN: LISTE UTILISATEURS
+# ========================================
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def admin_users_list(request):
+    """Liste tous les utilisateurs pour l'admin"""
+    from .serializers import UserSerializer
+    
+    users = User.objects.all().order_by('-date_joined')
+    serializer = UserSerializer(users, many=True)
+    return Response(serializer.data)
+
+
+# ========================================
+# 🆕 ADMIN: BLOQUER/DÉBLOQUER UTILISATEUR
+# ========================================
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def admin_block_user(request, user_id):
+    """Bloquer un utilisateur"""
+    try:
+        user = User.objects.get(id=user_id)
+        duration = request.data.get('duration')  # '7', '30', 'permanent'
+        
+        user.is_blocked = True
+        
+        if duration and duration != 'permanent':
+            user.blocked_until = timezone.now() + timedelta(days=int(duration))
+        else:
+            user.blocked_until = None  # Permanent
+        
+        user.save()
+        
+        return Response({
+            'message': 'Utilisateur bloqué avec succès',
+            'blocked_until': user.blocked_until
+        })
+    except User.DoesNotExist:
+        return Response(
+            {'error': 'Utilisateur introuvable'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminUser])
+def admin_unblock_user(request, user_id):
+    """Débloquer un utilisateur"""
+    try:
+        user = User.objects.get(id=user_id)
+        user.is_blocked = False
+        user.blocked_until = None
+        user.save()
+        
+        return Response({'message': 'Utilisateur débloqué'})
+    except User.DoesNotExist:
+        return Response(
+            {'error': 'Utilisateur introuvable'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+
+
+# ========================================
+# 🆕 ADMIN: SUPPRIMER UTILISATEUR
+# ========================================
+
+@api_view(['DELETE'])
+@permission_classes([IsAdminUser])
+def admin_delete_user(request, user_id):
+    """Supprimer un utilisateur (⚠️ cascade)"""
+    try:
+        user = User.objects.get(id=user_id)
+        username = user.username
+        user.delete()
+        
+        return Response({
+            'message': f'Utilisateur {username} supprimé définitivement'
+        })
+    except User.DoesNotExist:
+        return Response(
+            {'error': 'Utilisateur introuvable'},
+            status=status.HTTP_404_NOT_FOUND
+        )
 
 
 

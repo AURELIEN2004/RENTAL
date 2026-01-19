@@ -1,8 +1,4 @@
-
-// ============================================
-// src/pages/Search.jsx - Page de recherche
-// ============================================
-
+// src/pages/Search.jsx - VERSION CORRIGÉE
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -11,8 +7,9 @@ import { useAuth } from '../contexts/AuthContext';
 import HousingCard from '../components/housing/HousingCard';
 import SearchBar from '../components/search/SearchBar';
 import FilterPanel from '../components/search/FilterPanel';
-import Chatbot from '../components/search/Chatbot';
+import IntelligentChatbot from '../components/search/Chatbot';
 import { FaThLarge, FaList, FaFilter } from 'react-icons/fa';
+import { toast } from 'react-toastify';
 import './Search.css';
 
 const Search = () => {
@@ -20,10 +17,11 @@ const Search = () => {
   const { user } = useAuth();
   
   const [housings, setHousings] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [viewMode, setViewMode] = useState('grid');
   const [showFilters, setShowFilters] = useState(false);
   
+  // Initialiser les filtres depuis l'URL
   const [filters, setFilters] = useState({
     searchTerm: searchParams.get('search') || '',
     category: searchParams.get('category') || '',
@@ -44,11 +42,14 @@ const Search = () => {
   const [totalResults, setTotalResults] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
 
+  // Lancer la recherche au changement de filtres ou de page
   useEffect(() => {
     performSearch();
   }, [filters, currentPage]);
 
   const performSearch = async () => {
+    console.log('🔍 Recherche avec filtres:', filters);
+    
     setLoading(true);
     try {
       const searchFilters = {
@@ -59,7 +60,7 @@ const Search = () => {
 
       let result;
       
-      // Si utilisateur connecté ET pas de filtres spécifiques, utiliser recommandations
+      // Si utilisateur connecté ET recherche par défaut, utiliser recommandations
       if (user && isDefaultSearch(filters)) {
         result = await searchService.getRecommendations(searchFilters);
       } else {
@@ -67,11 +68,15 @@ const Search = () => {
         result = await searchService.advancedSearch(searchFilters);
       }
       
+      console.log('✅ Résultats:', result);
+      
       setHousings(result.results || []);
       setTotalResults(result.count || 0);
       setStats(result.stats || null);
     } catch (error) {
-      console.error('Erreur recherche:', error);
+      console.error('❌ Erreur recherche:', error);
+      toast.error('Erreur lors de la recherche');
+      setHousings([]);
     } finally {
       setLoading(false);
     }
@@ -82,7 +87,10 @@ const Search = () => {
            !filters.minPrice && !filters.maxPrice;
   };
 
+  // ✅ CORRECTION: Fonction de changement de filtres
   const handleFilterChange = (newFilters) => {
+    console.log('🔄 Nouveaux filtres:', newFilters);
+    
     setFilters(newFilters);
     setCurrentPage(1);
     
@@ -92,6 +100,20 @@ const Search = () => {
       if (value) params.set(key, value);
     });
     setSearchParams(params);
+  };
+
+  // ✅ CORRECTION: Fonction de recherche depuis SearchBar
+  const handleSearch = (searchData) => {
+    console.log('🔍 Recherche depuis SearchBar:', searchData);
+    
+    const newFilters = {
+      ...filters,
+      searchTerm: searchData.searchTerm || '',
+      city: searchData.city || '',
+      category: searchData.category || ''
+    };
+    
+    handleFilterChange(newFilters);
   };
 
   const handleResetFilters = () => {
@@ -110,12 +132,11 @@ const Search = () => {
       status: 'disponible',
       sortBy: 'recent',
     };
-    setFilters(resetFilters);
-    setCurrentPage(1);
-    setSearchParams({});
+    handleFilterChange(resetFilters);
   };
 
   const handleChatbotSearch = (chatbotFilters) => {
+    console.log('🤖 Recherche depuis Chatbot:', chatbotFilters);
     const mergedFilters = { ...filters, ...chatbotFilters };
     handleFilterChange(mergedFilters);
   };
@@ -126,8 +147,8 @@ const Search = () => {
         {/* Barre de recherche */}
         <div className="search-header">
           <SearchBar 
-            filters={filters}
-            onFilterChange={handleFilterChange}
+            onSearch={handleSearch}
+            initialFilters={filters}
           />
         </div>
 
@@ -193,7 +214,10 @@ const Search = () => {
 
             {/* Grille de logements */}
             {loading ? (
-              <div className="loading">Chargement des résultats...</div>
+              <div className="loading">
+                <div className="spinner"></div>
+                <p>Recherche en cours...</p>
+              </div>
             ) : housings.length === 0 ? (
               <div className="no-results">
                 <div className="no-results-icon">🏠</div>
@@ -210,6 +234,7 @@ const Search = () => {
                     <HousingCard key={housing.id} housing={housing} />
                   ))}
                 </div>
+                
 
                 {/* Pagination */}
                 {totalResults > 20 && (
@@ -236,7 +261,7 @@ const Search = () => {
       </div>
 
       {/* Chatbot */}
-      <Chatbot onSearch={handleChatbotSearch} />
+      <IntelligentChatbot onSearch={handleChatbotSearch} />
     </div>
   );
 };

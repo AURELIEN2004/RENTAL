@@ -26,13 +26,20 @@ export const searchService = {
   /**
    * Recherche avancée avec statistiques
    */
+  
   async advancedSearch(filters = {}) {
     try {
       const params = this.buildQueryParams(filters);
+      
+      console.log('📡 API Call - advancedSearch:', params);
+      
       const response = await api.get('/housings/search_advanced/', { params });
+      
+      console.log('✅ API Response:', response.data);
+      
       return response.data;
     } catch (error) {
-      console.error('Erreur recherche avancée:', error);
+      console.error('❌ Erreur recherche avancée:', error);
       throw error;
     }
   },
@@ -40,13 +47,20 @@ export const searchService = {
   /**
    * Recommandations personnalisées (avec ou sans filtres)
    */
+  
   async getRecommendations(filters = {}) {
     try {
       const params = this.buildQueryParams(filters);
+      
+      console.log('📡 API Call - recommendations:', params);
+      
       const response = await api.get('/housings/recommended/', { params });
+      
+      console.log('✅ API Response:', response.data);
+      
       return response.data;
     } catch (error) {
-      console.error('Erreur recommandations:', error);
+      console.error('❌ Erreur recommandations:', error);
       throw error;
     }
   },

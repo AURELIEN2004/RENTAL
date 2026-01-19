@@ -1,20 +1,63 @@
+// src/components/search/SearchBar.jsx - VERSION CORRIGÉE
 
-// ============================================
-// src/components/search/SearchBar.jsx
-// ============================================
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FaSearch, FaMapMarkerAlt, FaHome } from 'react-icons/fa';
+import api from '../../services/api';
 import './SearchBar.css';
 
-const SearchBar = ({ onSearch, showFilters = true }) => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [city, setCity] = useState('');
-  const [category, setCategory] = useState('');
+const SearchBar = ({ onSearch, showFilters = true, initialFilters = {} }) => {
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState(initialFilters.searchTerm || '');
+  const [city, setCity] = useState(initialFilters.city || '');
+  const [category, setCategory] = useState(initialFilters.category || '');
+  
+  // Listes dynamiques
+  const [cities, setCities] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    loadOptions();
+  }, []);
+
+  const loadOptions = async () => {
+    try {
+      const [citiesRes, categoriesRes] = await Promise.all([
+        api.get('/cities/'),
+        api.get('/categories/')
+      ]);
+
+      setCities(citiesRes.data.results || citiesRes.data || []);
+      setCategories(categoriesRes.data.results || categoriesRes.data || []);
+    } catch (error) {
+      console.error('Erreur chargement options:', error);
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSearch({ searchTerm, city, category });
+    
+    const searchData = {
+      searchTerm: searchTerm.trim(),
+      city: city,
+      category: category
+    };
+
+    console.log('🔍 Recherche lancée avec:', searchData);
+
+    // Si onSearch est fourni (depuis la page Search), l'utiliser
+    if (onSearch) {
+      onSearch(searchData);
+    } else {
+      // Sinon, naviguer vers la page de recherche avec les paramètres
+      const params = new URLSearchParams();
+      if (searchData.searchTerm) params.set('search', searchData.searchTerm);
+      if (searchData.city) params.set('city', searchData.city);
+      if (searchData.category) params.set('category', searchData.category);
+      
+      navigate(`/search?${params.toString()}`);
+    }
   };
 
   return (
@@ -25,7 +68,7 @@ const SearchBar = ({ onSearch, showFilters = true }) => {
           <FaSearch className="input-icon" />
           <input
             type="text"
-            placeholder="Rechercher un logement..."
+            placeholder="Rechercher un logement, un quartier..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
@@ -43,10 +86,9 @@ const SearchBar = ({ onSearch, showFilters = true }) => {
                 className="search-select"
               >
                 <option value="">Toutes les villes</option>
-                <option value="yaounde">Yaoundé</option>
-                <option value="douala">Douala</option>
-                <option value="bafoussam">Bafoussam</option>
-                {/* Autres villes depuis l'API */}
+                {cities.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
               </select>
             </div>
 
@@ -59,18 +101,21 @@ const SearchBar = ({ onSearch, showFilters = true }) => {
                 className="search-select"
               >
                 <option value="">Toutes catégories</option>
-                <option value="studio">Studio</option>
-                <option value="chambre">Chambre</option>
-                <option value="appartement">Appartement</option>
-                <option value="maison">Maison</option>
+                {categories.map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                ))}
               </select>
             </div>
           </>
         )}
 
         {/* Bouton recherche */}
-        <button type="submit" className="search-btn">
-          <FaSearch /> Rechercher
+        <button 
+          type="submit" 
+          className="search-btn"
+          disabled={loading}
+        >
+          <FaSearch /> {loading ? 'Recherche...' : 'Rechercher'}
         </button>
       </div>
     </form>

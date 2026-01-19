@@ -99,6 +99,8 @@ class HousingViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ['list', 'retrieve', 'search_advanced', 'recommended']:
             return [AllowAny()]
+        elif self.action == 'increment_views':  # ✅ CORRECTION
+            return [AllowAny()]  # Tout le monde peut voir
         return [IsAuthenticated(), IsOwnerOrReadOnly()]
 
     # ----------------------------

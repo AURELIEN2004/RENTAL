@@ -72,10 +72,6 @@ api.interceptors.response.use(
    ADMIN STATS
 ================================ */
 
-export const getAdminStats = async () => {
-  const res = await api.get('/admin/stats/');
-  return res.data;
-};
 
 /* ===============================
    USERS
@@ -86,14 +82,43 @@ export const getUsers = async () => {
   return res.data;
 };
 
-export const blockUser = (id) =>
-  api.post(`/admin/users/${id}/block/`);
 
-export const unblockUser = (id) =>
-  api.post(`/admin/users/${id}/unblock/`);
 
 export const deleteUser = (id) =>
   api.delete(`/admin/users/${id}/`);
+
+
+
+
+
+export const getAdminStats = async () => {
+  const res = await api.get('/admin/stats/');
+  return res.data;
+};
+
+/* ===============================
+   🆕 ADMIN USERS
+================================ */
+
+export const getAdminUsers = async () => {
+  const res = await api.get('/admin/users/');
+  return res.data;
+};
+
+export const blockUser = async (userId, duration) => {
+  const res = await api.post(`/admin/users/${userId}/block/`, { duration });
+  return res.data;
+};
+
+export const unblockUser = async (userId) => {
+  const res = await api.post(`/admin/users/${userId}/unblock/`);
+  return res.data;
+};
+
+export const deleteUserAdmin = async (userId) => {
+  const res = await api.delete(`/admin/users/${userId}/delete/`);
+  return res.data;
+};
 
 /* ===============================
    CATEGORIES
