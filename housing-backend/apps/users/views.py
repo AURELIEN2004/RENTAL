@@ -1007,6 +1007,8 @@ def create_support_conversation(request):
         }, status=status.HTTP_201_CREATED)
         
     except Exception as e:
+        import traceback
+        traceback.print_exc()  # ✅ Debug dans console
         return Response(
             {'error': str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
