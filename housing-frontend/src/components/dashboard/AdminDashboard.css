@@ -564,3 +564,11 @@
     grid-template-columns: 1fr;
   }
 }
+/* Dans AdminDashboard.css */
+.user-avatar-sm {
+    width: 100px;  /* Ajustez cette valeur selon vos besoins */
+    height: 100px; /* Doit être identique à width pour un cercle parfait */
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--border-color); /* Optionnel : ajoute une petite bordure */
+}

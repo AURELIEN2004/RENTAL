@@ -11,13 +11,16 @@ import ProfileEdit from '../profile/ProfileEdit';
 import ChangePassword from '../profile/ChangePassword';
 import { toast } from 'react-toastify';
 import {
-  FaUsers, FaHome, FaEye, FaEyeSlash, FaBell, FaTrash, FaBan,
+  FaUsers, FaEdit , FaHome, FaEye, FaEyeSlash, FaBell, FaTrash, FaBan,
   FaCheck, FaCog, FaChartBar, FaUser, FaEnvelope, FaTrophy,
   FaSearch, FaArrowLeft, FaLock, FaCheckCircle, FaComments
 } from 'react-icons/fa';
 import './AdminDashboard.css';
+import { useAuth } from '../../contexts/AuthContext';
 
-const AdminDashboard = () => {
+
+
+const AdminDashboard = ({ user }) => {
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
@@ -29,6 +32,9 @@ const AdminDashboard = () => {
   const [filterVisibility, setFilterVisibility] = useState('all');
   const [showProfileEdit, setShowProfileEdit] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
+
+  const [showEditProfile, setShowEditProfile] = useState(false); // ✅ AJOUTÉ
+  // ... autres états
 
   useEffect(() => {
     loadData();
@@ -430,27 +436,96 @@ const AdminDashboard = () => {
           </div>
         );
 
-      case 'profile':
-        return (
-          <div className="profile-section">
-            <h1><FaUser /> Mon Profil Admin</h1>
-            
-            {showProfileEdit && (
-              <ProfileEdit onClose={() => setShowProfileEdit(false)} />
-            )}
-            
-            {showChangePassword && (
-              <ChangePassword onClose={() => setShowChangePassword(false)} />
-            )}
-          </div>
-        );
+      // AdminDashboard.jsx - SECTION PROFIL
 
-      case 'messages':
-        return (
-          <div className="messages-section">
-            <MessagingPage />
+case 'profile':
+  return (
+    <div className="profile-section">
+      <h1><FaUser /> Mon Profil Admin</h1>
+      
+      {/* Carte profil */}
+      <div className="profile-card">
+        <div className="profile-header">
+          <img
+            src={user?.photo || '/default-avatar.png'}
+            alt={user?.username}
+            className="profile-avatar-large"
+            onError={(e) => { e.target.src = '/default-avatar.png'; }}
+          />
+          <div className="profile-info">
+            <h3>{user?.first_name} {user?.last_name}</h3>
+            <p>@{user?.username}</p>
+            <p className="role-badge admin">Administrateur</p>
           </div>
-        );
+        </div>
+
+        <div className="profile-details">
+          <div className="detail-item">
+            <strong>Email:</strong> {user?.email}
+          </div>
+          <div className="detail-item">
+            <strong>Téléphone:</strong> {user?.phone || 'Non renseigné'}
+          </div>
+          <div className="detail-item">
+            <strong>Membre depuis:</strong>{' '}
+            {new Date(user?.date_joined).toLocaleDateString('fr-FR')}
+          </div>
+        </div>
+
+        <div className="profile-actions">
+          <button
+            className="btn btn-primary"
+            onClick={() => setShowEditProfile(true)}
+          >
+            <FaEdit /> Modifier le profil
+          </button>
+
+          <button
+            className="btn btn-outline"
+            onClick={() => setShowChangePassword(true)}
+          >
+            <FaLock /> Changer le mot de passe
+          </button>
+        </div>
+      </div>
+
+      {/* Modals */}
+      {showEditProfile && (
+        <ProfileEdit
+          onClose={() => setShowEditProfile(false)}
+          onUpdate={(updatedUser) => {
+            if (typeof updateUser === 'function') {
+              updateUser(updatedUser);
+            }
+            setShowEditProfile(false);
+          }}
+        />
+      )}
+
+      {showChangePassword && (
+        <ChangePassword
+          onClose={() => setShowChangePassword(false)}
+        />
+      )}
+    </div>
+  );
+
+      // AdminDashboard.jsx - SECTION MESSAGES/SUPPORT
+
+case 'messages':
+  return (
+    <div className="messages-section">
+      <div className="messages-header">
+        <h1><FaComments /> Support Client</h1>
+        <p>Conversations avec les utilisateurs</p>
+      </div>
+      
+      {/* ✅ Intégration MessagingPage avec filtre admin */}
+      <MessagingPage isAdminView={true} />
+    </div>
+  );
+
+
 
       case 'notifications':
         return (
