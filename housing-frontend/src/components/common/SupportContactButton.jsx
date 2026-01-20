@@ -38,34 +38,38 @@ const SupportContactButton = () => {
     setIsOpen(false);
   };
 
-  // 🆕 NOUVEAU: Créer conversation avec admin et rediriger
-  const handleMessaging = async () => {
-    if (!user) {
-      toast.info('Veuillez vous connecter pour accéder au chat en direct');
-      navigate('/login');
-      setIsOpen(false);
-      return;
-    }
+const handleMessaging = async () => {
+  if (!user) {
+    toast.info('Veuillez vous connecter pour accéder au chat en direct');
+    navigate('/login');
+    setIsOpen(false);
+    return;
+  }
 
-    try {
-      setIsCreatingChat(true);
-      
-      // Créer ou récupérer la conversation avec l'admin
-      const response = await api.post('/users/create-support-conversation/');
-      
-      // Rediriger vers le dashboard messages avec l'ID de la conversation
-      navigate(`/dashboard?tab=messages&conversation=${response.data.conversation_id}`);
-      
-      toast.success('Chat avec le support ouvert !');
-      setIsOpen(false);
-      
-    } catch (error) {
-      console.error('Erreur création conversation:', error);
-      toast.error('Impossible d\'ouvrir le chat. Réessayez plus tard.');
-    } finally {
-      setIsCreatingChat(false);
-    }
-  };
+  try {
+    setIsCreatingChat(true);
+    
+    // ✅ CORRECTION : URL sans le préfixe /users/
+    const response = await api.post('/create-support-conversation/');
+    
+    // Rediriger vers le dashboard messages
+    navigate(`/dashboard?tab=messages&conversation=${response.data.conversation_id}`);
+    
+    toast.success('Chat avec le support ouvert !');
+    setIsOpen(false);
+    
+  } catch (error) {
+    console.error('Erreur création conversation:', error);
+    console.error('Détails:', error.response?.data); // ✅ Plus de détails
+    
+    const errorMsg = error.response?.data?.error || 
+                     error.response?.data?.detail ||
+                     'Impossible d\'ouvrir le chat. Réessayez plus tard.';
+    toast.error(errorMsg);
+  } finally {
+    setIsCreatingChat(false);
+  }
+};
 
   return (
     <>
