@@ -572,3 +572,49 @@
     object-fit: cover;
     border: 1px solid var(--border-color); /* Optionnel : ajoute une petite bordure */
 }
+.avatar-initial {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #4A5568;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 600;
+  font-size: 18px;
+}
+.avatar-initials-only {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  /* Empêche le cercle de se déformer dans un flexbox */
+  flex-shrink: 0; 
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border: 2px solid #ffffff;
+}
+.user-avatar-sm {
+  width: 35px; /* Ajuste selon tes besoins */
+  height: 35px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.avatar-initials {
+  color: white;
+  font-weight: bold;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}

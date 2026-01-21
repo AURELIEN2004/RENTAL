@@ -149,6 +149,24 @@ const AdminDashboard = ({ user }) => {
     }
   };
 
+  // Génère une couleur unique basée sur le nom
+const getAvatarColor = (name) => {
+  let hash = 0;
+  const text = name || "User";
+  for (let i = 0; i < text.length; i++) {
+    hash = text.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const hue = Math.abs(hash % 360);
+  return `hsl(${hue}, 65%, 45%)`;
+};
+
+// Récupère les initiales (ex: "JD" pour Jean Dupont)
+const getInitials = (user) => {
+  const first = user.first_name || "";
+  const last = user.last_name || user.username || "U";
+  if (first && last) return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase();
+  return last.charAt(0).toUpperCase();
+};
   // ==================== RENDER ====================
   
   const renderContent = () => {
@@ -221,11 +239,26 @@ const AdminDashboard = ({ user }) => {
                     {stats.users.top_owners.map((owner, idx) => (
                       <div key={owner.id} className="top-user-item">
                         <div className="rank">#{idx + 1}</div>
-                        <img 
+
+
+                        {/* <img 
                           src={owner.photo || '/default-avatar.png'} 
                           alt={owner.username}
                           onError={(e) => { e.target.src = '/default-avatar.png'; }}
-                        />
+                        /> */}
+                        
+                          <div 
+                          className="avatar-initials-only"
+                          style={{ 
+                            backgroundColor: getAvatarColor(owner.last_name || owner.username) 
+                          }}
+                          title={`${owner.first_name || ''} ${owner.last_name || owner.username}`}
+                        >
+                          {getInitials(owner)}
+                        </div>
+
+
+
                         <div className="user-info">
                           <h4>{owner.username}</h4>
                           <p>{owner.email}</p>
@@ -266,12 +299,32 @@ const AdminDashboard = ({ user }) => {
                     {users.map(user => (
                       <tr key={user.id}>
                         <td>
-                          <img 
+                          {/* <img 
                             src={user.photo || '/default-avatar.png'} 
                             alt={user.username}
                             className="user-avatar-sm"
                             onError={(e) => { e.target.src = '/default-avatar.png'; }}
+                          /> */}
+                          {user.photo ? (
+                          <img 
+                            src={user.photo} 
+                            alt={user.username}
+                            className="user-avatar-sm"
+                            onError={(e) => { 
+                              e.target.onerror = null; 
+                              e.target.src = '/default-avatar.png'; 
+                            }}
                           />
+                        ) : (
+                          <div 
+                            className="user-avatar-sm avatar-initials"
+                            style={{ backgroundColor: getAvatarColor(user.last_name || user.username) }}
+                          >
+                            {(user.last_name || user.username).charAt(0).toUpperCase()}
+                          </div>
+                        )}
+
+
                         </td>
                         <td>{user.username}</td>
                         <td>{user.email}</td>
@@ -446,12 +499,44 @@ case 'profile':
       {/* Carte profil */}
       <div className="profile-card">
         <div className="profile-header">
-          <img
+
+          {/* <img
             src={user?.photo || '/default-avatar.png'}
             alt={user?.username}
             className="profile-avatar-large"
             onError={(e) => { e.target.src = '/default-avatar.png'; }}
           />
+           */}
+           {/* Vérification si user existe pour éviter les erreurs de rendu */}
+{user?.photo ? (
+  <img 
+    src={user.photo} 
+    alt={user.username}
+    className="user-avatar-sm"
+    onError={(e) => { 
+      e.target.onerror = null; 
+      e.target.src = '/default-avatar.png'; 
+    }}
+  />
+) : (
+  <div 
+    className="user-avatar-sm avatar-initials"
+    style={{ 
+      backgroundColor: getAvatarColor(user?.last_name || user?.username || 'User'),
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: 'white',
+      fontWeight: 'bold',
+      borderRadius: '50%',
+      textTransform: 'uppercase'
+    }}
+  >
+    {/* Affiche l'initiale du nom, sinon du pseudo, sinon 'U' par défaut */}
+    {(user?.last_name || user?.username || 'U').charAt(0)}
+  </div>
+)}
+
           <div className="profile-info">
             <h3>{user?.first_name} {user?.last_name}</h3>
             <p>@{user?.username}</p>
