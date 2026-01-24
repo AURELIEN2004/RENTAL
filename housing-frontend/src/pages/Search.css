@@ -27,3 +27,469 @@
   background: #007bff;
   color: #fff;
 }
+/* src/pages/Search.css - VERSION AMÉLIORÉE */
+
+.search-page {
+  background-color: var(--bg-secondary);
+  min-height: 100vh;
+  padding: 20px 0;
+}
+
+.search-header {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.search-header .search-bar {
+  flex: 1;
+  min-width: 300px;
+}
+
+/* ✨ NOUVEAU: Bouton recherche vocale */
+.voice-search-toggle {
+  padding: 12px 24px;
+  border-radius: 12px;
+  border: 2px solid var(--primary-color);
+  background: white;
+  color: var(--primary-color);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.voice-search-toggle:hover {
+  background: var(--primary-color);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.voice-search-toggle.active {
+  background: var(--primary-color);
+  color: white;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+.voice-search-toggle svg {
+  font-size: 18px;
+}
+
+/* ✨ NOUVEAU: Section recherche vocale */
+.voice-search-section {
+  margin-bottom: 24px;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ✨ NOUVEAU: Indicateur de source de recherche */
+.search-source-indicator {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.source-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  animation: fadeInScale 0.3s ease-out;
+}
+
+.source-badge.voice {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.source-badge.chatbot {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.search-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.search-sidebar {
+  background: var(--bg-primary);
+  border-radius: 16px;
+  padding: 20px;
+  height: fit-content;
+  position: sticky;
+  top: 90px;
+  box-shadow: var(--shadow);
+}
+
+.search-results {
+  min-height: 400px;
+}
+
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.results-info h2 {
+  font-size: 24px;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.algo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.results-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.filter-toggle-mobile {
+  display: none;
+  padding: 10px 16px;
+  border: 2px solid var(--border-color);
+  background: var(--bg-primary);
+  border-radius: 8px;
+  cursor: pointer;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.filter-toggle-mobile:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.view-toggle {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-secondary);
+  padding: 4px;
+  border-radius: 8px;
+}
+
+.view-toggle button {
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+}
+
+.view-toggle button:hover {
+  color: var(--primary-color);
+}
+
+.view-toggle button.active {
+  background: var(--primary-color);
+  color: white;
+}
+
+/* Statistiques */
+.search-stats {
+  display: flex;
+  gap: 24px;
+  padding: 16px;
+  background: var(--bg-primary);
+  border-radius: 12px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+  flex-wrap: wrap;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 18px;
+  color: var(--primary-color);
+  font-weight: 700;
+}
+
+/* Grilles de logements */
+.housing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.housing-grid.list {
+  grid-template-columns: 1fr;
+}
+
+/* Loading */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid var(--border-color);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* État vide */
+.no-results {
+  text-align: center;
+  padding: 60px 20px;
+  background: var(--bg-primary);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+}
+
+.no-results-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.5;
+}
+
+.no-results h3 {
+  font-size: 24px;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.no-results p {
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+.suggestions {
+  background: var(--bg-secondary);
+  padding: 20px;
+  border-radius: 12px;
+  margin: 24px 0;
+  text-align: left;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.suggestions p {
+  margin: 0 0 12px 0;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.suggestions ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.suggestions li {
+  padding: 8px 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.suggestions li::before {
+  content: "→ ";
+  color: var(--primary-color);
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin-top: 40px;
+  padding: 20px;
+}
+
+.page-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.page-info .separator {
+  opacity: 0.5;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .search-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .search-sidebar {
+    display: none;
+  }
+  
+  .search-sidebar.mobile-visible {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    background: var(--bg-primary);
+    padding: 20px;
+    overflow-y: auto;
+  }
+  
+  .filter-toggle-mobile {
+    display: flex;
+  }
+}
+
+@media (max-width: 768px) {
+  .search-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .voice-search-toggle {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .housing-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .results-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .results-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .search-stats {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .pagination {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .pagination .btn {
+    width: 100%;
+  }
+}
+
+/* Mode sombre */
+[data-theme="dark"] .voice-search-toggle {
+  background: var(--bg-tertiary);
+  border-color: var(--primary-color);
+}
+
+[data-theme="dark"] .voice-search-toggle:hover {
+  background: var(--primary-color);
+}
+
+[data-theme="dark"] .search-sidebar {
+  background: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .search-stats {
+  background: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .no-results {
+  background: var(--bg-tertiary);
+}
+
+[data-theme="dark"] .suggestions {
+  background: var(--bg-secondary);
+}

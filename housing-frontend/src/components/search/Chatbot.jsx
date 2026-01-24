@@ -1,22 +1,68 @@
-// ============================================
-// src/components/search/chatbot.jsx
-// ============================================
-
 import React, { useState, useRef, useEffect } from 'react';
-import { FaTimes, FaRobot, FaPaperPlane } from 'react-icons/fa';
+import { Send, Mic, MicOff, X, Volume2, Globe, MapPin, Home as HomeIcon } from 'lucide-react';
 
 const IntelligentChatbot = ({ onSearch }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
       type: 'bot',
-      text: "👋 Bonjour ! Je suis votre assistant de recherche. Décrivez-moi le logement que vous recherchez. Par exemple : 'Je cherche un studio meublé à Bastos pour 50000 FCFA'",
+      text: "👋 Bonjour ! Je suis votre assistant de recherche intelligent. Vous pouvez me parler en français ou en anglais pour trouver le logement parfait. Essayez : 'Je cherche un studio meublé près d'une école' ou 'Apartment near supermarket'",
       timestamp: new Date()
     }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [language, setLanguage] = useState('fr-FR');
+  const [transcript, setTranscript] = useState('');
   const messagesEndRef = useRef(null);
+  const recognitionRef = useRef(null);
+
+  // Initialize speech recognition
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = true;
+      recognitionRef.current.lang = language;
+
+      recognitionRef.current.onstart = () => setIsListening(true);
+      recognitionRef.current.onend = () => setIsListening(false);
+
+      recognitionRef.current.onresult = (event) => {
+        let interimText = '';
+        let finalText = '';
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcriptPart = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalText += transcriptPart;
+          } else {
+            interimText += transcriptPart;
+          }
+        }
+
+        setTranscript(interimText);
+        
+        if (finalText) {
+          setInputValue(finalText);
+          handleSend(finalText);
+        }
+      };
+
+      recognitionRef.current.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        setIsListening(false);
+      };
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+    };
+  }, [language]);
 
   useEffect(() => {
     scrollToBottom();
@@ -26,17 +72,47 @@ const IntelligentChatbot = ({ onSearch }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // 🧠 Intelligence du Chatbot
+  const toggleVoiceInput = () => {
+    if (!recognitionRef.current) {
+      addMessage('bot', "❌ Désolé, votre navigateur ne supporte pas la reconnaissance vocale.");
+      return;
+    }
+
+    if (isListening) {
+      recognitionRef.current.stop();
+    } else {
+      recognitionRef.current.lang = language;
+      recognitionRef.current.start();
+    }
+  };
+
+  const toggleLanguage = () => {
+    const newLang = language === 'fr-FR' ? 'en-US' : 'fr-FR';
+    setLanguage(newLang);
+    if (recognitionRef.current) {
+      recognitionRef.current.lang = newLang;
+    }
+    addMessage('bot', `🌍 Langue changée : ${newLang === 'fr-FR' ? 'Français' : 'English'}`);
+  };
+
+  const addMessage = (type, text) => {
+    setMessages(prev => [...prev, {
+      type,
+      text,
+      timestamp: new Date()
+    }]);
+  };
+
   const parseUserIntent = (message) => {
     const lowerMessage = message.toLowerCase();
     const filters = {};
 
-    // Catégories
+    // Categories (bilingue)
     const categoryMap = {
-      'studio': 1,
-      'chambre': 2,
-      'appartement': 3,
-      'maison': 4
+      'studio': 1, 'studios': 1,
+      'chambre': 2, 'chambres': 2, 'room': 2, 'bedroom': 2,
+      'appartement': 3, 'appartements': 3, 'apartment': 3, 'flat': 3,
+      'maison': 4, 'maisons': 4, 'house': 4, 'villa': 4
     };
 
     for (const [keyword, id] of Object.entries(categoryMap)) {
@@ -46,25 +122,23 @@ const IntelligentChatbot = ({ onSearch }) => {
       }
     }
 
-    // Types
+    // Types (bilingue)
     const typeMap = {
-      'simple': 1,
-      'moderne': 2,
-      'meublé': 3,
-      'meuble': 3
+      'simple': 1, 'basic': 1,
+      'moderne': 2, 'modern': 2, 'contemporary': 2,
+      'meublé': 3, 'meuble': 3, 'furnished': 3, 'equipped': 3
     };
 
     for (const [keyword, id] of Object.entries(typeMap)) {
       if (lowerMessage.includes(keyword)) {
-        filters.housingType = id;
+        filters.housing_type = id;
         break;
       }
     }
 
-    // Villes
+    // Cities (bilingue)
     const cityMap = {
-      'yaoundé': 1,
-      'yaounde': 1,
+      'yaoundé': 1, 'yaounde': 1,
       'douala': 2,
       'bafoussam': 3
     };
@@ -76,23 +150,22 @@ const IntelligentChatbot = ({ onSearch }) => {
       }
     }
 
-    // Quartiers (Yaoundé)
-    const districtMap = {
-      'bastos': 1,
-      'odza': 2,
-      'melen': 3,
-      'essos': 4,
-      'ngousso': 5
+    // Points of Interest (POI) - bilingue
+    const poiPatterns = {
+      'école': /(?:près|proche|autour|around|near|close to).*(?:école|school|university|université|campus)/i,
+      'marché': /(?:près|proche|autour|around|near|close to).*(?:marché|market|supermarket|supermarch[ée]|mall|shopping)/i,
+      'hôpital': /(?:près|proche|autour|around|near|close to).*(?:hôpital|hospital|clinic|clinique|medical center)/i,
+      'centre': /(?:près|proche|autour|around|near|close to).*(?:centre|center|downtown|city center)/i
     };
 
-    for (const [keyword, id] of Object.entries(districtMap)) {
-      if (lowerMessage.includes(keyword)) {
-        filters.district = id;
+    for (const [poi, pattern] of Object.entries(poiPatterns)) {
+      if (pattern.test(lowerMessage)) {
+        filters.poi = poi;
         break;
       }
     }
 
-    // Prix
+    // Prix (bilingue)
     const priceMatches = lowerMessage.match(/(\d+)\s*(k|000|fcfa)?/g);
     if (priceMatches) {
       const prices = priceMatches.map(p => {
@@ -101,38 +174,23 @@ const IntelligentChatbot = ({ onSearch }) => {
       });
 
       if (prices.length === 1) {
-        filters.maxPrice = prices[0];
+        if (lowerMessage.match(/(moins|max|maximum|under|less)/)) {
+          filters.max_price = prices[0];
+        } else if (lowerMessage.match(/(plus|min|minimum|above|more)/)) {
+          filters.min_price = prices[0];
+        } else {
+          filters.max_price = prices[0];
+        }
       } else if (prices.length >= 2) {
-        filters.minPrice = Math.min(...prices);
-        filters.maxPrice = Math.max(...prices);
+        filters.min_price = Math.min(...prices);
+        filters.max_price = Math.max(...prices);
       }
     }
 
-    // Chambres
-    const roomsMatch = lowerMessage.match(/(\d+)\s*(chambre|room|piece)/);
+    // Chambres/Rooms
+    const roomsMatch = lowerMessage.match(/(\d+)\s*(chambre|room|bedroom)/i);
     if (roomsMatch) {
       filters.rooms = parseInt(roomsMatch[1]);
-    }
-
-    // Douches
-    const bathroomsMatch = lowerMessage.match(/(\d+)\s*(douche|salle de bain|bathroom)/);
-    if (bathroomsMatch) {
-      filters.bathrooms = parseInt(bathroomsMatch[1]);
-    }
-
-    // Superficie
-    const areaMatch = lowerMessage.match(/(\d+)\s*m[²2]/);
-    if (areaMatch) {
-      filters.minArea = parseInt(areaMatch[1]);
-    }
-
-    // Mots-clés de tri
-    if (lowerMessage.includes('pas cher') || lowerMessage.includes('moins cher')) {
-      filters.sortBy = 'price_asc';
-    } else if (lowerMessage.includes('grand') || lowerMessage.includes('spacieux')) {
-      filters.sortBy = 'area_desc';
-    } else if (lowerMessage.includes('récent') || lowerMessage.includes('nouveau')) {
-      filters.sortBy = 'recent';
     }
 
     return filters;
@@ -141,94 +199,84 @@ const IntelligentChatbot = ({ onSearch }) => {
   const generateResponse = (filters) => {
     const parts = [];
     
-    // Catégorie
     if (filters.category) {
       const categories = ['', 'studio', 'chambre', 'appartement', 'maison'];
       parts.push(categories[filters.category]);
     }
 
-    // Type
-    if (filters.housingType) {
+    if (filters.housing_type) {
       const types = ['', 'simple', 'moderne', 'meublé'];
-      parts.push(types[filters.housingType]);
+      parts.push(types[filters.housing_type]);
     }
 
-    // Localisation
-    if (filters.district) {
-      const districts = ['', 'Bastos', 'Odza', 'Melen', 'Essos', 'Ngousso'];
-      parts.push(`à ${districts[filters.district]}`);
-    } else if (filters.city) {
+    if (filters.poi) {
+      parts.push(`près d'${filters.poi === 'école' ? 'une école' : 'un ' + filters.poi}`);
+    }
+
+    if (filters.city) {
       const cities = ['', 'Yaoundé', 'Douala', 'Bafoussam'];
       parts.push(`à ${cities[filters.city]}`);
     }
 
-    // Prix
-    if (filters.minPrice && filters.maxPrice) {
-      parts.push(`entre ${filters.minPrice.toLocaleString()} et ${filters.maxPrice.toLocaleString()} FCFA`);
-    } else if (filters.maxPrice) {
-      parts.push(`jusqu'à ${filters.maxPrice.toLocaleString()} FCFA`);
+    if (filters.min_price && filters.max_price) {
+      parts.push(`entre ${filters.min_price.toLocaleString()} et ${filters.max_price.toLocaleString()} FCFA`);
+    } else if (filters.max_price) {
+      parts.push(`jusqu'à ${filters.max_price.toLocaleString()} FCFA`);
+    } else if (filters.min_price) {
+      parts.push(`à partir de ${filters.min_price.toLocaleString()} FCFA`);
     }
 
-    // Chambres/Douches
     if (filters.rooms) {
       parts.push(`${filters.rooms} chambre${filters.rooms > 1 ? 's' : ''}`);
-    }
-    if (filters.bathrooms) {
-      parts.push(`${filters.bathrooms} douche${filters.bathrooms > 1 ? 's' : ''}`);
     }
 
     if (parts.length === 0) {
       return {
-        response: "Je n'ai pas bien compris votre recherche. Pouvez-vous préciser ? Par exemple : 'Studio meublé à Bastos' ou 'Appartement moderne moins de 100000 FCFA'",
+        response: language === 'fr-FR'
+          ? "Je n'ai pas bien compris. Pouvez-vous préciser ? Ex: 'Studio meublé près d'une école'"
+          : "I didn't understand. Can you clarify? Ex: 'Furnished studio near a school'",
         hasResults: false
       };
     }
 
     return {
-      response: `✓ Parfait ! Je recherche : ${parts.join(', ')}.\n\n🔍 Lancement de la recherche...`,
+      response: `✓ ${language === 'fr-FR' ? 'Parfait ! Je recherche' : 'Perfect! Searching for'} : ${parts.join(', ')}.\n\n🔍 ${language === 'fr-FR' ? 'Lancement de la recherche...' : 'Starting search...'}`,
       hasResults: true,
       filters
     };
   };
 
-  const getSuggestions = () => [
-    "Studio meublé à Bastos",
-    "Appartement moderne à Yaoundé moins de 100000 FCFA",
-    "Chambre pas chère près de l'université",
-    "Maison avec jardin à Douala",
-    "Studio récent à Odza"
-  ];
+  const getSuggestions = () => {
+    return language === 'fr-FR' ? [
+      "Studio meublé près d'une école",
+      "Appartement moderne près du centre commercial",
+      "Chambre pas chère près de l'université",
+      "Maison avec jardin à Douala"
+    ] : [
+      "Furnished studio near school",
+      "Modern apartment near shopping center",
+      "Cheap room near university",
+      "House with garden in Douala"
+    ];
+  };
 
-  const handleSend = async () => {
-    if (!inputValue.trim()) return;
+  const handleSend = async (text = inputValue) => {
+    if (!text.trim()) return;
 
-    // Message utilisateur
-    const userMessage = {
-      type: 'user',
-      text: inputValue,
-      timestamp: new Date()
-    };
-    setMessages(prev => [...prev, userMessage]);
+    const userMessage = text;
+    addMessage('user', userMessage);
     setInputValue('');
+    setTranscript('');
     setIsTyping(true);
 
-    // Simuler délai de traitement
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Parser l'intention
-    const filters = parseUserIntent(inputValue);
+    const filters = parseUserIntent(userMessage);
     const { response, hasResults, filters: searchFilters } = generateResponse(filters);
 
-    // Réponse du bot
-    const botMessage = {
-      type: 'bot',
-      text: response,
-      timestamp: new Date()
-    };
-    setMessages(prev => [...prev, botMessage]);
+    addMessage('bot', response);
     setIsTyping(false);
 
-    // Lancer la recherche si résultats trouvés
     if (hasResults && onSearch) {
       setTimeout(() => {
         onSearch(searchFilters);
@@ -254,11 +302,10 @@ const IntelligentChatbot = ({ onSearch }) => {
   return (
     <div style={{
       position: 'fixed',
-      bottom: '20px',
-      right: '124px',
+      bottom: '24px',
+      right: '24px',
       zIndex: 1000
     }}>
-      {/* Bouton d'ouverture */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
@@ -266,10 +313,10 @@ const IntelligentChatbot = ({ onSearch }) => {
             width: '64px',
             height: '64px',
             borderRadius: '50%',
-            backgroundColor: '#2563eb',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
             color: 'white',
             border: 'none',
-            boxShadow: '0 4px 12px rgba(37, 99, 235, 0.4)',
+            boxShadow: '0 8px 24px rgba(102, 126, 234, 0.4)',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
@@ -281,18 +328,17 @@ const IntelligentChatbot = ({ onSearch }) => {
           onMouseOver={(e) => e.target.style.transform = 'scale(1.1)'}
           onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
         >
-          <FaRobot />
+          🤖
         </button>
       )}
 
-      {/* Fenêtre du chatbot */}
       {isOpen && (
         <div style={{
-          width: '380px',
-          height: '600px',
+          width: '400px',
+          height: '650px',
           backgroundColor: 'white',
-          borderRadius: '16px',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
+          borderRadius: '20px',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
           display: 'flex',
           flexDirection: 'column',
           overflow: 'hidden'
@@ -300,7 +346,7 @@ const IntelligentChatbot = ({ onSearch }) => {
           {/* Header */}
           <div style={{
             padding: '20px',
-            background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
             color: 'white',
             display: 'flex',
             alignItems: 'center',
@@ -324,27 +370,46 @@ const IntelligentChatbot = ({ onSearch }) => {
                   Assistant RentAL
                 </h3>
                 <p style={{ margin: 0, fontSize: '12px', opacity: 0.9 }}>
-                  En ligne
+                  🎤 {language === 'fr-FR' ? 'Français' : 'English'}
                 </p>
               </div>
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '50%',
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                border: 'none',
-                color: 'white',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <FaTimes />
-            </button>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={toggleLanguage}
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(255,255,255,0.2)',
+                  border: 'none',
+                  color: 'white',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <Globe size={18} />
+              </button>
+              <button
+                onClick={() => setIsOpen(false)}
+                style={{
+                  width: '36px',
+                  height: '36px',
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(255,255,255,0.2)',
+                  border: 'none',
+                  color: 'white',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <X size={18} />
+              </button>
+            </div>
           </div>
 
           {/* Messages */}
@@ -368,12 +433,13 @@ const IntelligentChatbot = ({ onSearch }) => {
                     width: '32px',
                     height: '32px',
                     borderRadius: '50%',
-                    backgroundColor: '#2563eb',
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     marginRight: '8px',
-                    fontSize: '16px'
+                    fontSize: '16px',
+                    flexShrink: 0
                   }}>
                     🤖
                   </div>
@@ -383,12 +449,17 @@ const IntelligentChatbot = ({ onSearch }) => {
                   maxWidth: '75%',
                   padding: '12px 16px',
                   borderRadius: '16px',
-                  backgroundColor: msg.type === 'user' ? '#2563eb' : 'white',
+                  backgroundColor: msg.type === 'user' 
+                    ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+                    : 'white',
                   color: msg.type === 'user' ? 'white' : '#374151',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                   fontSize: '14px',
                   lineHeight: '1.5',
-                  whiteSpace: 'pre-wrap'
+                  whiteSpace: 'pre-wrap',
+                  background: msg.type === 'user' 
+                    ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+                    : 'white'
                 }}>
                   {msg.text}
                   <div style={{
@@ -408,7 +479,7 @@ const IntelligentChatbot = ({ onSearch }) => {
                   width: '32px',
                   height: '32px',
                   borderRadius: '50%',
-                  backgroundColor: '#2563eb',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -440,6 +511,18 @@ const IntelligentChatbot = ({ onSearch }) => {
                 </div>
               </div>
             )}
+
+            {isListening && transcript && (
+              <div style={{
+                padding: '12px',
+                backgroundColor: '#fef3c7',
+                borderRadius: '8px',
+                marginTop: '8px',
+                fontSize: '14px'
+              }}>
+                🎤 {transcript}
+              </div>
+            )}
             
             <div ref={messagesEndRef} />
           </div>
@@ -453,7 +536,7 @@ const IntelligentChatbot = ({ onSearch }) => {
                 fontWeight: '500',
                 color: '#6b7280'
               }}>
-                Suggestions :
+                💡 Suggestions :
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {getSuggestions().map((suggestion, idx) => (
@@ -471,7 +554,7 @@ const IntelligentChatbot = ({ onSearch }) => {
                       textAlign: 'left',
                       transition: 'all 0.2s'
                     }}
-                    onMouseOver={(e) => e.target.style.borderColor = '#2563eb'}
+                    onMouseOver={(e) => e.target.style.borderColor = '#667eea'}
                     onMouseOut={(e) => e.target.style.borderColor = '#e5e7eb'}
                   >
                     {suggestion}
@@ -487,45 +570,65 @@ const IntelligentChatbot = ({ onSearch }) => {
             borderTop: '1px solid #e5e7eb',
             backgroundColor: 'white'
           }}>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <textarea
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <button
+                onClick={toggleVoiceInput}
+                style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '50%',
+                  backgroundColor: isListening ? '#ef4444' : '#667eea',
+                  border: 'none',
+                  color: 'white',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s',
+                  animation: isListening ? 'pulse 1s infinite' : 'none'
+                }}
+              >
+                {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+              </button>
+              
+              <input
+                type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Décrivez votre recherche..."
-                rows="1"
+                placeholder={language === 'fr-FR' ? "Décrivez votre recherche..." : "Describe your search..."}
                 style={{
                   flex: 1,
                   padding: '12px',
                   border: '1px solid #e5e7eb',
                   borderRadius: '12px',
                   fontSize: '14px',
-                  resize: 'none',
-                  outline: 'none',
-                  fontFamily: 'inherit'
+                  outline: 'none'
                 }}
-                onFocus={(e) => e.target.style.borderColor = '#2563eb'}
+                onFocus={(e) => e.target.style.borderColor = '#667eea'}
                 onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
               />
+              
               <button
-                onClick={handleSend}
+                onClick={() => handleSend()}
                 disabled={!inputValue.trim()}
                 style={{
                   width: '48px',
                   height: '48px',
                   borderRadius: '12px',
-                  backgroundColor: inputValue.trim() ? '#2563eb' : '#e5e7eb',
+                  background: inputValue.trim() 
+                    ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+                    : '#e5e7eb',
                   color: 'white',
                   border: 'none',
                   cursor: inputValue.trim() ? 'pointer' : 'not-allowed',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '18px',
                   transition: 'all 0.2s'
                 }}
               >
-                <FaPaperPlane />
+                <Send size={20} />
               </button>
             </div>
           </div>
@@ -535,10 +638,10 @@ const IntelligentChatbot = ({ onSearch }) => {
       <style>{`
         @keyframes pulse {
           0%, 100% {
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
           }
           50% {
-            box-shadow: 0 4px 20px rgba(37, 99, 235, 0.6);
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.6);
           }
         }
 
