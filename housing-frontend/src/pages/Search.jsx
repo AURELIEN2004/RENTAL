@@ -14,7 +14,6 @@ import Chatbot from '../components/search/Chatbot';
 import { FaThLarge, FaList, FaFilter, FaMicrophone } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import './Search.css';
-import IntelligentSearchAssistant from '../components/search/IntelligentSearchAssistant';
 
 
 const Search = () => {
@@ -377,7 +376,7 @@ const Search = () => {
         onSearch={handleChatbotSearch}
         voiceSearchEnabled={true}
       />
-      <IntelligentSearchAssistant onSearch={handleChatbotSearch} />
+      {/* <IntelligentSearchAssistant onSearch={handleChatbotSearch} /> */}
 
     </div>
   );
