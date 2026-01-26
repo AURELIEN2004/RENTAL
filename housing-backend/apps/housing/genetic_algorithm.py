@@ -3,8 +3,6 @@
 # # GENETIC_ALGORITHM.PY - 
 # # ============================================
 
-
-
 import math
 import random
 from django.utils import timezone
