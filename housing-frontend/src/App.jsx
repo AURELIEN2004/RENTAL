@@ -9,7 +9,6 @@ import 'react-toastify/dist/ReactToastify.css';
 
 // Pages
 import Home from './pages/Home';
-import Search from './pages/Search';
 import HousingDetailPage from './pages/HousingDetailPage';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -22,6 +21,7 @@ import HousingForm from './components/housing/HousingForm';
 import VisibilityManagement from './pages/VisibilityManagement';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import SearchPage from './pages/SearchPage';
 
 // Components
 import Navbar from './components/common/Navbar';
@@ -53,7 +53,6 @@ function App() {
               <Routes>
                 {/* Routes publiques */}
                 <Route path="/" element={<Home />} />
-                <Route path="/search" element={<Search />} />
                 <Route path="/housing/:id" element={<HousingDetailPage />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/services" element={<Services />} />
@@ -63,7 +62,8 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password/:token" element={<ResetPassword />} />
-                
+                <Route path="/search" element={<SearchPage />} />
+
                 {/* Routes protégées */}
                 <Route
                   path="/dashboard/*"

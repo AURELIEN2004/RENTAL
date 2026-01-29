@@ -21,6 +21,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+        'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -30,7 +31,7 @@ INSTALLED_APPS = [
     # Third party
     'rest_framework',
     'rest_framework_simplejwt',
-    'corsheaders',
+    # 'corsheaders',
     'django_filters',
     'modeltranslation',
     
@@ -41,13 +42,15 @@ INSTALLED_APPS = [
     'apps.messaging',
     'apps.visits',
     'apps.notifications',
+    'apps.recherche',
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',  # Pour React et Flutter
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -218,15 +221,53 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React dev
     "http://localhost:8000",
     "http://127.0.0.1:3000",
-    "http://127.0.0.1:5173",
-    "http://localhost:5174",  # Vite dev
+    # "http://localhost:5174",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",  # Vite dev
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:5173",
+]
+# Optionnel : si tu ajoutes des headers personnalisés
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "authorization",
+    "content-type",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800
 
+# ============================================
+# CONFIGURATION OPTIONNELLE POUR LA RECHERCHE
+# ============================================
 
+# Configuration Ollama (LLM local)
+OLLAMA_API_URL = 'http://localhost:11434'
+OLLAMA_MODEL = 'mistral'  # ou 'llama2', 'phi'
 
+# Configuration reconnaissance vocale
+SPEECH_RECOGNITION_ENGINE = 'google'  # ou 'whisper'
+WHISPER_MODEL = 'base'  # 'tiny', 'base', 'small', 'medium', 'large'
+
+# Algorithme génétique
+GENETIC_ALGORITHM_ENABLED = True
+GENETIC_POPULATION_SIZE = 50
+GENETIC_GENERATIONS = 30
+
+# Recherche
+SEARCH_RESULTS_PER_PAGE = 20
+SEARCH_MAX_RESULTS = 100
+
+# # configuration OSGeo4W
+# import os
+# if os.name == 'nt':
+#     # Remplacez par votre chemin d'installation
+#     os.environ['PATH'] = r"C:\OSGeo4W\bin" + ';' + os.environ['PATH']
+#     GDAL_LIBRARY_PATH = r"C:\OSGeo4W\bin\gdal310.dll" # Vérifiez le numéro du dll
 

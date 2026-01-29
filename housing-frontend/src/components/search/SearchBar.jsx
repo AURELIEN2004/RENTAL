@@ -1,124 +1,186 @@
-// src/components/search/SearchBar.jsx - VERSION CORRIGÉE
+// ============================================
+// 📁 src/components/Search/SearchBar.jsx
+// Barre de recherche principale avec vocal
+// ============================================
 
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FaSearch, FaMapMarkerAlt, FaHome } from 'react-icons/fa';
-import api from '../../services/api';
+import React, { useState } from 'react';
+import { Search, Mic, MicOff, Loader } from 'lucide-react';
+import { useVoiceRecording } from '../../hooks/useVoiceRecording';
+import searchService from '../../services/searchService';
 import './SearchBar.css';
 
-const SearchBar = ({ onSearch, showFilters = true, initialFilters = {} }) => {
-  const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState(initialFilters.searchTerm || '');
-  const [city, setCity] = useState(initialFilters.city || '');
-  const [category, setCategory] = useState(initialFilters.category || '');
-  
-  // Listes dynamiques
-  const [cities, setCities] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(false);
+const SearchBar = ({ onSearch, onVoiceSearch, language = 'fr' }) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [isProcessingVoice, setIsProcessingVoice] = useState(false);
 
-  useEffect(() => {
-    loadOptions();
-  }, []);
+  const {
+    isRecording,
+    recordingTime,
+    audioBlob,
+    startRecording,
+    stopRecording,
+    cancelRecording,
+    clearAudio,
+  } = useVoiceRecording();
 
-  const loadOptions = async () => {
-    try {
-      const [citiesRes, categoriesRes] = await Promise.all([
-        api.get('/cities/'),
-        api.get('/categories/')
-      ]);
-
-      setCities(citiesRes.data.results || citiesRes.data || []);
-      setCategories(categoriesRes.data.results || categoriesRes.data || []);
-    } catch (error) {
-      console.error('Erreur chargement options:', error);
-    }
-  };
-
-  const handleSubmit = (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
-    
-    const searchData = {
-      searchTerm: searchTerm.trim(),
-      city: city,
-      category: category
-    };
+    if (!searchQuery.trim()) return;
 
-    console.log('🔍 Recherche lancée avec:', searchData);
-
-    // Si onSearch est fourni (depuis la page Search), l'utiliser
-    if (onSearch) {
-      onSearch(searchData);
-    } else {
-      // Sinon, naviguer vers la page de recherche avec les paramètres
-      const params = new URLSearchParams();
-      if (searchData.searchTerm) params.set('search', searchData.searchTerm);
-      if (searchData.city) params.set('city', searchData.city);
-      if (searchData.category) params.set('category', searchData.category);
-      
-      navigate(`/search?${params.toString()}`);
+    setIsSearching(true);
+    try {
+      await onSearch(searchQuery);
+    } finally {
+      setIsSearching(false);
     }
   };
+
+  const handleVoiceToggle = async () => {
+    if (isRecording) {
+      // Arrêter l'enregistrement
+      stopRecording();
+    } else {
+      // Démarrer l'enregistrement
+      try {
+        await startRecording();
+      } catch (error) {
+        alert(
+          language === 'fr'
+            ? 'Erreur: Impossible d\'accéder au microphone'
+            : 'Error: Cannot access microphone'
+        );
+      }
+    }
+  };
+
+  // Traiter l'audio quand l'enregistrement est terminé
+  React.useEffect(() => {
+    if (audioBlob && !isRecording) {
+      handleVoiceSearch();
+    }
+  }, [audioBlob, isRecording]);
+
+  const handleVoiceSearch = async () => {
+    if (!audioBlob) return;
+
+    setIsProcessingVoice(true);
+    try {
+      const result = await searchService.voiceSearch(audioBlob, language);
+      
+      if (result.success) {
+        // Mettre à jour la barre de recherche avec la transcription
+        setSearchQuery(result.transcription);
+        
+        // Notifier le parent avec les résultats
+        if (onVoiceSearch) {
+          onVoiceSearch(result);
+        }
+      } else {
+        alert(
+          language === 'fr'
+            ? 'Erreur: Impossible de comprendre l\'audio'
+            : 'Error: Could not understand audio'
+        );
+      }
+    } catch (error) {
+      console.error('Voice search error:', error);
+      alert(
+        language === 'fr'
+          ? 'Erreur lors de la recherche vocale'
+          : 'Voice search error'
+      );
+    } finally {
+      setIsProcessingVoice(false);
+      clearAudio();
+    }
+  };
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const placeholderText = language === 'fr'
+    ? 'Rechercher un logement... (ex: appartement 2 chambres à Yaoundé)'
+    : 'Search housing... (ex: 2 bedroom apartment in Yaounde)';
 
   return (
-    <form className="search-bar" onSubmit={handleSubmit}>
-      <div className="search-bar-container">
-        {/* Recherche textuelle */}
-        <div className="search-input-group">
-          <FaSearch className="input-icon" />
+    <div className="search-bar-container">
+      <form onSubmit={handleSearch} className="search-bar-form">
+        <div className="search-input-wrapper">
+          <Search className="search-icon" size={20} />
+          
           <input
             type="text"
-            placeholder="Rechercher un logement, un quartier..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input"
+            placeholder={placeholderText}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            disabled={isRecording || isProcessingVoice}
           />
+
+          <button
+            type="button"
+            className={`voice-button ${isRecording ? 'recording' : ''}`}
+            onClick={handleVoiceToggle}
+            disabled={isProcessingVoice}
+            title={
+              language === 'fr'
+                ? 'Recherche vocale'
+                : 'Voice search'
+            }
+          >
+            {isRecording ? (
+              <MicOff size={20} className="pulse" />
+            ) : (
+              <Mic size={20} />
+            )}
+          </button>
+
+          <button
+            type="submit"
+            className="search-button"
+            disabled={!searchQuery.trim() || isSearching || isRecording}
+          >
+            {isSearching ? (
+              <Loader className="spinner" size={20} />
+            ) : (
+              language === 'fr' ? 'Rechercher' : 'Search'
+            )}
+          </button>
         </div>
 
-        {showFilters && (
-          <>
-            {/* Ville */}
-            <div className="search-input-group">
-              <FaMapMarkerAlt className="input-icon" />
-              <select
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="search-select"
-              >
-                <option value="">Toutes les villes</option>
-                {cities.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Catégorie */}
-            <div className="search-input-group">
-              <FaHome className="input-icon" />
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="search-select"
-              >
-                <option value="">Toutes catégories</option>
-                {categories.map(cat => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
-                ))}
-              </select>
-            </div>
-          </>
+        {isRecording && (
+          <div className="recording-indicator">
+            <span className="recording-dot"></span>
+            <span className="recording-text">
+              {language === 'fr' ? 'Enregistrement' : 'Recording'}
+              {' '}{formatTime(recordingTime)}
+            </span>
+            <button
+              type="button"
+              className="cancel-recording"
+              onClick={cancelRecording}
+            >
+              {language === 'fr' ? 'Annuler' : 'Cancel'}
+            </button>
+          </div>
         )}
 
-        {/* Bouton recherche */}
-        <button 
-          type="submit" 
-          className="search-btn"
-          disabled={loading}
-        >
-          <FaSearch /> {loading ? 'Recherche...' : 'Rechercher'}
-        </button>
-      </div>
-    </form>
+        {isProcessingVoice && (
+          <div className="processing-indicator">
+            <Loader className="spinner" size={16} />
+            <span>
+              {language === 'fr'
+                ? 'Traitement de l\'audio...'
+                : 'Processing audio...'}
+            </span>
+          </div>
+        )}
+      </form>
+    </div>
   );
 };
 

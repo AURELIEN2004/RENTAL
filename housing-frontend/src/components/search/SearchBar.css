@@ -1,190 +1,212 @@
-/* ============================================
-   SearchBar.css
-   ============================================ */
-
-.search-bar {
-  width: 100%;
-  padding: 0.8rem 1rem;
-  background-color: #f9fafb;
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: 'Inter', Arial, sans-serif;
-}
-
-/* src/components/search/SearchBar.css */
-
-.search-bar {
-  width: 100%;
-  max-width: 1000px;
-  margin: 0 auto;
-}
+/* =========================================
+   SearchBar – Container
+========================================= */
 
 .search-bar-container {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  background: var(--bg-primary);
-  padding: 16px;
-  border-radius: 12px;
-  box-shadow: var(--shadow-lg);
-}
-
-.search-input-group {
-  position: relative;
-  flex: 1;
-  min-width: 200px;
-}
-
-.input-icon {
-  position: absolute;
-  left: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-secondary);
-  pointer-events: none;
-  z-index: 1;
-}
-
-.search-input,
-.search-select {
   width: 100%;
-  padding: 12px 12px 12px 40px;
-  border: 2px solid var(--border-color);
-  border-radius: 8px;
-  font-size: 15px;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
-  transition: all 0.3s ease;
+  margin-bottom: 1.5rem;
 }
 
-.search-input:focus,
-.search-select:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
+/* =========================================
+   Form
+========================================= */
 
-.search-select {
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 36px;
-}
-
-.search-btn {
-  padding: 12px 32px;
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.3s ease;
-  white-space: nowrap;
-}
-
-.search-btn:hover:not(:disabled) {
-  background-color: #1d4ed8;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-}
-
-.search-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .search-bar-container {
-    flex-direction: column;
-  }
-
-  .search-input-group {
-    min-width: 100%;
-  }
-
-  .search-btn {
-    width: 100%;
-    justify-content: center;
-  }
-}
-.search-bar-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
+.search-bar-form {
   width: 100%;
-  max-width: 900px;
 }
 
-.search-input-group {
-  position: relative;
-  flex: 1;
-  min-width: 150px;
-}
+/* =========================================
+   Input Wrapper
+========================================= */
 
-.input-icon {
-  position: absolute;
-  top: 50%;
-  left: 0.6rem;
-  transform: translateY(-50%);
-  color: #6b7280;
-  font-size: 1rem;
-}
-
-.search-input,
-.search-select {
-  width: 100%;
-  padding: 0.5rem 0.5rem 0.5rem 2.2rem;
-  border-radius: 8px;
-  border: 1px solid #d1d5db;
-  font-size: 0.95rem;
-  transition: border-color 0.2s;
-}
-
-.search-input:focus,
-.search-select:focus {
-  outline: none;
-  border-color: #1d4ed8;
-  box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
-}
-
-.search-btn {
+.search-input-wrapper {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  background-color: #1d4ed8;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 0.4rem 0.6rem;
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+}
+
+/* =========================================
+   Search Icon
+========================================= */
+
+.search-icon {
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+/* =========================================
+   Input
+========================================= */
+
+.search-input {
+  flex: 1;
   border: none;
-  font-weight: 500;
+  outline: none;
+  font-size: 0.95rem;
+  padding: 0.6rem;
+  color: #111827;
+}
+
+.search-input::placeholder {
+  color: #9ca3af;
+}
+
+.search-input:disabled {
+  background: transparent;
+  color: #9ca3af;
+}
+
+/* =========================================
+   Voice Button
+========================================= */
+
+.voice-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: #e5e7eb;
+  border-radius: 999px;
+  width: 38px;
+  height: 38px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.2s ease;
 }
 
-.search-btn:hover {
-  background-color: #2563eb;
+.voice-button:hover {
+  background: #d1d5db;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .search-bar-container {
-    flex-direction: column;
-    gap: 0.6rem;
+.voice-button.recording {
+  background: #ef4444;
+  color: #fff;
+}
+
+/* Pulse animation when recording */
+.pulse {
+  animation: pulse 1.3s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* =========================================
+   Search Button
+========================================= */
+
+.search-button {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.55rem 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.search-button:hover {
+  background: #1d4ed8;
+}
+
+.search-button:disabled {
+  background: #93c5fd;
+  cursor: not-allowed;
+}
+
+/* Spinner */
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================================
+   Recording Indicator
+========================================= */
+
+.recording-indicator {
+  margin-top: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 0.5rem 0.8rem;
+  border-radius: 10px;
+}
+
+.recording-dot {
+  width: 8px;
+  height: 8px;
+  background: #ef4444;
+  border-radius: 50%;
+  animation: pulse 1.2s infinite;
+}
+
+.recording-text {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #b91c1c;
+}
+
+.cancel-recording {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: #991b1b;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.cancel-recording:hover {
+  text-decoration: underline;
+}
+
+/* =========================================
+   Processing Indicator
+========================================= */
+
+.processing-indicator {
+  margin-top: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #374151;
+}
+
+/* =========================================
+   Responsive
+========================================= */
+
+@media (max-width: 640px) {
+  .search-input-wrapper {
+    flex-wrap: wrap;
   }
 
-  .search-btn {
+  .search-button {
     width: 100%;
-    justify-content: center;
   }
 }

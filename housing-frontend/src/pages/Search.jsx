@@ -4,16 +4,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { searchService } from '../services/searchService';
+// import { searchService } from '../services/searchService';
 import { useAuth } from '../contexts/AuthContext';
 import HousingCard from '../components/housing/HousingCard';
-import SearchBar from '../components/search/SearchBar';
-import FilterPanel from '../components/search/FilterPanel';
-import VoiceSearch from '../components/search/VoiceSearch';
-import Chatbot from '../components/search/Chatbot';
 import { FaThLarge, FaList, FaFilter, FaMicrophone } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import './Search.css';
+import searchService from "../services/searchService";
+
 
 
 const Search = () => {
@@ -185,10 +183,7 @@ const Search = () => {
       <div className="container">
         {/* Barre de recherche */}
         <div className="search-header">
-          <SearchBar 
-            filters={filters}
-            onFilterChange={handleFilterChange}
-          />
+         
           
           {/* ✨ NOUVEAU: Bouton pour afficher/masquer recherche vocale */}
           <button
@@ -230,11 +225,7 @@ const Search = () => {
         <div className="search-layout">
           {/* Sidebar Filtres (Desktop) */}
           <aside className={`search-sidebar ${showFilters ? 'mobile-visible' : ''}`}>
-            <FilterPanel
-              filters={filters}
-              onFilterChange={handleFilterChange}
-              onReset={handleResetFilters}
-            />
+       
           </aside>
 
           {/* Résultats */}
@@ -372,11 +363,7 @@ const Search = () => {
       </div>
 
       {/* Chatbot - avec intégration recherche vocale */}
-      <Chatbot 
-        onSearch={handleChatbotSearch}
-        voiceSearchEnabled={true}
-      />
-      {/* <IntelligentSearchAssistant onSearch={handleChatbotSearch} /> */}
+      
 
     </div>
   );

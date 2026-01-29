@@ -2,7 +2,9 @@
 // src/services/housingService.js - VERSION COMPLÈTE
 
 import api from './api';
-import { searchService } from './searchService';
+// import { searchService } from './searchService';
+import searchService from './searchService';
+
 
 export const housingService = {
   // ===============================

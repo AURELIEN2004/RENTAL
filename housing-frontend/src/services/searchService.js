@@ -1,175 +1,167 @@
 // ============================================
-// src/services/searchService.js - SERVICE RECHERCHE
+// 📁 src/services/searchService.js
+// Service API pour toutes les recherches
 // ============================================
 
-import api from './api';
+import axios from 'axios';
 
-export const searchService = {
-  /**
-   * Recherche de logements avec filtres avancés
-   * @param {Object} filters - Objet contenant tous les filtres
-   * @returns {Promise} Résultats de recherche
-   */
-  async searchHousings(filters = {}) {
-    try {
-      // Construire les paramètres de requête
-      const params = this.buildQueryParams(filters);
-      
-      const response = await api.get('/housings/', { params });
-      return response.data;
-    } catch (error) {
-      console.error('Erreur recherche:', error);
-      throw error;
-    }
-  },
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
-  /**
-   * Recherche avancée avec statistiques
-   */
-  
-  async advancedSearch(filters = {}) {
-    try {
-      const params = this.buildQueryParams(filters);
-      
-      console.log('📡 API Call - advancedSearch:', params);
-      
-      const response = await api.get('/housings/search_advanced/', { params });
-      
-      console.log('✅ API Response:', response.data);
-      
-      return response.data;
-    } catch (error) {
-      console.error('❌ Erreur recherche avancée:', error);
-      throw error;
-    }
-  },
-
-  /**
-   * Recommandations personnalisées (avec ou sans filtres)
-   */
-  
-  async getRecommendations(filters = {}) {
-    try {
-      const params = this.buildQueryParams(filters);
-      
-      console.log('📡 API Call - recommendations:', params);
-      
-      const response = await api.get('/housings/recommended/', { params });
-      
-      console.log('✅ API Response:', response.data);
-      
-      return response.data;
-    } catch (error) {
-      console.error('❌ Erreur recommandations:', error);
-      throw error;
-    }
-  },
-
-  /**
-   * Construit les paramètres de requête à partir des filtres
-   */
-  buildQueryParams(filters) {
-    const params = {};
-
-    // Recherche textuelle
-    if (filters.searchTerm) {
-      params.search = filters.searchTerm;
-    }
-
-    // Localisation
-    if (filters.category) params.category = filters.category;
-    if (filters.housingType) params.housing_type = filters.housingType;
-    if (filters.city) params.city = filters.city;
-    if (filters.district) params.district = filters.district;
-    if (filters.region) params.region = filters.region;
-
-    // Prix
-    if (filters.minPrice) params.min_price = filters.minPrice;
-    if (filters.maxPrice) params.max_price = filters.maxPrice;
-
-    // Superficie
-    if (filters.minArea) params.min_area = filters.minArea;
-    if (filters.maxArea) params.max_area = filters.maxArea;
-
-    // Caractéristiques
-    if (filters.rooms) {
-      params.rooms = filters.rooms;
-    }
-    if (filters.minRooms) params.min_rooms = filters.minRooms;
-    if (filters.maxRooms) params.max_rooms = filters.maxRooms;
-
-    if (filters.bathrooms) {
-      params.bathrooms = filters.bathrooms;
-    }
-    if (filters.minBathrooms) params.min_bathrooms = filters.minBathrooms;
-    if (filters.maxBathrooms) params.max_bathrooms = filters.maxBathrooms;
-
-    // Statut
-    if (filters.status) params.status = filters.status;
-
-    // Tri
-    if (filters.sortBy) params.sortBy = filters.sortBy;
-
-    // Pagination
-    if (filters.page) params.page = filters.page;
-    if (filters.pageSize) params.page_size = filters.pageSize;
-
-    return params;
-  },
-
-  /**
-   * Obtenir les options pour les filtres (catégories, villes, etc.)
-   */
-  async getFilterOptions() {
-    try {
-      const [categories, types, regions, cities] = await Promise.all([
-        api.get('/categories/'),
-        api.get('/types/'),
-        api.get('/regions/'),
-        api.get('/cities/')
-      ]);
-
-      return {
-        categories: categories.data.results || categories.data,
-        types: types.data.results || types.data,
-        regions: regions.data.results || regions.data,
-        cities: cities.data.results || cities.data,
-      };
-    } catch (error) {
-      console.error('Erreur chargement options:', error);
-      throw error;
-    }
-  },
-
-  /**
-   * Obtenir les quartiers d'une ville
-   */
-  async getDistricts(cityId) {
-    try {
-      const response = await api.get('/districts/', {
-        params: { city: cityId }
-      });
-      return response.data.results || response.data;
-    } catch (error) {
-      console.error('Erreur chargement quartiers:', error);
-      throw error;
-    }
-  },
-
-  /**
-   * Obtenir les villes d'une région
-   */
-  async getCities(regionId) {
-    try {
-      const response = await api.get('/cities/', {
-        params: { region: regionId }
-      });
-      return response.data.results || response.data;
-    } catch (error) {
-      console.error('Erreur chargement villes:', error);
-      throw error;
-    }
+class SearchService {
+  // ========== Recherche Simple ==========
+  async searchHousings(params) {
+    const queryParams = new URLSearchParams(params).toString();
+    const response = await axios.get(
+      `${API_BASE_URL}/recherche/search/?${queryParams}`
+    );
+    return response.data;
   }
-};
 
+  // ========== Recherche Avancée ==========
+  async advancedSearch(filters) {
+    const response = await axios.post(
+      `${API_BASE_URL}/recherche/search/advanced/`,
+      filters
+    );
+    return response.data;
+  }
 
+  // ========== Recherche Vocale ==========
+  async voiceSearch(audioBlob, language = 'fr') {
+    const formData = new FormData();
+    formData.append('audio', audioBlob, 'recording.wav');
+    formData.append('language', language);
+
+    const response = await axios.post(
+      `${API_BASE_URL}/recherche/search/voice/`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return response.data;
+  }
+
+  // ========== Chatbot ==========
+  async sendChatMessage(message, sessionId = null, language = 'fr') {
+    const response = await axios.post(
+      `${API_BASE_URL}/recherche/chatbot/chat/`,
+      {
+        message,
+        session_id: sessionId,
+        language,
+      }
+    );
+    return response.data;
+  }
+
+  async sendVoiceMessage(audioBlob, sessionId = null, language = 'fr') {
+    const formData = new FormData();
+    formData.append('audio', audioBlob, 'recording.wav');
+    formData.append('language', language);
+    if (sessionId) formData.append('session_id', sessionId);
+
+    const response = await axios.post(
+      `${API_BASE_URL}/recherche/chatbot/chat/`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+    return response.data;
+  }
+
+  async getChatHistory(sessionId) {
+    const response = await axios.get(
+      `${API_BASE_URL}/recherche/chatbot/history/?session_id=${sessionId}`
+    );
+    return response.data;
+  }
+
+  // ========== Filtres Sauvegardés ==========
+  async getSavedFilters() {
+    const response = await axios.get(
+      `${API_BASE_URL}/recherche/saved-filters/`
+    );
+    return response.data;
+  }
+
+  async createSavedFilter(filterData) {
+    const response = await axios.post(
+      `${API_BASE_URL}/recherche/saved-filters/`,
+      filterData
+    );
+    return response.data;
+  }
+
+  async applySavedFilter(filterId) {
+    const response = await axios.post(
+      `${API_BASE_URL}/recherche/saved-filters/${filterId}/apply/`
+    );
+    return response.data;
+  }
+
+  async deleteSavedFilter(filterId) {
+    const response = await axios.delete(
+      `${API_BASE_URL}/recherche/saved-filters/${filterId}/`
+    );
+    return response.data;
+  }
+
+  // ========== Historique ==========
+  async getSearchHistory() {
+    const response = await axios.get(
+      `${API_BASE_URL}/recherche/history/`
+    );
+    return response.data;
+  }
+
+  // ========== Lieux de Proximité ==========
+  async getProximityPlaces(params = {}) {
+    const queryParams = new URLSearchParams(params).toString();
+    const response = await axios.get(
+      `${API_BASE_URL}/recherche/proximity-places/?${queryParams}`
+    );
+    return response.data;
+  }
+
+  async getProximityPlaceTypes() {
+    const response = await axios.get(
+      `${API_BASE_URL}/recherche/proximity-places/types/`
+    );
+    return response.data;
+  }
+
+  // ========== Données de Base ==========
+  async getCategories() {
+    const response = await axios.get(`${API_BASE_URL}/housing/categories/`);
+    return response.data;
+  }
+
+  async getHousingTypes() {
+    const response = await axios.get(`${API_BASE_URL}/housing/types/`);
+    return response.data;
+  }
+
+  async getCities(regionId = null) {
+    const url = regionId 
+      ? `${API_BASE_URL}/location/cities/?region=${regionId}`
+      : `${API_BASE_URL}/location/cities/`;
+    const response = await axios.get(url);
+    return response.data;
+  }
+
+  async getDistricts(cityId = null) {
+    const url = cityId
+      ? `${API_BASE_URL}/location/districts/?city=${cityId}`
+      : `${API_BASE_URL}/location/districts/`;
+    const response = await axios.get(url);
+    return response.data;
+  }
+}
+
+export default new SearchService();

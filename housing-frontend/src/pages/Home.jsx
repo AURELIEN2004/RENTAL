@@ -6,7 +6,6 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { housingService } from '../services/housingService';
 import HousingCard from '../components/housing/HousingCard';
-import SearchBar from '../components/search/SearchBar';
 import { FaHome, FaUsers, FaCity, FaStar } from 'react-icons/fa';
 import './Home.css';
 
@@ -65,7 +64,7 @@ const Home = () => {
             Plateforme intelligente de location de logements au Cameroun
           </p>
           
-          <SearchBar onSearch={handleSearch} showFilters={false} />
+          {/* <SearchBar onSearch={handleSearch} showFilters={false} /> */}
         </div>
       </section>
 
