@@ -64,8 +64,9 @@ const Home = () => {
           <p className="hero-subtitle">
             Plateforme intelligente de location de logements au Cameroun
           </p>
-          
-          <SearchBar onSearch={handleSearch} showFilters={false} />
+          <Link to="/search" className="btn btn-white btn-lg">
+            Rechercher Logement
+          </Link>
         </div>
       </section>
 
