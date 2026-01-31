@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, X, ChevronDown, ChevronUp, MapPin } from 'lucide-react';
 import searchService from '../../services/searchService';
 import './AdvancedFilters.css';
+// import './Search.css';
 
 const AdvancedFilters = ({ 
   onFiltersChange, 

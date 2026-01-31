@@ -10,7 +10,9 @@ import {
 } from 'lucide-react';
 import { useVoiceRecording } from '../../hooks/useVoiceRecording';
 import searchService from '../../services/searchService';
-import './ChatbotAssistant.css';
+// import './ChatbotAssistant.css';
+// import './Search.css';
+
 
 const ChatbotAssistant = ({ language = 'fr', onLanguageChange, onHousingClick }) => {
   const [isOpen, setIsOpen] = useState(false);

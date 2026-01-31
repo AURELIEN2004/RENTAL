@@ -5,15 +5,17 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import SearchBar from '../components/search/SearchBar';
-import AdvancedFilters from '../components/search/AdvancedFilters';
-import ChatbotAssistant from '../components/search/ChatbotAssistant';
+import SearchBar from '../components/Search/SearchBar';
+import AdvancedFilters from '../components/Search/AdvancedFilters';
+import ChatbotAssistant from '../components/Search/ChatbotAssistant';
 import searchService from '../services/searchService';
 import { 
   Grid, List, Loader, AlertCircle, Bookmark, 
   Save, MapPin, Bed, Maximize, Eye 
 } from 'lucide-react';
 import './SearchPage.css';
+// import './Search.css';
+
 
 const SearchPage = () => {
   const navigate = useNavigate();

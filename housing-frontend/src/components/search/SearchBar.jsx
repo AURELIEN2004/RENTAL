@@ -8,6 +8,8 @@ import { Search, Mic, MicOff, Loader } from 'lucide-react';
 import { useVoiceRecording } from '../../hooks/useVoiceRecording';
 import searchService from '../../services/searchService';
 import './SearchBar.css';
+// import './Search.css';
+
 
 const SearchBar = ({ onSearch, onVoiceSearch, language = 'fr' }) => {
   const [searchQuery, setSearchQuery] = useState('');
