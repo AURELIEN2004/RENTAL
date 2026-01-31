@@ -8,6 +8,7 @@ import { housingService } from '../services/housingService';
 import HousingCard from '../components/housing/HousingCard';
 import { FaHome, FaUsers, FaCity, FaStar } from 'react-icons/fa';
 import './Home.css';
+import SearchBar from '../components/Search/SearchBar';
 
 const Home = () => {
   const [featuredHousings, setFeaturedHousings] = useState([]);
@@ -64,7 +65,7 @@ const Home = () => {
             Plateforme intelligente de location de logements au Cameroun
           </p>
           
-          {/* <SearchBar onSearch={handleSearch} showFilters={false} /> */}
+          <SearchBar onSearch={handleSearch} showFilters={false} />
         </div>
       </section>
 
