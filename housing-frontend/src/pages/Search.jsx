@@ -1,5 +1,3 @@
-
-
 // src/pages/Search.jsx - VERSION AMÉLIORÉE AVEC RECHERCHE VOCALE
 
 import React, { useState, useEffect } from 'react';

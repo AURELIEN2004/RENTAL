@@ -22,8 +22,8 @@ from .serializers import (
     FavoriteSerializer, SavedHousingSerializer,
     CommentSerializer, TestimonialSerializer
 )
-from .genetic_algorithm import apply_genetic_algorithm
-from .filters import HousingFilter
+# from .genetic_algorithm import apply_genetic_algorithm
+# from .filters import HousingFilter
 from .permissions import IsOwnerOrReadOnly
 
 
@@ -78,7 +78,7 @@ class HousingViewSet(viewsets.ModelViewSet):
     ).prefetch_related('images')
 
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_class = HousingFilter
+
     search_fields = ['title', 'description', 'city__name', 'district__name']
     ordering_fields = ['price', 'created_at', 'views_count', 'likes_count', 'area', 'rooms']
     permission_classes = [IsOwnerOrReadOnly]
