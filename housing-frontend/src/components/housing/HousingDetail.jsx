@@ -134,6 +134,17 @@ const HousingDetail = () => {
     setCurrentImageIndex((prev) => 
       prev === 0 ? housing.images.length - 1 : prev - 1
     );
+
+    // const pour le bouton de retour
+
+const handleBack = () => {
+  if (window.history.state && window.history.state.idx > 0) {
+    navigate(-1);
+  } else {
+    navigate('/'); // Fallback vers l'accueil si aucune page précédente
+  }
+};
+
   };
 
   if (loading) return <Loading fullScreen message="Chargement du logement..." />;
@@ -141,6 +152,16 @@ const HousingDetail = () => {
 
   return (
     <div className="housing-detail">
+
+      {/* Bouton de retour */}
+      <div className="detail-back">
+  <button className="btn btn-secondary back-btn" onClick={handleBack}>
+    ← Retour
+  </button>
+</div>
+
+
+
       {/* Galerie d'images */}
       <div className="image-gallery">
         {housing.images && housing.images.length > 0 && (

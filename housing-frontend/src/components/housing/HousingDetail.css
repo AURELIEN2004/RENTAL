@@ -3,6 +3,49 @@
   margin: 0 auto;
   padding: 20px;
 }
+/* Bouton de retour */
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  background-color: #f0f0f0; /* couleur de fond claire */
+  color: #333; /* texte sombre */
+  border: 1px solid #e91414;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  margin-bottom: 1rem;
+}
+.detail-back {
+  position: sticky;
+  top: 1rem;
+  z-index: 100;
+}
+
+.back-btn:hover {
+  background-color: #e0e0e0;
+  border-color: #999;
+}
+
+.back-btn:active {
+  transform: translateY(1px);
+}
+
+/* Responsive : sur mobile, bouton plus grand */
+@media (max-width: 768px) {
+  .back-btn {
+    padding: 0.75rem 1.25rem;
+    font-size: 1.1rem;
+  }
+}
+
+/* Optionnel : mettre le bouton toujours visible en haut du détail */
+.detail-back {
+  margin: 1rem 0;
+}
 
 /* Galerie d'images */
 .image-gallery {

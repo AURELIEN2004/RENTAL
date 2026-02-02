@@ -119,8 +119,29 @@ const HousingDetailPage = () => {
     lng: housing.longitude || 11.502,
   };
 
+
+          {/* Bouton de retour */}
+  const handleBack = () => {
+  if (window.history.state && window.history.state.idx > 0) {
+    navigate(-1);
+  } else {
+    navigate('/'); // Fallback vers l'accueil si aucune page précédente
+  }
+};
+       {/* FIN BOUTTON DE RETOUR */}
+
+
   return (
     <div className="housing-detail-page">
+      
+        {/* Bouton de retour */}
+        <div className="detail-back">
+            <button className="btn btn-secondary back-btn" onClick={handleBack}>
+              ← Retour
+            </button>
+          </div>
+       {/* FIN BOUTTON DE RETOUR */}
+
       <div className="container">
         {/* Breadcrumb */}
         <nav className="breadcrumb">
