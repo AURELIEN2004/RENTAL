@@ -1,6 +1,5 @@
 // ============================================
 // 📁 src/components/Search/ChatbotAssistant.jsx
-// Assistant chatbot avec recherche vocale intégrée
 // ============================================
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -9,12 +8,11 @@ import {
   Maximize2, Loader, Globe, ExternalLink 
 } from 'lucide-react';
 import { useVoiceRecording } from '../../hooks/useVoiceRecording';
-import searchService from '../../services/searchService';
+import chatbotService from '../../services/chatbotService';
 // import './ChatbotAssistant.css';
 // import './Search.css';
 
-
-const ChatbotAssistant = ({ language = 'fr', onLanguageChange, onHousingClick }) => {
+const ChatbotAssistant = ({ onHousingClick }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -22,7 +20,7 @@ const ChatbotAssistant = ({ language = 'fr', onLanguageChange, onHousingClick })
   const [sessionId, setSessionId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isProcessingVoice, setIsProcessingVoice] = useState(false);
-
+  const [language, setLanguage] = useState('fr');
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -93,7 +91,7 @@ const ChatbotAssistant = ({ language = 'fr', onLanguageChange, onHousingClick })
     setIsLoading(true);
 
     try {
-      const result = await searchService.sendChatMessage(text, sessionId, language);
+      const result = await chatbotService.sendChatMessage(text, messages);
 
       // Sauvegarder session ID
       if (result.session_id && !sessionId) {
@@ -104,7 +102,7 @@ const ChatbotAssistant = ({ language = 'fr', onLanguageChange, onHousingClick })
       const assistantMessage = {
         id: result.message_id || Date.now() + 1,
         role: 'assistant',
-        content: result.response,
+        content: result.response || result.message,
         housings: result.housings || [],
         timestamp: new Date(),
       };
@@ -160,13 +158,13 @@ const ChatbotAssistant = ({ language = 'fr', onLanguageChange, onHousingClick })
     setMessages(prev => [...prev, voiceIndicator]);
 
     try {
-      const result = await searchService.sendVoiceMessage(audioBlob, sessionId, language);
+      const result = await chatbotService.sendVoiceMessage(audioBlob, messages);
 
-      if (result.success) {
+      if (result.success || result.transcription) {
         // Remplacer indicateur par transcription
         setMessages(prev => prev.map(msg => 
           msg.id === voiceIndicator.id
-            ? { ...msg, content: result.transcription, isVoice: true }
+            ? { ...msg, content: result.transcription || result.text, isVoice: true }
             : msg
         ));
 
@@ -179,7 +177,7 @@ const ChatbotAssistant = ({ language = 'fr', onLanguageChange, onHousingClick })
         const assistantMessage = {
           id: result.message_id || Date.now() + 1,
           role: 'assistant',
-          content: result.response,
+          content: result.response || result.message,
           housings: result.housings || [],
           timestamp: new Date(),
         };
@@ -196,11 +194,17 @@ const ChatbotAssistant = ({ language = 'fr', onLanguageChange, onHousingClick })
     } catch (error) {
       console.error('Voice message error:', error);
       setMessages(prev => prev.filter(msg => msg.id !== voiceIndicator.id));
-      alert(
-        language === 'fr'
-          ? 'Erreur lors du traitement vocal'
-          : 'Voice processing error'
-      );
+      
+      // Message d'erreur pour feature non disponible
+      const errorMsg = {
+        id: Date.now() + 1,
+        role: 'assistant',
+        content: language === 'fr'
+          ? 'La fonctionnalité vocale sera bientôt disponible. Veuillez utiliser le chat texte.'
+          : 'Voice feature coming soon. Please use text chat.',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMsg]);
     } finally {
       setIsProcessingVoice(false);
       clearAudio();
@@ -221,6 +225,12 @@ const ChatbotAssistant = ({ language = 'fr', onLanguageChange, onHousingClick })
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const toggleLanguage = () => {
+    const newLang = language === 'fr' ? 'en' : 'fr';
+    setLanguage(newLang);
+    localStorage.setItem('chatbot_language', newLang);
   };
 
   if (!isOpen) {
@@ -250,7 +260,7 @@ const ChatbotAssistant = ({ language = 'fr', onLanguageChange, onHousingClick })
         <div className="header-right">
           <button
             className="header-btn language-btn"
-            onClick={() => onLanguageChange(language === 'fr' ? 'en' : 'fr')}
+            onClick={toggleLanguage}
             title={language === 'fr' ? 'Changer langue' : 'Change language'}
           >
             <Globe size={16} />

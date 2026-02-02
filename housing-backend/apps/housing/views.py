@@ -22,8 +22,8 @@ from .serializers import (
     FavoriteSerializer, SavedHousingSerializer,
     CommentSerializer, TestimonialSerializer
 )
-# from .genetic_algorithm import apply_genetic_algorithm
-# from .filters import HousingFilter
+from .genetic_algorithm import apply_genetic_algorithm
+from .filters import HousingFilter
 from .permissions import IsOwnerOrReadOnly
 
 

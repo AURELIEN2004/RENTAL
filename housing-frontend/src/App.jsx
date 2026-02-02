@@ -27,9 +27,10 @@ import SearchPage from './pages/SearchPage';
 import Navbar from './components/common/Navbar';
 import Footer from './components/common/Footer';
 import SupportContactButton from './components/common/SupportContactButton';
-
+import Chatbot from './components/Search/ChatbotAssistant';
 // Styles
 import './styles/global.css';
+import ChatbotAssistant from './components/Search/ChatbotAssistant';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -98,6 +99,7 @@ function App() {
             
             {/* ✨ NOUVEAU: Bouton Support Flottant */}
             <SupportContactButton />
+            {/* <ChatbotAssistant /> */}
             
             <ToastContainer position="top-right" autoClose={3000} />
           </div>

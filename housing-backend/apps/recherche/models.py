@@ -1,6 +1,4 @@
-from django.db import models
 
-# Create your models here.
 # ============================================
 # 📁 apps/recherche/models.py
 # ============================================
@@ -9,7 +7,6 @@ from django.db import models
 from django.conf import settings
 # from django.contrib.postgres.fields import ArrayField
 import json
-
 
 class SearchHistory(models.Model):
     """Historique des recherches utilisateur"""

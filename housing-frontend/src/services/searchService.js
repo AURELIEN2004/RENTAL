@@ -1,166 +1,263 @@
-// ============================================
-// 📁 src/services/searchService.js
-// Service API pour toutes les recherches
-// ============================================
+// // ============================================
+// // 📁 src/services/searchService.js
+// // ============================================
 
-import axios from 'axios';
 
+
+// import API_URL from '../config/api';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
+
 class SearchService {
-  // ========== Recherche Simple ==========
-  async searchHousings(params) {
-    const queryParams = new URLSearchParams(params).toString();
-    const response = await axios.get(
-      `${API_BASE_URL}/recherche/search/?${queryParams}`
-    );
-    return response.data;
+  // Recherche principale avec tous les filtres
+  async search(filters) {
+    try {
+      const queryParams = this.buildQueryParams(filters);
+      const response = await fetch(`${API_URL}/recherche/search/?${queryParams}`);
+      
+      if (!response.ok) {
+        throw new Error('Erreur lors de la recherche');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Search error:', error);
+      throw error;
+    }
   }
 
-  // ========== Recherche Avancée ==========
-  async advancedSearch(filters) {
-    const response = await axios.post(
-      `${API_BASE_URL}/recherche/search/advanced/`,
-      filters
-    );
-    return response.data;
+  // Construire les paramètres de recherche
+  buildQueryParams(filters) {
+    const params = new URLSearchParams();
+    
+    if (filters.category) params.append('category', filters.category);
+    if (filters.city) params.append('city', filters.city);
+    if (filters.district) params.append('district', filters.district);
+    if (filters.housingType) params.append('housing_type', filters.housingType);
+    if (filters.minPrice) params.append('min_price', filters.minPrice);
+    if (filters.maxPrice) params.append('max_price', filters.maxPrice);
+    if (filters.minSurface) params.append('min_surface', filters.minSurface);
+    if (filters.maxSurface) params.append('max_surface', filters.maxSurface);
+    if (filters.bedrooms) params.append('bedrooms', filters.bedrooms);
+    if (filters.bathrooms) params.append('bathrooms', filters.bathrooms);
+    
+    // Équipements
+    if (filters.hasParking) params.append('has_parking', 'true');
+    if (filters.hasGarden) params.append('has_garden', 'true');
+    if (filters.hasPool) params.append('has_pool', 'true');
+    if (filters.isFurnished) params.append('is_furnished', 'true');
+    
+    return params.toString();
   }
 
-  // ========== Recherche Vocale ==========
-  async voiceSearch(audioBlob, language = 'fr') {
-    const formData = new FormData();
-    formData.append('audio', audioBlob, 'recording.wav');
-    formData.append('language', language);
+  // Recherche par texte libre
+  async searchByText(query) {
+    try {
+      const response = await fetch(`${API_URL}/recherche/search/?query=${encodeURIComponent(query)}`);
+      
+      if (!response.ok) {
+        throw new Error('Erreur lors de la recherche textuelle');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Text search error:', error);
+      throw error;
+    }
+  }
 
-    const response = await axios.post(
-      `${API_BASE_URL}/recherche/search/voice/`,
-      formData,
-      {
+  // Sauvegarder les filtres de recherche
+  async saveFilters(filters) {
+    try {
+      const response = await fetch(`${API_URL}/recherche/save-filters/`, {
+        method: 'POST',
         headers: {
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify(filters),
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Erreur lors de la sauvegarde des filtres');
       }
-    );
-    return response.data;
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Save filters error:', error);
+      throw error;
+    }
   }
 
-  // ========== Chatbot ==========
-  async sendChatMessage(message, sessionId = null, language = 'fr') {
-    const response = await axios.post(
-      `${API_BASE_URL}/recherche/chatbot/chat/`,
-      {
-        message,
-        session_id: sessionId,
-        language,
-      }
-    );
-    return response.data;
-  }
-
-  async sendVoiceMessage(audioBlob, sessionId = null, language = 'fr') {
-    const formData = new FormData();
-    formData.append('audio', audioBlob, 'recording.wav');
-    formData.append('language', language);
-    if (sessionId) formData.append('session_id', sessionId);
-
-    const response = await axios.post(
-      `${API_BASE_URL}/recherche/chatbot/chat/`,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
-    );
-    return response.data;
-  }
-
-  async getChatHistory(sessionId) {
-    const response = await axios.get(
-      `${API_BASE_URL}/recherche/chatbot/history/?session_id=${sessionId}`
-    );
-    return response.data;
-  }
-
-  // ========== Filtres Sauvegardés ==========
+  // Récupérer les filtres sauvegardés
   async getSavedFilters() {
-    const response = await axios.get(
-      `${API_BASE_URL}/recherche/saved-filters/`
-    );
-    return response.data;
+    try {
+      const response = await fetch(`${API_URL}/recherche/saved-filters/`, {
+        credentials: 'include'
+      });
+      
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération des filtres');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Get saved filters error:', error);
+      return [];
+    }
   }
 
-  async createSavedFilter(filterData) {
-    const response = await axios.post(
-      `${API_BASE_URL}/recherche/saved-filters/`,
-      filterData
-    );
-    return response.data;
+  // Récupérer les suggestions de recherche
+  async getSearchSuggestions(query) {
+    try {
+      const response = await fetch(`${API_URL}/recherche/suggestions/?q=${encodeURIComponent(query)}`);
+      
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération des suggestions');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Get suggestions error:', error);
+      return [];
+    }
   }
 
-  async applySavedFilter(filterId) {
-    const response = await axios.post(
-      `${API_BASE_URL}/recherche/saved-filters/${filterId}/apply/`
-    );
-    return response.data;
+  // Obtenir les logements recommandés
+  async getRecommendations(filters = {}) {
+    try {
+      const queryParams = this.buildQueryParams(filters);
+      const response = await fetch(`${API_URL}/recherche/recommendations/?${queryParams}`);
+      
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération des recommandations');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Get recommendations error:', error);
+      return [];
+    }
   }
 
-  async deleteSavedFilter(filterId) {
-    const response = await axios.delete(
-      `${API_BASE_URL}/recherche/saved-filters/${filterId}/`
-    );
-    return response.data;
+  // Obtenir les logements vedettes
+  async getFeaturedHousings() {
+    try {
+      const response = await fetch(`${API_URL}/recherche/featured/`);
+      
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération des logements vedettes');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Get featured housings error:', error);
+      return [];
+    }
   }
 
-  // ========== Historique ==========
-  async getSearchHistory() {
-    const response = await axios.get(
-      `${API_BASE_URL}/recherche/history/`
-    );
-    return response.data;
+  // Obtenir les logements récents
+  async getRecentHousings(limit = 8) {
+    try {
+      const response = await fetch(`${API_URL}/recherche/recent/?limit=${limit}`);
+      
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération des logements récents');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Get recent housings error:', error);
+      return [];
+    }
   }
 
-  // ========== Lieux de Proximité ==========
-  async getProximityPlaces(params = {}) {
-    const queryParams = new URLSearchParams(params).toString();
-    const response = await axios.get(
-      `${API_BASE_URL}/recherche/proximity-places/?${queryParams}`
-    );
-    return response.data;
+  // Obtenir les statistiques de la plateforme
+  async getPlatformStats() {
+    try {
+      const response = await fetch(`${API_URL}/recherche/stats/`);
+      
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération des statistiques');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Get stats error:', error);
+      return {
+        total_housings: 0,
+        total_cities: 0,
+        total_users: 0
+      };
+    }
   }
 
-  async getProximityPlaceTypes() {
-    const response = await axios.get(
-      `${API_BASE_URL}/recherche/proximity-places/types/`
-    );
-    return response.data;
-  }
-
-  // ========== Données de Base ==========
+  // Récupérer les catégories
   async getCategories() {
-    const response = await axios.get(`${API_BASE_URL}/housing/categories/`);
-    return response.data;
+    try {
+      const response = await fetch(`${API_URL}/housing/categories/`);
+      
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération des catégories');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Get categories error:', error);
+      return [];
+    }
   }
 
+  // Récupérer les villes
+  async getCities() {
+    try {
+      const response = await fetch(`${API_URL}/location/cities/`);
+      
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération des villes');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Get cities error:', error);
+      return [];
+    }
+  }
+
+  // Récupérer les quartiers par ville
+  async getDistricts(cityId) {
+    try {
+      const url = cityId 
+        ? `${API_URL}/location/districts/?city=${cityId}`
+        : `${API_URL}/location/districts/`;
+        
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération des quartiers');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Get districts error:', error);
+      return [];
+    }
+  }
+
+  // Récupérer les types de logement
   async getHousingTypes() {
-    const response = await axios.get(`${API_BASE_URL}/housing/types/`);
-    return response.data;
-  }
-
-  async getCities(regionId = null) {
-    const url = regionId 
-      ? `${API_BASE_URL}/location/cities/?region=${regionId}`
-      : `${API_BASE_URL}/location/cities/`;
-    const response = await axios.get(url);
-    return response.data;
-  }
-
-  async getDistricts(cityId = null) {
-    const url = cityId
-      ? `${API_BASE_URL}/location/districts/?city=${cityId}`
-      : `${API_BASE_URL}/location/districts/`;
-    const response = await axios.get(url);
-    return response.data;
+    try {
+      const response = await fetch(`${API_URL}/housing/types/`);
+      
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération des types de logement');
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.error('Get housing types error:', error);
+      return [];
+    }
   }
 }
 

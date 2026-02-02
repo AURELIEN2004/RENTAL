@@ -191,3 +191,105 @@
   .section-header h2 { font-size: 1.8rem; }
   .housing-grid { grid-template-columns: 1fr; }
 }
+
+/* ============================================
+   SECTION RECOMMANDATIONS (FEATURED)
+   ============================================ */
+
+.featured-section {
+  padding: 80px 0;
+  background-color: var(--bg-light, #f9f9f9); /* S'adaptera au mode clair/sombre */
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.section-header h2 {
+  font-size: 2.5rem;
+  color: #2d3436;
+  margin-bottom: 10px;
+  font-weight: 700;
+  position: relative;
+  display: inline-block;
+}
+
+/* Petit trait décoratif sous le titre */
+.section-header h2::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 4px;
+  background: #0984e3; /* Bleu primaire */
+  margin: 10px auto 0;
+  border-radius: 2px;
+}
+
+.section-header p {
+  color: #636e72;
+  font-size: 1.1rem;
+}
+
+/* Grille de Logements */
+.housing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+/* Animation au survol des cartes (si pas déjà dans HousingCard) */
+.housing-grid > * {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.housing-grid > *:hover {
+  transform: translateY(-10px);
+}
+
+/* Footer de section (Bouton Voir tout) */
+.section-footer {
+  text-align: center;
+  margin-top: 50px;
+}
+
+.btn-primary {
+  background-color: #0984e3;
+  color: white;
+  padding: 15px 35px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(9, 132, 227, 0.3);
+}
+
+.btn-primary:hover {
+  background-color: #0773c5;
+  box-shadow: 0 6px 20px rgba(9, 132, 227, 0.4);
+  transform: scale(1.05);
+}
+
+/* Skeleton / Loading state */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  font-style: italic;
+  color: #0984e3;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .section-header h2 {
+    font-size: 2rem;
+  }
+  
+  .housing-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 0 15px;
+  }
+}

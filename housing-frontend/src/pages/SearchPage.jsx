@@ -1,518 +1,274 @@
-// ============================================
-// 📁 src/pages/SearchPage.jsx
-// Page principale de recherche
-// ============================================
+// // ============================================
+// // 📁 src/pages/SearchPage.jsx
+// // ============================================
+
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import SearchBar from '../components/Search/SearchBar';
-import AdvancedFilters from '../components/Search/AdvancedFilters';
-import ChatbotAssistant from '../components/Search/ChatbotAssistant';
+import { useNavigate, useLocation } from 'react-router-dom';
+import SearchBar from '../components/search/SearchBar';
+import AdvancedFilters from '../components/search/AdvancedFilters';
+import HousingList from '../components/housing/HousingList';
+// import Pagination from '../components/common/Pagination';
 import searchService from '../services/searchService';
-import { 
-  Grid, List, Loader, AlertCircle, Bookmark, 
-  Save, MapPin, Bed, Maximize, Eye 
-} from 'lucide-react';
 import './SearchPage.css';
-// import './Search.css';
-
+import ChatbotAssistant from '../components/Search/ChatbotAssistant';
 
 const SearchPage = () => {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  const [language, setLanguage] = useState('fr');
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+  const location = useLocation();
   
-  // États de recherche
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
-  const [filters, setFilters] = useState({});
-  const [results, setResults] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState({
+    category: '',
+    city: '',
+    district: '',
+    housingType: '',
+    minPrice: '',
+    maxPrice: '',
+    minSurface: '',
+    maxSurface: '',
+    bedrooms: '',
+    bathrooms: '',
+    hasParking: false,
+    hasGarden: false,
+    hasPool: false,
+    isFurnished: false
+  });
+  
+  const [housings, setHousings] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
-  const [pageSize] = useState(20);
-
-  // Filtres sauvegardés
+  const [showFilters, setShowFilters] = useState(false);
   const [savedFilters, setSavedFilters] = useState([]);
-  const [showSaveDialog, setShowSaveDialog] = useState(false);
 
-  // Charger filtres sauvegardés au montage
+  // Charger les filtres sauvegardés au montage
   useEffect(() => {
     loadSavedFilters();
   }, []);
 
-  // Effectuer recherche initiale si paramètres URL
+  // Effectuer la recherche quand les filtres changent
   useEffect(() => {
-    const query = searchParams.get('q');
-    if (query) {
-      performSearch(query, filters);
-    }
-  }, []);
+    performSearch();
+  }, [filters, currentPage]);
 
   const loadSavedFilters = async () => {
     try {
-      const data = await searchService.getSavedFilters();
-      setSavedFilters(data);
+      const filters = await searchService.getSavedFilters();
+      setSavedFilters(filters);
     } catch (error) {
       console.error('Error loading saved filters:', error);
     }
   };
 
-  const performSearch = async (query = searchQuery, currentFilters = filters) => {
-    setIsLoading(true);
+  const performSearch = async () => {
+    setLoading(true);
     setError(null);
-
+    
     try {
-      const searchFilters = {
-        ...currentFilters,
-        query: query || undefined,
-        page: currentPage,
-        page_size: pageSize,
-      };
-
-      const data = await searchService.advancedSearch(searchFilters);
-
-      setResults(data.results || []);
-      setTotalCount(data.count || 0);
-      setTotalPages(data.total_pages || 1);
-
-      // Mettre à jour URL
-      if (query) {
-        setSearchParams({ q: query });
-      }
-
-    } catch (err) {
-      console.error('Search error:', err);
-      setError(
-        language === 'fr'
-          ? 'Erreur lors de la recherche. Veuillez réessayer.'
-          : 'Search error. Please try again.'
-      );
+      const results = await searchService.search({
+        ...filters,
+        page: currentPage
+      });
+      
+      setHousings(results.housings || []);
+      setTotalPages(Math.ceil((results.total || 0) / 12));
+    } catch (error) {
+      console.error('Search error:', error);
+      setError('Erreur lors de la recherche. Veuillez réessayer.');
+      setHousings([]);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const handleSearch = async (query) => {
+  const handleSearch = (query) => {
     setSearchQuery(query);
+    setFilters(prev => ({ ...prev }));
     setCurrentPage(1);
-    await performSearch(query, filters);
   };
 
-  const handleVoiceSearch = async (voiceResult) => {
-    setSearchQuery(voiceResult.transcription);
-    setResults(voiceResult.results || []);
-    setTotalCount(voiceResult.results_count || 0);
+  const handleVoiceSearch = (transcript) => {
+    setSearchQuery(transcript);
+    setFilters(prev => ({ ...prev }));
+    setCurrentPage(1);
   };
 
   const handleFiltersChange = (newFilters) => {
+    // Mise à jour des filtres SANS appeler performSearch
+    // performSearch sera appelé automatiquement par useEffect
     setFilters(newFilters);
-  };
-
-  const handleApplyFilters = async () => {
     setCurrentPage(1);
-    await performSearch(searchQuery, filters);
   };
 
-  const handlePageChange = async (page) => {
+  const handlePageChange = (page) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    
-    // Effectuer nouvelle recherche avec nouvelle page
-    const searchFilters = {
-      ...filters,
-      query: searchQuery || undefined,
-      page,
-      page_size: pageSize,
-    };
-
-    try {
-      setIsLoading(true);
-      const data = await searchService.advancedSearch(searchFilters);
-      setResults(data.results || []);
-    } catch (error) {
-      console.error('Pagination error:', error);
-    } finally {
-      setIsLoading(false);
-    }
   };
 
-  const handleSaveFilters = async (name) => {
+  const handleSaveFilters = async () => {
     try {
-      await searchService.createSavedFilter({
-        name,
-        filters: { ...filters, query: searchQuery },
-        notify_new_results: true,
-      });
-      
-      setShowSaveDialog(false);
+      await searchService.saveFilters(filters);
+      alert('Filtres sauvegardés avec succès!');
       loadSavedFilters();
-      
-      alert(
-        language === 'fr'
-          ? 'Filtre sauvegardé avec succès !'
-          : 'Filter saved successfully!'
-      );
     } catch (error) {
-      console.error('Save filter error:', error);
-      alert(
-        language === 'fr'
-          ? 'Erreur lors de la sauvegarde'
-          : 'Error saving filter'
-      );
+      console.error('Error saving filters:', error);
+      alert('Erreur lors de la sauvegarde des filtres');
     }
   };
 
-  const handleApplySavedFilter = async (filterId) => {
-    try {
-      const data = await searchService.applySavedFilter(filterId);
-      setResults(data.results || []);
-      setTotalCount(data.count || 0);
-      setFilters(data.filters || {});
-    } catch (error) {
-      console.error('Apply filter error:', error);
-    }
+  const handleLoadSavedFilter = (savedFilter) => {
+    setFilters(savedFilter.filters);
+    setCurrentPage(1);
   };
 
-  const handleHousingClick = (housingId) => {
-    navigate(`/housing/${housingId}`);
+  const handleResetFilters = () => {
+    setFilters({
+      category: '',
+      city: '',
+      district: '',
+      housingType: '',
+      minPrice: '',
+      maxPrice: '',
+      minSurface: '',
+      maxSurface: '',
+      bedrooms: '',
+      bathrooms: '',
+      hasParking: false,
+      hasGarden: false,
+      hasPool: false,
+      isFurnished: false
+    });
+    setSearchQuery('');
+    setCurrentPage(1);
   };
 
-  const renderPagination = () => {
-    if (totalPages <= 1) return null;
-
-    const pages = [];
-    const maxVisible = 5;
-    let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisible - 1);
-
-    if (endPage - startPage < maxVisible - 1) {
-      startPage = Math.max(1, endPage - maxVisible + 1);
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      pages.push(i);
-    }
-
-    return (
-      <div className="pagination">
-        <button
-          className="page-btn"
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-        >
-          {language === 'fr' ? 'Précédent' : 'Previous'}
-        </button>
-
-        {startPage > 1 && (
-          <>
-            <button className="page-number" onClick={() => handlePageChange(1)}>
-              1
-            </button>
-            {startPage > 2 && <span className="page-dots">...</span>}
-          </>
-        )}
-
-        {pages.map(page => (
-          <button
-            key={page}
-            className={`page-number ${page === currentPage ? 'active' : ''}`}
-            onClick={() => handlePageChange(page)}
-          >
-            {page}
-          </button>
-        ))}
-
-        {endPage < totalPages && (
-          <>
-            {endPage < totalPages - 1 && <span className="page-dots">...</span>}
-            <button 
-              className="page-number" 
-              onClick={() => handlePageChange(totalPages)}
-            >
-              {totalPages}
-            </button>
-          </>
-        )}
-
-        <button
-          className="page-btn"
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-        >
-          {language === 'fr' ? 'Suivant' : 'Next'}
-        </button>
-      </div>
-    );
+  const toggleFilters = () => {
+    setShowFilters(!showFilters);
   };
 
   return (
     <div className="search-page">
-      {/* Header de recherche */}
-      <div className="search-header">
-        <div className="container">
-          <h1 className="page-title">
-            {language === 'fr' 
-              ? '🔍 Rechercher un logement' 
-              : '🔍 Search Housing'}
-          </h1>
+      <div className="search-page-header">
+        <h1>Recherche de logements</h1>
+        <SearchBar 
+          onSearch={handleSearch}
+          onVoiceSearch={handleVoiceSearch}
+          placeholder="Rechercher un logement..."
+        />
+      </div>
 
-          <SearchBar
-            onSearch={handleSearch}
-            onVoiceSearch={handleVoiceSearch}
-            language={language}
-          />
-
-          <AdvancedFilters
-            onFiltersChange={handleFiltersChange}
-            initialFilters={filters}
-            language={language}
-          />
-
-          <div className="search-actions">
-            <button
-              className="action-btn primary"
-              onClick={handleApplyFilters}
-              disabled={isLoading}
+      <div className="search-page-content">
+        <div className={`filters-sidebar ${showFilters ? 'show' : ''}`}>
+          <div className="filters-header">
+            <h2>Filtres</h2>
+            <button 
+              className="close-filters-btn"
+              onClick={toggleFilters}
             >
-              {isLoading ? (
-                <>
-                  <Loader className="spinner" size={16} />
-                  {language === 'fr' ? 'Recherche...' : 'Searching...'}
-                </>
-              ) : (
-                <>
-                  {language === 'fr' ? 'Appliquer les filtres' : 'Apply filters'}
-                </>
-              )}
+              ✕
             </button>
-
-            <button
-              className="action-btn"
-              onClick={() => setShowSaveDialog(true)}
-              disabled={Object.keys(filters).length === 0 && !searchQuery}
+          </div>
+          
+          <AdvancedFilters 
+            filters={filters}
+            onFiltersChange={handleFiltersChange}
+          />
+          
+          <div className="filters-actions">
+            <button 
+              className="btn btn-secondary"
+              onClick={handleResetFilters}
             >
-              <Save size={16} />
-              {language === 'fr' ? 'Sauvegarder' : 'Save'}
+              Réinitialiser
+            </button>
+            <button 
+              className="btn btn-primary"
+              onClick={handleSaveFilters}
+            >
+              Sauvegarder
             </button>
           </div>
 
-          {/* Filtres sauvegardés */}
           {savedFilters.length > 0 && (
             <div className="saved-filters">
-              <p className="saved-filters-label">
-                {language === 'fr' ? 'Filtres sauvegardés:' : 'Saved filters:'}
-              </p>
-              <div className="saved-filters-list">
-                {savedFilters.map(filter => (
-                  <button
-                    key={filter.id}
-                    className="saved-filter-btn"
-                    onClick={() => handleApplySavedFilter(filter.id)}
-                  >
-                    <Bookmark size={14} />
-                    {filter.name}
-                  </button>
+              <h3>Recherches sauvegardées</h3>
+              <ul>
+                {savedFilters.map((saved, index) => (
+                  <li key={index}>
+                    <button
+                      onClick={() => handleLoadSavedFilter(saved)}
+                      className="saved-filter-btn"
+                    >
+                      {saved.name || `Recherche ${index + 1}`}
+                    </button>
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
           )}
         </div>
-      </div>
 
-      {/* Résultats */}
-      <div className="search-results">
-        <div className="container">
-          {/* Barre d'outils résultats */}
-          {results.length > 0 && (
-            <div className="results-toolbar">
-              <div className="results-count">
-                {totalCount} {language === 'fr' ? 'logement(s)' : 'housing(s)'}
-              </div>
-
-              <div className="view-toggle">
-                <button
-                  className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
-                  onClick={() => setViewMode('grid')}
-                >
-                  <Grid size={18} />
-                </button>
-                <button
-                  className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
-                  onClick={() => setViewMode('list')}
-                >
-                  <List size={18} />
-                </button>
-              </div>
+        <div className="search-results">
+          <div className="results-header">
+            <button 
+              className="toggle-filters-btn"
+              onClick={toggleFilters}
+            >
+              <span className="icon">⚙️</span>
+              Filtres
+            </button>
+            
+            <div className="results-count">
+              {loading ? (
+                'Recherche en cours...'
+              ) : (
+                `${housings.length} logement${housings.length > 1 ? 's' : ''} trouvé${housings.length > 1 ? 's' : ''}`
+              )}
             </div>
-          )}
+          </div>
 
-          {/* Loading */}
-          {isLoading && (
-            <div className="loading-container">
-              <Loader className="spinner large" size={48} />
-              <p>{language === 'fr' ? 'Recherche en cours...' : 'Searching...'}</p>
-            </div>
-          )}
-
-          {/* Error */}
           {error && (
-            <div className="error-container">
-              <AlertCircle size={48} />
-              <p>{error}</p>
-              <button onClick={() => performSearch(searchQuery, filters)}>
-                {language === 'fr' ? 'Réessayer' : 'Try again'}
+            <div className="error-message">
+              {error}
+            </div>
+          )}
+
+          {loading ? (
+            <div className="loading-spinner">
+              <div className="spinner"></div>
+              <p>Recherche en cours...</p>
+            </div>
+          ) : housings.length > 0 ? (
+            <>
+              <HousingList housings={housings} />
+              
+              {totalPages > 1 && (
+                <Pagination 
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
+              )}
+            </>
+          ) : (
+            <div className="no-results">
+              <div className="no-results-icon">🏠</div>
+              <h3>Aucun logement trouvé</h3>
+              <p>Essayez de modifier vos critères de recherche</p>
+              <button 
+                className="btn btn-primary"
+                onClick={handleResetFilters}
+              >
+                Réinitialiser les filtres
               </button>
             </div>
           )}
+                      <ChatbotAssistant />
 
-          {/* Résultats */}
-          {!isLoading && !error && results.length > 0 && (
-            <>
-              <div className={`results-grid ${viewMode}`}>
-                {results.map(housing => (
-                  <div
-                    key={housing.id}
-                    className="housing-card"
-                    onClick={() => handleHousingClick(housing.id)}
-                  >
-                    {housing.main_image && (
-                      <div className="card-image-container">
-                        <img 
-                          src={housing.main_image} 
-                          alt={housing.title}
-                          className="card-image"
-                        />
-                        {housing.status && (
-                          <span className={`status-badge ${housing.status}`}>
-                            {housing.status}
-                          </span>
-                        )}
-                      </div>
-                    )}
-
-                    <div className="card-content">
-                      <h3 className="card-title">{housing.title}</h3>
-                      
-                      <p className="card-price">
-                        {housing.price?.toLocaleString()} FCFA
-                        {housing.category_name && (
-                          <span className="price-period">
-                            /{housing.category_name.toLowerCase()}
-                          </span>
-                        )}
-                      </p>
-
-                      <p className="card-location">
-                        <MapPin size={14} />
-                        {housing.district_name}, {housing.city_name}
-                      </p>
-
-                      <div className="card-features">
-                        {housing.rooms && (
-                          <span className="feature">
-                            <Bed size={14} />
-                            {housing.rooms} {language === 'fr' ? 'ch.' : 'beds'}
-                          </span>
-                        )}
-                        {housing.area && (
-                          <span className="feature">
-                            <Maximize size={14} />
-                            {housing.area}m²
-                          </span>
-                        )}
-                        {housing.views_count && (
-                          <span className="feature">
-                            <Eye size={14} />
-                            {housing.views_count}
-                          </span>
-                        )}
-                      </div>
-
-                      {housing.description && (
-                        <p className="card-description">
-                          {housing.description.substring(0, 100)}...
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {renderPagination()}
-            </>
-          )}
-
-          {/* Aucun résultat */}
-          {!isLoading && !error && results.length === 0 && searchQuery && (
-            <div className="no-results">
-              <AlertCircle size={48} />
-              <h3>
-                {language === 'fr' 
-                  ? 'Aucun logement trouvé' 
-                  : 'No housing found'}
-              </h3>
-              <p>
-                {language === 'fr'
-                  ? 'Essayez de modifier vos critères de recherche'
-                  : 'Try modifying your search criteria'}
-              </p>
-            </div>
-          )}
         </div>
       </div>
-
-      {/* Chatbot Assistant */}
-      <ChatbotAssistant
-        language={language}
-        onLanguageChange={setLanguage}
-        onHousingClick={handleHousingClick}
-      />
-
-      {/* Dialog sauvegarder filtre */}
-      {showSaveDialog && (
-        <div className="modal-overlay" onClick={() => setShowSaveDialog(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h3>
-              {language === 'fr' 
-                ? 'Sauvegarder cette recherche' 
-                : 'Save this search'}
-            </h3>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                const name = e.target.filterName.value;
-                if (name) handleSaveFilters(name);
-              }}
-            >
-              <input
-                type="text"
-                name="filterName"
-                placeholder={
-                  language === 'fr' 
-                    ? 'Nom du filtre...' 
-                    : 'Filter name...'
-                }
-                required
-                autoFocus
-              />
-              <div className="modal-actions">
-                <button type="button" onClick={() => setShowSaveDialog(false)}>
-                  {language === 'fr' ? 'Annuler' : 'Cancel'}
-                </button>
-                <button type="submit" className="primary">
-                  {language === 'fr' ? 'Sauvegarder' : 'Save'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

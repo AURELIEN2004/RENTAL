@@ -8,7 +8,7 @@ import { housingService } from '../services/housingService';
 import HousingCard from '../components/housing/HousingCard';
 import { FaHome, FaUsers, FaCity, FaStar } from 'react-icons/fa';
 import './Home.css';
-import SearchBar from '../components/Search/SearchBar';
+// import SearchBar from '../components/Search/SearchBar';
 
 const Home = () => {
   const [featuredHousings, setFeaturedHousings] = useState([]);
@@ -47,10 +47,11 @@ const Home = () => {
     const params = new URLSearchParams(searchData).toString();
     window.location.href = `/search?${params}`;
   };
+  
 
   return (
     <div className="home-page">
-      {/* Hero Section */}
+  {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-overlay"></div>
         <video autoPlay loop muted className="hero-video">
