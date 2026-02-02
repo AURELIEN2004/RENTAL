@@ -34,6 +34,8 @@ INSTALLED_APPS = [
     # 'corsheaders',
     'django_filters',
     'modeltranslation',
+    'django_extensions',
+
     
     # Apps locales
     'apps.users',
@@ -43,6 +45,8 @@ INSTALLED_APPS = [
     'apps.visits',
     'apps.notifications',
     'apps.recherche',
+
+
 ]
 
 MIDDLEWARE = [

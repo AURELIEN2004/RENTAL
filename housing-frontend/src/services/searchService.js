@@ -2,11 +2,8 @@
 // // 📁 src/services/searchService.js
 // // ============================================
 
-
-
 // import API_URL from '../config/api';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
-
 
 class SearchService {
   // Recherche principale avec tous les filtres
