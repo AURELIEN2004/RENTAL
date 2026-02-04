@@ -1,64 +1,32 @@
-
-# # ============================================
-# # 📁 apps/housing/views.py 
-# # ============================================
+# ============================================
+# 📁 apps/housing/views.py - VERSION CORRIGÉE
+# ============================================
 
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
-from django.db.models import Q, Count, Sum, Avg, Min, Max
-from django.utils import timezone
-import traceback
-
+from django.db.models import Q, Avg, Count, Sum, Min, Max
 from .models import (
     Category, HousingType, Housing, HousingImage,
     Favorite, SavedHousing, UserInteraction, Comment, Testimonial
 )
 from .serializers import (
-    CategorySerializer, HousingTypeSerializer,
-    HousingListSerializer, HousingDetailSerializer, HousingCreateUpdateSerializer,
-    FavoriteSerializer, SavedHousingSerializer,
-    CommentSerializer, TestimonialSerializer
+    CategorySerializer, HousingTypeSerializer, HousingListSerializer,
+    HousingDetailSerializer, HousingCreateUpdateSerializer,
+    FavoriteSerializer, SavedHousingSerializer, CommentSerializer,
+    TestimonialSerializer
 )
-from .genetic_algorithm import apply_genetic_algorithm
-from .filters import HousingFilter
 from .permissions import IsOwnerOrReadOnly
+from .filters import HousingFilter
+import traceback
 
 
-# --- CATEGORIES ET TYPES ---
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [AllowAny]
-
-class CommentViewSet(viewsets.ModelViewSet):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
-    permission_classes = [IsAuthenticated]
-    
-    def get_queryset(self):
-        housing_id = self.request.query_params.get('housing')
-        if housing_id:
-            return Comment.objects.filter(housing_id=housing_id).order_by('-created_at')
-        return Comment.objects.all()
-    
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
-class TestimonialViewSet(viewsets.ModelViewSet):
-    queryset = Testimonial.objects.filter(is_approved=True)
-    serializer_class = TestimonialSerializer
-    permission_classes = [AllowAny]
-    
-    def get_permissions(self):
-        if self.action == 'create':
-            return [IsAuthenticated()]
-        return super().get_permissions()
-    
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
 
 
 class HousingTypeViewSet(viewsets.ReadOnlyModelViewSet):
@@ -94,13 +62,26 @@ class HousingViewSet(viewsets.ModelViewSet):
         return HousingDetailSerializer
 
     # ----------------------------
-    # Permissions dynamiques
+    # Permissions dynamiques - ✅ CORRIGÉ
     # ----------------------------
     def get_permissions(self):
+        # Actions publiques (lecture seule)
         if self.action in ['list', 'retrieve', 'search_advanced', 'recommended']:
             return [AllowAny()]
-        elif self.action == 'increment_views':  # ✅ CORRECTION
+        
+        # Actions publiques mais qui peuvent enregistrer des stats
+        elif self.action == 'increment_views':
             return [AllowAny()]  # Tout le monde peut voir
+        
+        # ✅ CORRECTION : Actions utilisateur authentifié (like, save, favorites, saved)
+        elif self.action in ['toggle_like', 'toggle_save', 'favorites', 'saved']:
+            return [IsAuthenticated()]
+        
+        # Actions propriétaires
+        elif self.action in ['my_housings', 'owner_statistics']:
+            return [IsAuthenticated()]
+        
+        # Actions de modification (create, update, delete)
         return [IsAuthenticated(), IsOwnerOrReadOnly()]
 
     # ----------------------------
@@ -195,6 +176,7 @@ class HousingViewSet(viewsets.ModelViewSet):
 
             if request.user.is_authenticated:
                 try:
+                    from .genetic_algorithm import apply_genetic_algorithm
                     ranked_housings = apply_genetic_algorithm(request.user, housings)
                 except Exception as e:
                     print(f"⚠️ Genetic algorithm error: {e}")
@@ -211,10 +193,11 @@ class HousingViewSet(viewsets.ModelViewSet):
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # ----------------------------
-    # ACTIONS UTILISATEURS
+    # ACTIONS UTILISATEURS - ✅ CORRIGÉ
     # ----------------------------
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], permission_classes=[AllowAny])
     def increment_views(self, request, pk=None):
+        """Incrémenter les vues - accessible à tous"""
         housing = self.get_object()
         housing.increment_views()
 
@@ -226,8 +209,9 @@ class HousingViewSet(viewsets.ModelViewSet):
 
         return Response({'views_count': housing.views_count})
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def toggle_like(self, request, pk=None):
+        """Toggle like - nécessite authentification"""
         housing = self.get_object()
         favorite, created = Favorite.objects.get_or_create(user=request.user, housing=housing)
         if not created:
@@ -242,8 +226,9 @@ class HousingViewSet(viewsets.ModelViewSet):
             interaction.save()
         return Response({'liked': liked, 'likes_count': housing.likes_count})
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def toggle_save(self, request, pk=None):
+        """Toggle save - nécessite authentification"""
         housing = self.get_object()
         saved, created = SavedHousing.objects.get_or_create(user=request.user, housing=housing)
         if not created:
@@ -256,14 +241,16 @@ class HousingViewSet(viewsets.ModelViewSet):
             interaction.save()
         return Response({'saved': is_saved})
 
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def favorites(self, request):
+        """Liste des logements favoris de l'utilisateur"""
         favorites = Favorite.objects.filter(user=request.user)
         serializer = FavoriteSerializer(favorites, many=True, context={'request': request})
         return Response(serializer.data)
 
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def saved(self, request):
+        """Liste des logements sauvegardés de l'utilisateur"""
         saved = SavedHousing.objects.filter(user=request.user)
         serializer = SavedHousingSerializer(saved, many=True, context={'request': request})
         return Response(serializer.data)
@@ -271,8 +258,9 @@ class HousingViewSet(viewsets.ModelViewSet):
     # ----------------------------
     # ACTIONS PROPRIÉTAIRES
     # ----------------------------
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def my_housings(self, request):
+        """Liste des logements du propriétaire connecté"""
         housings = Housing.objects.filter(owner=request.user).select_related(
             'category', 'housing_type', 'city', 'district'
         ).prefetch_related('images')
@@ -293,8 +281,9 @@ class HousingViewSet(viewsets.ModelViewSet):
         serializer = HousingListSerializer(housings, many=True, context={'request': request})
         return Response({'count': housings.count(), 'results': serializer.data})
 
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
     def owner_statistics(self, request):
+        """Statistiques pour le propriétaire"""
         housings = Housing.objects.filter(owner=request.user)
 
         from apps.messaging.models import Conversation
@@ -313,3 +302,39 @@ class HousingViewSet(viewsets.ModelViewSet):
             'total_conversations': Conversation.objects.filter(housing__owner=request.user).count(),
             'pending_visits': Visit.objects.filter(housing__owner=request.user, status='attente').count(),
         })
+
+
+# ----------------------------
+# VIEWSETS ADDITIONNELS
+# ----------------------------
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [IsAuthenticated]
+
+#     def get_queryset(self):
+#         housing_id = self.request.query_params.get('housing')
+#         if housing_id:
+#             return Comment.objects.filter(housing_id=housing_id).order_by('-created_at')
+#         return Comment.objects.all()
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class TestimonialViewSet(viewsets.ModelViewSet):
+    queryset = Testimonial.objects.filter(is_approved=True)
+    serializer_class = TestimonialSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        if self.action == 'list':
+            return Testimonial.objects.filter(is_approved=True, is_featured=True)
+        return super().get_queryset()
+
+    def get_permissions(self):
+        if self.action == 'create':
+            return [IsAuthenticated()]
+        return [AllowAny()]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
