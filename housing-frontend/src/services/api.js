@@ -9,14 +9,22 @@ import axios from 'axios';
    CONFIG API
 ================================ */
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+// const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
+// const api = axios.create({
+//   baseURL: API_URL,
+//   headers: {
+//     'Content-Type': 'application/json',
+//   },
+// });
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: "http://localhost:8000/api",
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
+
+console.log("Axios instance methods:", Object.keys(api));
 
 /* ===============================
    INTERCEPTORS
