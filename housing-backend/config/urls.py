@@ -33,7 +33,7 @@ urlpatterns = [
     path('api/', include('apps.visits.urls')),
     
     # ✅ CORRECTION: Ajouter le préfixe 'recherche' pour correspondre au frontend
-    path('api/', include('apps.recherche.urls')),  # ← MODIFIÉ ICI
+    path('api/recherche/', include('apps.recherche.urls')),  # ← MODIFIÉ ICI
     
     # Notifications
     path('api/', include('apps.notifications.urls')),

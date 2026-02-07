@@ -1,81 +1,95 @@
-// // ============================================
-// // 📁 src/pages/SearchPage.jsx
-// // ============================================
 
+// ============================================
+// 📁 src/pages/SearchPage.jsx
+// ============================================
 
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import SearchBar from '../components/search/SearchBar';
-import AdvancedFilters from '../components/search/AdvancedFilters';
+import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import SearchBar from '../components/Search/SearchBar';
+import FilterPanel from '../components/Search/FilterPanel';
+import NearMeButton from '../components/Search/NearMeButton';
 import HousingList from '../components/housing/HousingList';
-// import Pagination from '../components/common/Pagination';
 import searchService from '../services/searchService';
-import './SearchPage.css';
-import ChatbotAssistant from '../components/Search/ChatbotAssistant';
+import { Loader, MapPin, TrendingUp } from 'lucide-react';
 
+/**
+ * Page de recherche complète
+ */
 const SearchPage = () => {
-  const navigate = useNavigate();
   const location = useLocation();
-  
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filters, setFilters] = useState({
-    category: '',
-    city: '',
-    district: '',
-    housingType: '',
-    minPrice: '',
-    maxPrice: '',
-    minSurface: '',
-    maxSurface: '',
-    bedrooms: '',
-    bathrooms: '',
-    hasParking: false,
-    hasGarden: false,
-    hasPool: false,
-    isFurnished: false
-  });
-  
-  const [housings, setHousings] = useState([]);
+  const navigate = useNavigate();
+
   const [loading, setLoading] = useState(false);
+  const [housings, setHousings] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [filters, setFilters] = useState({});
+  const [searchType, setSearchType] = useState('classic'); // 'classic', 'nearby', 'smart'
+  const [userLocation, setUserLocation] = useState(null);
   const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [showFilters, setShowFilters] = useState(false);
-  const [savedFilters, setSavedFilters] = useState([]);
 
-  // Charger les filtres sauvegardés au montage
+  // Récupérer query params au chargement
   useEffect(() => {
-    loadSavedFilters();
-  }, []);
+    const params = new URLSearchParams(location.search);
+    const initialFilters = {};
+    
+    params.forEach((value, key) => {
+      initialFilters[key] = value;
+    });
 
-  // Effectuer la recherche quand les filtres changent
-  useEffect(() => {
-    performSearch();
-  }, [filters, currentPage]);
+    performSearch(initialFilters);
+  }, [location.search]);
 
-  const loadSavedFilters = async () => {
-    try {
-      const filters = await searchService.getSavedFilters();
-      setSavedFilters(filters);
-    } catch (error) {
-      console.error('Error loading saved filters:', error);
-    }
-  };
-
-  const performSearch = async () => {
+  /**
+   * Effectuer la recherche selon le type
+   */
+  const performSearch = async (searchFilters = {}) => {
     setLoading(true);
     setError(null);
-    
+
     try {
-      const results = await searchService.search({
-        ...filters,
-        page: currentPage
-      });
-      
-      setHousings(results.housings || []);
-      setTotalPages(Math.ceil((results.total || 0) / 12));
-    } catch (error) {
-      console.error('Search error:', error);
+      let results;
+
+      // Recherche géolocalisée
+      if (searchFilters.lat && searchFilters.lng) {
+        // Vérifier s'il y a des filtres métier
+        const hasBusinessFilters =
+          searchFilters.query ||
+          searchFilters.city ||
+          searchFilters.category ||
+          searchFilters.max_price ||
+          searchFilters.min_rooms;
+
+        if (!hasBusinessFilters) {
+          // 📍 Cas 1 : seulement position → Nearby
+          setSearchType('nearby');
+          results = await searchService.searchNearby(
+            searchFilters.lat,
+            searchFilters.lng,
+            searchFilters.radius || 5
+          );
+        } else {
+          // 🧠 Cas 2 : position + filtres → Smart
+          setSearchType('smart');
+          const { radius, ...smartFilters } = searchFilters; // radius non supporté
+          results = await searchService.smartSearch(smartFilters);
+        }
+      } else if (Object.keys(searchFilters).length === 0) {
+        // Recherche par défaut
+        setSearchType('classic');
+        results = await searchService.searchHousings({ status: 'disponible' });
+      } else {
+        // Recherche classique avec filtres
+        setSearchType('classic');
+        results = await searchService.searchHousings(searchFilters);
+      }
+
+      setHousings(results.results || []);
+      setStats(results.stats || null);
+
+      // Mettre à jour l'URL
+      updateURL(searchFilters);
+    } catch (err) {
+      console.error('Erreur recherche:', err);
       setError('Erreur lors de la recherche. Veuillez réessayer.');
       setHousings([]);
     } finally {
@@ -83,191 +97,183 @@ const SearchPage = () => {
     }
   };
 
-  const handleSearch = (query) => {
-    setSearchQuery(query);
-    setFilters(prev => ({ ...prev }));
-    setCurrentPage(1);
-  };
-
-  const handleVoiceSearch = (transcript) => {
-    setSearchQuery(transcript);
-    setFilters(prev => ({ ...prev }));
-    setCurrentPage(1);
-  };
-
-  const handleFiltersChange = (newFilters) => {
-    // Mise à jour des filtres SANS appeler performSearch
-    // performSearch sera appelé automatiquement par useEffect
-    setFilters(newFilters);
-    setCurrentPage(1);
-  };
-
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleSaveFilters = async () => {
-    try {
-      await searchService.saveFilters(filters);
-      alert('Filtres sauvegardés avec succès!');
-      loadSavedFilters();
-    } catch (error) {
-      console.error('Error saving filters:', error);
-      alert('Erreur lors de la sauvegarde des filtres');
-    }
-  };
-
-  const handleLoadSavedFilter = (savedFilter) => {
-    setFilters(savedFilter.filters);
-    setCurrentPage(1);
-  };
-
-  const handleResetFilters = () => {
-    setFilters({
-      category: '',
-      city: '',
-      district: '',
-      housingType: '',
-      minPrice: '',
-      maxPrice: '',
-      minSurface: '',
-      maxSurface: '',
-      bedrooms: '',
-      bathrooms: '',
-      hasParking: false,
-      hasGarden: false,
-      hasPool: false,
-      isFurnished: false
+  /**
+   * Mise à jour de l'URL avec les filtres
+   */
+  const updateURL = (searchFilters) => {
+    const params = new URLSearchParams();
+    Object.entries(searchFilters).forEach(([key, value]) => {
+      if (value !== '' && value !== null && value !== undefined) {
+        params.set(key, value);
+      }
     });
-    setSearchQuery('');
-    setCurrentPage(1);
+    navigate(`/search?${params.toString()}`, { replace: true });
   };
 
-  const toggleFilters = () => {
-    setShowFilters(!showFilters);
+  /**
+   * Recherche textuelle
+   */
+  const handleSearch = (searchData) => {
+    const newFilters = { ...filters, ...searchData };
+    setFilters(newFilters);
+    performSearch(newFilters);
+  };
+
+  /**
+   * Application des filtres
+   */
+  const handleApplyFilters = (newFilters) => {
+    setFilters(newFilters);
+    performSearch(newFilters);
+  };
+
+  /**
+   * Recherche "Près de moi"
+   */
+  const handleNearbySearch = async (location) => {
+    setUserLocation(location);
+
+    // Filtre minimal pour Nearby
+    const nearbyFilters = {
+      lat: location.lat,
+      lng: location.lng,
+      radius: 5 // 5 km par défaut
+    };
+
+    setFilters(nearbyFilters);
+    performSearch(nearbyFilters);
+  };
+
+  /**
+   * Tri des résultats
+   */
+  const handleSort = (sortBy) => {
+    const sortedFilters = { ...filters, sortBy };
+    setFilters(sortedFilters);
+    performSearch(sortedFilters);
   };
 
   return (
     <div className="search-page">
-      <div className="search-page-header">
-        <h1>Recherche de logements</h1>
-        <SearchBar 
-          onSearch={handleSearch}
-          onVoiceSearch={handleVoiceSearch}
-          placeholder="Rechercher un logement..."
-        />
+      {/* En-tête de recherche */}
+      <div className="search-header">
+        <div className="container">
+          <h1>Rechercher un logement</h1>
+          
+          {/* Barre de recherche + actions */}
+          <div className="search-controls">
+            <SearchBar
+              onSearch={handleSearch}
+              loading={loading}
+              placeholder="Rechercher par titre, ville, quartier..."
+            />
+            
+            <div className="search-actions">
+              <NearMeButton
+                onLocationFound={handleNearbySearch}
+                onError={(msg) => setError(msg)}
+              />
+              
+              <FilterPanel
+                onApplyFilters={handleApplyFilters}
+                initialFilters={filters}
+              />
+            </div>
+          </div>
+
+          {/* Indicateur de géolocalisation */}
+          {userLocation && (
+            <div className="location-indicator">
+              <MapPin size={16} />
+              <span>Recherche autour de votre position</span>
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="search-page-content">
-        <div className={`filters-sidebar ${showFilters ? 'show' : ''}`}>
-          <div className="filters-header">
-            <h2>Filtres</h2>
-            <button 
-              className="close-filters-btn"
-              onClick={toggleFilters}
+      {/* Contenu principal */}
+      <div className="container search-content">
+        {/* Statistiques */}
+        {stats && (
+          <div className="search-stats">
+            <div className="stat-item">
+              <span className="stat-label">Résultats</span>
+              <span className="stat-value">{stats.total_results}</span>
+            </div>
+            {stats.avg_price > 0 && (
+              <>
+                <div className="stat-item">
+                  <span className="stat-label">Prix moyen</span>
+                  <span className="stat-value">
+                    {Math.round(stats.avg_price).toLocaleString()} FCFA
+                  </span>
+                </div>
+                <div className="stat-item">
+                  <span className="stat-label">Fourchette</span>
+                  <span className="stat-value">
+                    {stats.min_price?.toLocaleString()} - {stats.max_price?.toLocaleString()} FCFA
+                  </span>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+
+        {/* Tri */}
+        {housings.length > 0 && (
+          <div className="sort-controls">
+            <label>Trier par :</label>
+            <select
+              value={filters.sortBy || 'recent'}
+              onChange={(e) => handleSort(e.target.value)}
             >
-              ✕
+              <option value="recent">Plus récents</option>
+              <option value="price_asc">Prix croissant</option>
+              <option value="price_desc">Prix décroissant</option>
+              <option value="area_desc">Surface (grande → petite)</option>
+              <option value="popular">Popularité</option>
+              {searchType === 'smart' && <option value="score">Pertinence</option>}
+            </select>
+          </div>
+        )}
+
+        {/* Messages d'état */}
+        {loading && (
+          <div className="loading-state">
+            <Loader className="spinner" size={40} />
+            <p>Recherche en cours...</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="error-state">
+            <p>{error}</p>
+            <button onClick={() => performSearch(filters)}>
+              Réessayer
             </button>
           </div>
-          
-          <AdvancedFilters 
-            filters={filters}
-            onFiltersChange={handleFiltersChange}
-          />
-          
-          <div className="filters-actions">
-            <button 
-              className="btn btn-secondary"
-              onClick={handleResetFilters}
-            >
-              Réinitialiser
-            </button>
-            <button 
-              className="btn btn-primary"
-              onClick={handleSaveFilters}
-            >
-              Sauvegarder
-            </button>
-          </div>
+        )}
 
-          {savedFilters.length > 0 && (
-            <div className="saved-filters">
-              <h3>Recherches sauvegardées</h3>
-              <ul>
-                {savedFilters.map((saved, index) => (
-                  <li key={index}>
-                    <button
-                      onClick={() => handleLoadSavedFilter(saved)}
-                      className="saved-filter-btn"
-                    >
-                      {saved.name || `Recherche ${index + 1}`}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-
-        <div className="search-results">
-          <div className="results-header">
-            <button 
-              className="toggle-filters-btn"
-              onClick={toggleFilters}
-            >
-              <span className="icon">⚙️</span>
-              Filtres
-            </button>
-            
-            <div className="results-count">
-              {loading ? (
-                'Recherche en cours...'
-              ) : (
-                `${housings.length} logement${housings.length > 1 ? 's' : ''} trouvé${housings.length > 1 ? 's' : ''}`
-              )}
-            </div>
-          </div>
-
-          {error && (
-            <div className="error-message">
-              {error}
-            </div>
-          )}
-
-          {loading ? (
-            <div className="loading-spinner">
-              <div className="spinner"></div>
-              <p>Recherche en cours...</p>
-            </div>
-          ) : housings.length > 0 ? (
-            <>
+        {/* Résultats */}
+        {!loading && !error && (
+          <>
+            {housings.length > 0 ? (
               <HousingList housings={housings} />
-              
-              {totalPages > 1 && (
-                <Pagination 
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={handlePageChange}
-                />
-              )}
-            </>
-          ) : (
-            <div className="no-results">
-              <div className="no-results-icon">🏠</div>
-              <h3>Aucun logement trouvé</h3>
-              <p>Essayez de modifier vos critères de recherche</p>
-              <button 
-                className="btn btn-primary"
-                onClick={handleResetFilters}
-              >
-                Réinitialiser les filtres
-              </button>
-            </div>
-          )}
-                      <ChatbotAssistant />
-
-        </div>
+            ) : (
+              <div className="empty-state">
+                <TrendingUp size={48} />
+                <h3>Aucun résultat</h3>
+                <p>Essayez d'ajuster vos critères de recherche</p>
+                <button onClick={() => {
+                  setFilters({});
+                  performSearch({});
+                }}>
+                  Réinitialiser la recherche
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );

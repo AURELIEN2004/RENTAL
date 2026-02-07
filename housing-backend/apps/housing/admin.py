@@ -29,7 +29,7 @@ class HousingImageInline(admin.TabularInline):
 
 @admin.register(Housing)
 class HousingAdmin(admin.ModelAdmin):
-    list_display = ['title', 'owner', 'category', 'housing_type', 'city', 
+    list_display = ['title', 'owner', 'category', 'housing_type', 'city','district', 
                     'price', 'status', 'is_visible', 'views_count', 'likes_count', 
                     'created_at']
     list_filter = ['status', 'category', 'housing_type', 'city', 'is_visible']
