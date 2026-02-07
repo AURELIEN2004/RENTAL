@@ -17,7 +17,6 @@
 #     path('', include(router.urls)),
 # ]
 
-
 # ============================================
 # 📁 apps/recherche/urls.py
 # ============================================
@@ -32,6 +31,12 @@ from .views import (
     SmartSearchAPIView,
     MapHousingAPIView
 )
+from .chatbot_views import (
+    ChatbotQueryAPIView,
+    ChatbotSuggestionsAPIView,
+    ChatbotCitiesAPIView,
+    ChatbotCategoriesAPIView
+)
 
 urlpatterns = [
     # 🔍 Recherche classique avec filtres
@@ -45,4 +50,10 @@ urlpatterns = [
     
     # 🗺️ Carte des logements
     path('map/', MapHousingAPIView.as_view(), name='housing-map'),
+    
+    # 🤖 CHATBOT IA
+    path('chatbot/', ChatbotQueryAPIView.as_view(), name='chatbot-query'),
+    path('chatbot/suggestions/', ChatbotSuggestionsAPIView.as_view(), name='chatbot-suggestions'),
+    path('chatbot/cities/', ChatbotCitiesAPIView.as_view(), name='chatbot-cities'),
+    path('chatbot/categories/', ChatbotCategoriesAPIView.as_view(), name='chatbot-categories'),
 ]

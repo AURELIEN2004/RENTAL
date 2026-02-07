@@ -89,6 +89,7 @@ class SmartSearchSerializer(serializers.Serializer):
     furnished = serializers.BooleanField(required=False, allow_null=True)
     max_results = serializers.IntegerField(default=20, required=False)
     
+    
     def validate(self, data):
         # Au moins un critère doit être fourni
         if not any([

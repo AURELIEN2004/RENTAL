@@ -48,15 +48,27 @@ const searchService = {
    * @param {Object} criteria - Critères de recherche avancés
    * @returns {Promise} Résultats scorés
    */
+  // async smartSearch(criteria = {}) {
+  //   try {
+  //     const response = await api.get('/recherche/smart/', { params: criteria });
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error('Erreur recherche intelligente:', error);
+  //     throw error;
+  //   }
+  // },
   async smartSearch(criteria = {}) {
-    try {
-      const response = await api.get('/recherche/smart/', { params: criteria });
-      return response.data;
-    } catch (error) {
-      console.error('Erreur recherche intelligente:', error);
-      throw error;
-    }
-  },
+  // Supprimer radius si présent
+  const { radius, ...params } = criteria;
+  try {
+    const response = await api.get('/recherche/smart/', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Erreur recherche intelligente:', error);
+    throw error;
+  }
+}
+,
 
   /**
    * 🗺️ Récupérer tous les logements pour la carte
@@ -136,6 +148,8 @@ const searchService = {
     // Cas 2 : position + critères → Smart
     if (lat && lng && hasBusinessCriteria) {
       const { radius, ...smartParams } = params; // radius non supporté par smart
+        console.log('Smart params envoyés au backend:', smartParams);
+
       return await this.smartSearch(smartParams);
     }
 

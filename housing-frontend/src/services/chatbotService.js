@@ -1,118 +1,114 @@
-// // ============================================
-// // 📁 src/services/chatbotService.js
-// // ============================================
 
+// ============================================
+// 📁 src/services/chatbotService.js
+// ============================================
 
-import API_URL from '../config/api';
+import api from './api';
 
-class ChatbotService {
-  // Envoyer un message texte au chatbot
-  async sendChatMessage(message, conversationHistory = []) {
+/**
+ * Service pour l'assistant chatbot IA
+ */
+const chatbotService = {
+  
+  /**
+   * 🤖 Envoyer un message au chatbot
+   * @param {string} message - Message utilisateur
+   * @param {Object} options - Options (method, coordinates)
+   * @returns {Promise} Réponse du bot
+   */
+  async sendMessage(message, options = {}) {
     try {
-      const response = await fetch(`${API_URL}/chatbot/chat/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: message,
-          history: conversationHistory
-        }),
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        throw new Error('Erreur lors de l\'envoi du message');
+      const payload = {
+        message: message.trim(),
+        method: options.method || 'simple', // 'simple', 'openai', 'ollama'
+      };
+
+      // Ajouter coordonnées si disponibles
+      if (options.lat && options.lng) {
+        payload.user_lat = options.lat;
+        payload.user_lng = options.lng;
       }
-      
-      return await response.json();
+
+      const response = await api.post('/recherche/chatbot/', payload);
+      return response.data;
     } catch (error) {
-      console.error('Chat message error:', error);
+      console.error('Erreur chatbot:', error);
       throw error;
     }
-  }
+  },
 
-  // Envoyer un message vocal au chatbot
-  async sendVoiceMessage(audioBlob, conversationHistory = []) {
-    try {
-      const formData = new FormData();
-      formData.append('audio', audioBlob, 'voice_message.webm');
-      formData.append('history', JSON.stringify(conversationHistory));
-      
-      const response = await fetch(`${API_URL}/chatbot/voice/`, {
-        method: 'POST',
-        body: formData,
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        throw new Error('Erreur lors de l\'envoi du message vocal');
-      }
-      
-      return await response.json();
-    } catch (error) {
-      console.error('Voice message error:', error);
-      throw error;
-    }
-  }
-
-  // Récupérer l'historique de conversation
-  async getConversationHistory() {
-    try {
-      const response = await fetch(`${API_URL}/chatbot/history/`, {
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        throw new Error('Erreur lors de la récupération de l\'historique');
-      }
-      
-      return await response.json();
-    } catch (error) {
-      console.error('Get conversation history error:', error);
-      return [];
-    }
-  }
-
-  // Effacer l'historique de conversation
-  async clearConversationHistory() {
-    try {
-      const response = await fetch(`${API_URL}/chatbot/clear-history/`, {
-        method: 'POST',
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        throw new Error('Erreur lors de l\'effacement de l\'historique');
-      }
-      
-      return await response.json();
-    } catch (error) {
-      console.error('Clear conversation history error:', error);
-      throw error;
-    }
-  }
-
-  // Obtenir des suggestions de questions
+  /**
+   * 💡 Obtenir des suggestions de recherche
+   * @returns {Promise<Array>} Liste de suggestions
+   */
   async getSuggestions() {
     try {
-      const response = await fetch(`${API_URL}/chatbot/suggestions/`);
-      
-      if (!response.ok) {
-        throw new Error('Erreur lors de la récupération des suggestions');
-      }
-      
-      return await response.json();
+      const response = await api.get('/recherche/chatbot/suggestions/');
+      return response.data.suggestions;
     } catch (error) {
-      console.error('Get suggestions error:', error);
-      return [
-        "Quels sont les logements disponibles à Yaoundé?",
-        "Je cherche un appartement meublé",
-        "Montrez-moi des maisons avec piscine",
-        "Quel est le prix moyen d'un studio?"
-      ];
+      console.error('Erreur suggestions:', error);
+      return [];
     }
-  }
-}
+  },
 
-export default new ChatbotService();
+  /**
+   * 🏙️ Obtenir la liste des villes
+   * @returns {Promise<Array>} Liste des villes
+   */
+  async getCities() {
+    try {
+      const response = await api.get('/recherche/chatbot/cities/');
+      return response.data.cities;
+    } catch (error) {
+      console.error('Erreur villes:', error);
+      return [];
+    }
+  },
+
+  /**
+   * 🏠 Obtenir la liste des catégories
+   * @returns {Promise<Array>} Liste des catégories
+   */
+  async getCategories() {
+    try {
+      const response = await api.get('/recherche/chatbot/categories/');
+      return response.data.categories;
+    } catch (error) {
+      console.error('Erreur catégories:', error);
+      return [];
+    }
+  },
+
+  /**
+   * 📝 Formater les critères pour affichage
+   * @param {Object} criteria - Critères extraits
+   * @returns {string} Texte formaté
+   */
+  formatCriteria(criteria) {
+    const parts = [];
+
+    if (criteria.city) {
+      parts.push(`Ville: ${criteria.city}`);
+    }
+
+    if (criteria.category_name) {
+      parts.push(`Type: ${criteria.category_name}`);
+    }
+
+    if (criteria.max_price) {
+      parts.push(`Budget max: ${criteria.max_price.toLocaleString()} FCFA`);
+    }
+
+    if (criteria.min_rooms) {
+      parts.push(`${criteria.min_rooms} chambre${criteria.min_rooms > 1 ? 's' : ''}`);
+    }
+
+    if (criteria.district_name) {
+      parts.push(`Quartier: ${criteria.district_name}`);
+    }
+
+    return parts.join(' • ') || 'Tous logements';
+  }
+};
+
+export default chatbotService;

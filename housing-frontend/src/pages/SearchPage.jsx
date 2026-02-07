@@ -1,4 +1,3 @@
-
 // ============================================
 // 📁 src/pages/SearchPage.jsx
 // ============================================
@@ -8,9 +7,12 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import SearchBar from '../components/Search/SearchBar';
 import FilterPanel from '../components/Search/FilterPanel';
 import NearMeButton from '../components/Search/NearMeButton';
+import ChatbotButton from '../components/Search/ChatbotButton';
+import VoiceSearch from '../components/Search/VoiceSearch';
 import HousingList from '../components/housing/HousingList';
 import searchService from '../services/searchService';
 import { Loader, MapPin, TrendingUp } from 'lucide-react';
+import './SearchPage.css';
 
 /**
  * Page de recherche complète
@@ -36,7 +38,13 @@ const SearchPage = () => {
       initialFilters[key] = value;
     });
 
-    performSearch(initialFilters);
+    if (Object.keys(initialFilters).length > 0) {
+      setFilters(initialFilters);
+      performSearch(initialFilters);
+    } else {
+      // Recherche par défaut
+      performSearch({});
+    }
   }, [location.search]);
 
   /**
@@ -49,33 +57,13 @@ const SearchPage = () => {
     try {
       let results;
 
-      // Recherche géolocalisée
+      // Déterminer le type de recherche
       if (searchFilters.lat && searchFilters.lng) {
-        // Vérifier s'il y a des filtres métier
-        const hasBusinessFilters =
-          searchFilters.query ||
-          searchFilters.city ||
-          searchFilters.category ||
-          searchFilters.max_price ||
-          searchFilters.min_rooms;
-
-        if (!hasBusinessFilters) {
-          // 📍 Cas 1 : seulement position → Nearby
-          setSearchType('nearby');
-          results = await searchService.searchNearby(
-            searchFilters.lat,
-            searchFilters.lng,
-            searchFilters.radius || 5
-          );
-        } else {
-          // 🧠 Cas 2 : position + filtres → Smart
-          setSearchType('smart');
-          const { radius, ...smartFilters } = searchFilters; // radius non supporté
-          results = await searchService.smartSearch(smartFilters);
-        }
+        // Recherche géolocalisée intelligente
+        setSearchType('smart');
+        results = await searchService.smartSearch(searchFilters);
       } else if (Object.keys(searchFilters).length === 0) {
-        // Recherche par défaut
-        setSearchType('classic');
+        // Recherche par défaut (tous les logements)
         results = await searchService.searchHousings({ status: 'disponible' });
       } else {
         // Recherche classique avec filtres
@@ -85,7 +73,7 @@ const SearchPage = () => {
 
       setHousings(results.results || []);
       setStats(results.stats || null);
-
+      
       // Mettre à jour l'URL
       updateURL(searchFilters);
     } catch (err) {
@@ -120,6 +108,22 @@ const SearchPage = () => {
   };
 
   /**
+   * Recherche vocale
+   */
+  const handleVoiceTranscript = (transcript) => {
+    handleSearch({ query: transcript });
+  };
+
+  /**
+   * Résultats du chatbot
+   */
+  const handleChatbotResults = (results, criteria) => {
+    setHousings(results);
+    setFilters(criteria);
+    setStats({ total_results: results.length });
+  };
+
+  /**
    * Application des filtres
    */
   const handleApplyFilters = (newFilters) => {
@@ -132,14 +136,14 @@ const SearchPage = () => {
    */
   const handleNearbySearch = async (location) => {
     setUserLocation(location);
-
-    // Filtre minimal pour Nearby
+    
     const nearbyFilters = {
+      ...filters,
       lat: location.lat,
       lng: location.lng,
       radius: 5 // 5 km par défaut
     };
-
+    
     setFilters(nearbyFilters);
     performSearch(nearbyFilters);
   };
@@ -160,7 +164,7 @@ const SearchPage = () => {
         <div className="container">
           <h1>Rechercher un logement</h1>
           
-          {/* Barre de recherche + actions */}
+          {/* Barre de recherche */}
           <div className="search-controls">
             <SearchBar
               onSearch={handleSearch}
@@ -169,6 +173,11 @@ const SearchPage = () => {
             />
             
             <div className="search-actions">
+              <VoiceSearch
+                onTranscript={handleVoiceTranscript}
+                onError={(msg) => setError(msg)}
+              />
+              
               <NearMeButton
                 onLocationFound={handleNearbySearch}
                 onError={(msg) => setError(msg)}
@@ -179,6 +188,8 @@ const SearchPage = () => {
                 initialFilters={filters}
               />
             </div>
+            {/* Bouton flottant chatbot */}
+      <ChatbotButton onResultsFound={handleChatbotResults} />
           </div>
 
           {/* Indicateur de géolocalisation */}
@@ -274,7 +285,12 @@ const SearchPage = () => {
             )}
           </>
         )}
+        {/* Bouton flottant chatbot */}
+      <ChatbotButton onResultsFound={handleChatbotResults} />
       </div>
+
+      {/* Bouton flottant chatbot */}
+      <ChatbotButton onResultsFound={handleChatbotResults} />
     </div>
   );
 };

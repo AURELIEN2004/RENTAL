@@ -10,6 +10,7 @@ from django.db import models
 from django.core.validators import MinValueValidator
 from django.conf import settings
 from django.utils import timezone
+from apps.location.models import Region, City, District  # <- importer depuis Location
 
 
 class Category(models.Model):
