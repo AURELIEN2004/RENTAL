@@ -1,3 +1,6 @@
+// // ============================================
+// src/services/housingService.js - VERSION COMPLÈTE
+// // ============================================
 
 // src/services/housingService.js - VERSION COMPLÈTE
 
