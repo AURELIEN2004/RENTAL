@@ -163,44 +163,35 @@ class HousingViewSet(viewsets.ModelViewSet):
 
     # ----------------------------
     # RECOMMANDATIONS
-    # ----------------------------@action(detail=False, methods=['get'])
-def recommended(self, request):
-    try:
-        housings = Housing.objects.filter(
-            is_visible=True, 
-            status='disponible'
-        ).select_related(
-            'owner', 'category', 'housing_type', 'region', 'city', 'district'
-        ).prefetch_related('images')
+    # ----------------------------
+    @action(detail=False, methods=['get'])
+    def recommended(self, request):
+        try:
+            housings = Housing.objects.filter(is_visible=True, status='disponible').select_related(
+                'owner', 'category', 'housing_type', 'region', 'city', 'district'
+            ).prefetch_related('images')
 
-        if not housings.exists():
-            return Response([], status=status.HTTP_200_OK)
+            if not housings.exists():
+                return Response([], status=status.HTTP_200_OK)
 
-        if request.user.is_authenticated:
-            try:
-                # ✅ CORRECTION : Vérifier qu'il y a assez de logements
-                if housings.count() >= 3:  # Besoin d'au moins 3 logements
-                    from apps.housing.genetic_algorithm import apply_genetic_algorithm
+            if request.user.is_authenticated:
+                try:
+                    from .genetic_algorithm import apply_genetic_algorithm
                     ranked_housings = apply_genetic_algorithm(request.user, housings)
-                else:
-                    # Pas assez de logements pour l'algo, tri simple
+                except Exception as e:
+                    print(f"⚠️ Genetic algorithm error: {e}")
                     ranked_housings = housings.order_by('-views_count', '-likes_count')[:20]
-            except Exception as e:
-                print(f"⚠️ Genetic algorithm error: {e}")
+            else:
                 ranked_housings = housings.order_by('-views_count', '-likes_count')[:20]
-        else:
-            ranked_housings = housings.order_by('-views_count', '-likes_count')[:20]
 
-        serializer = HousingListSerializer(ranked_housings, many=True, context={'request': request})
-        return Response(serializer.data)
-    except Exception as e:
-        print(f"❌ Error in recommended endpoint: {e}")
-        import traceback
-        traceback.print_exc()
-        return Response(
-            {"error": "Erreur lors du chargement des recommandations"},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
+            serializer = HousingListSerializer(ranked_housings, many=True, context={'request': request})
+            return Response(serializer.data)
+        except Exception as e:
+            print(f"❌ Error in recommended endpoint: {e}")
+            traceback.print_exc()
+            return Response({"error": "Erreur lors du chargement des recommandations"},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     # ----------------------------
     # ACTIONS UTILISATEURS - ✅ CORRIGÉ
     # ----------------------------
@@ -347,153 +338,3 @@ class TestimonialViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
-
-
-        # ============================================
-# 📁 apps/housing/views.py - AJOUT DES VUES MANQUANTES
-# ============================================
-
-"""
-INSTRUCTIONS :
-Ajoutez ces deux classes À LA FIN de votre fichier apps/housing/views.py existant
-NE SUPPRIMEZ PAS vos vues actuelles (HousingViewSet, etc.)
-"""
-
-from rest_framework.generics import ListAPIView
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
-from django.db.models import Q
-from .models import Housing, Category
-from .serializers import HousingListSerializer, CategorySerializer
-
-
-# ============================================
-# ✅ NOUVELLE VUE - Route de recherche compatible
-# ============================================
-
-class HousingSearchView(ListAPIView):
-    """
-    API de recherche compatible avec le frontend existant
-    GET /api/housing/search/?query=studio&city=1&max_price=80000
-    """
-    serializer_class = HousingListSerializer
-    permission_classes = [AllowAny]
-    
-    def get_queryset(self):
-        """Recherche avec filtres multiples"""
-        qs = Housing.objects.filter(is_visible=True, status='disponible')
-        
-        # Préchargement des relations
-        qs = qs.select_related(
-            'owner', 'category', 'housing_type', 'region', 'city', 'district'
-        ).prefetch_related('images')
-        
-        # ============================================
-        # FILTRES
-        # ============================================
-        
-        # 1. Recherche textuelle libre (query)
-        query = self.request.query_params.get('query', '').strip()
-        if query:
-            qs = qs.filter(
-                Q(title__icontains=query) |
-                Q(description__icontains=query) |
-                Q(city__name__icontains=query) |
-                Q(district__name__icontains=query) |
-                Q(category__name__icontains=query) |
-                Q(additional_features__icontains=query)
-            )
-        
-        # 2. Catégorie
-        category = self.request.query_params.get('category')
-        if category:
-            qs = qs.filter(category_id=category)
-        
-        # 3. Région
-        region = self.request.query_params.get('region')
-        if region:
-            qs = qs.filter(region_id=region)
-        
-        # 4. Ville
-        city = self.request.query_params.get('city')
-        if city:
-            qs = qs.filter(city_id=city)
-        
-        # 5. Quartier
-        district = self.request.query_params.get('district')
-        if district:
-            qs = qs.filter(district_id=district)
-        
-        # 6. Prix minimum
-        min_price = self.request.query_params.get('min_price')
-        if min_price:
-            try:
-                qs = qs.filter(price__gte=int(min_price))
-            except ValueError:
-                pass
-        
-        # 7. Prix maximum
-        max_price = self.request.query_params.get('max_price')
-        if max_price:
-            try:
-                qs = qs.filter(price__lte=int(max_price))
-            except ValueError:
-                pass
-        
-        # 8. Meublé (via housing_type)
-        furnished = self.request.query_params.get('furnished')
-        if furnished == 'true':
-            qs = qs.filter(housing_type__name__icontains='meublé')
-        elif furnished == 'false':
-            qs = qs.exclude(housing_type__name__icontains='meublé')
-        
-        # 9. Tri
-        sort_by = self.request.query_params.get('sortBy', '-created_at')
-        valid_sorts = [
-            'price', '-price', 
-            'created_at', '-created_at',
-            'views_count', '-views_count',
-            'area', '-area',
-            'rooms', '-rooms'
-        ]
-        if sort_by in valid_sorts:
-            qs = qs.order_by(sort_by)
-        else:
-            qs = qs.order_by('-created_at')
-        
-        return qs
-
-
-# ============================================
-# ✅ NOUVELLE VUE - Liste des catégories
-# ============================================
-
-class CategoryListView(ListAPIView):
-    """
-    API pour lister les catégories
-    GET /api/housing/categories/
-    """
-    queryset = Category.objects.all().order_by('name')
-    serializer_class = CategorySerializer
-    permission_classes = [AllowAny]
-
-
-# ============================================
-# 💡 REMARQUE IMPORTANTE
-# ============================================
-"""
-Ces vues sont des AJOUTS à votre HousingViewSet existant.
-
-STRUCTURE FINALE :
-- /api/housing/search/         → HousingSearchView (NOUVEAU - pour frontend existant)
-- /api/housing/categories/     → CategoryListView (NOUVEAU - pour frontend existant)
-- /api/housings/               → HousingViewSet (EXISTANT - garde toutes les fonctionnalités)
-- /api/housings/recommended/   → HousingViewSet.recommended (EXISTANT)
-- /api/housings/favorites/     → HousingViewSet.favorites (EXISTANT)
-- etc.
-
-Vous avez maintenant DEUX systèmes qui cohabitent :
-1. Routes classiques /api/housing/* (pour frontend existant)
-2. Routes ViewSet /api/housings/* (pour nouvelles fonctionnalités)
-"""

@@ -1,0 +1,285 @@
+/* ============================================
+   Advanced Filters – Housing Search
+============================================ */
+
+.advanced-filters {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* ===============================
+   Basic filters
+================================ */
+
+.basic-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-select,
+.filter-input,
+.filter-input-small {
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  padding: 10px 12px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.filter-input-small {
+  width: 80px;
+}
+
+.filter-select:focus,
+.filter-input:focus {
+  border-color: #2563eb;
+}
+
+/* ===============================
+   Toggle filters button
+================================ */
+
+.toggle-filters-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #f3f4f6;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #374151;
+  transition: background 0.2s ease;
+}
+
+.toggle-filters-btn:hover {
+  background: #e5e7eb;
+}
+
+/* ===============================
+   More filters container
+================================ */
+
+.more-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ===============================
+   Active filter block
+================================ */
+
+.active-filter {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 12px;
+  background: #fafafa;
+}
+
+.filter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.filter-icon {
+  font-size: 1.2rem;
+}
+
+.filter-name {
+  font-weight: 600;
+  color: #111827;
+  flex: 1;
+  margin-left: 8px;
+}
+
+.remove-filter-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+}
+
+.remove-filter-btn:hover {
+  color: #ef4444;
+}
+
+.filter-content {
+  margin-top: 8px;
+}
+
+/* ===============================
+   Range filters
+================================ */
+
+.filter-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.range-separator {
+  font-weight: 600;
+  color: #6b7280;
+}
+
+/* ===============================
+   Checkboxes
+================================ */
+
+.filter-checkboxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.checkbox-label input {
+  accent-color: #2563eb;
+}
+
+/* ===============================
+   Proximity
+================================ */
+
+.proximity-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.radius-slider label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.slider {
+  width: 100%;
+}
+
+/* ===============================
+   Advanced options
+================================ */
+
+.advanced-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sort-option {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.genetic-option {
+  background: #eef2ff;
+  padding: 10px;
+  border-radius: 10px;
+  font-weight: 500;
+}
+
+/* ===============================
+   Add filter buttons
+================================ */
+
+.add-filter-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.add-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f9fafb;
+  border: 1px dashed #d1d5db;
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.add-filter-btn:hover {
+  background: #eef2ff;
+  border-color: #2563eb;
+}
+
+/* ===============================
+   Reset button
+================================ */
+
+.reset-filters-btn {
+  align-self: flex-start;
+  background: #fee2e2;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #b91c1c;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.reset-filters-btn:hover {
+  background: #fecaca;
+}
+
+/* ===============================
+   Responsive
+================================ */
+
+@media (max-width: 640px) {
+  .advanced-filters {
+    padding: 12px;
+  }
+
+  .filter-range {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-input-small {
+    width: 100%;
+  }
+}

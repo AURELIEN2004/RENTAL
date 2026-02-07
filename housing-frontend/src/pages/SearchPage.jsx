@@ -1,272 +1,274 @@
+// // ============================================
+// // 📁 src/pages/SearchPage.jsx
+// // ============================================
 
 
-// ============================================
-// 📁 pages/SearchPage.jsx - VERSION MODERNE CORRIGÉE
-// ============================================
-
-import { useState } from "react";
-import HousingList from "../components/housing/HousingList";
-import { searchHousing } from "../services/housingService";
-import { assistantSearch } from "../services/chatbotService";
-import SearchBar from "../components/Search/SearchBar";
-import FilterPanel from "../components/Search/FilterPanel";
-import ChatbotModal from "../components/chatbot/ChatbotModal";
-import NearMeButton from "../components/Search/NearMeButton";
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import SearchBar from '../components/search/SearchBar';
+import AdvancedFilters from '../components/search/AdvancedFilters';
+import HousingList from '../components/housing/HousingList';
+// import Pagination from '../components/common/Pagination';
+import searchService from '../services/searchService';
+import './SearchPage.css';
+import ChatbotAssistant from '../components/Search/ChatbotAssistant';
 
 const SearchPage = () => {
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [searchInfo, setSearchInfo] = useState(null);
+  const navigate = useNavigate();
+  const location = useLocation();
   
-  // États pour les modales/panneaux
-  const [showFilters, setShowFilters] = useState(false);
-  const [showChatbot, setShowChatbot] = useState(false);
-  
-  // État de la recherche
-  const [query, setQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
-    category: "",
-    region: "",
-    city: "",
-    district: "",
-    min_price: "",
-    max_price: "",
-    furnished: "",
+    category: '',
+    city: '',
+    district: '',
+    housingType: '',
+    minPrice: '',
+    maxPrice: '',
+    minSurface: '',
+    maxSurface: '',
+    bedrooms: '',
+    bathrooms: '',
+    hasParking: false,
+    hasGarden: false,
+    hasPool: false,
+    isFurnished: false
   });
+  
+  const [housings, setHousings] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [showFilters, setShowFilters] = useState(false);
+  const [savedFilters, setSavedFilters] = useState([]);
 
-  // 🔍 Recherche principale - VERSION CORRIGÉE
-  const handleSearch = async (searchQuery = query, searchFilters = filters) => {
+  // Charger les filtres sauvegardés au montage
+  useEffect(() => {
+    loadSavedFilters();
+  }, []);
+
+  // Effectuer la recherche quand les filtres changent
+  useEffect(() => {
+    performSearch();
+  }, [filters, currentPage]);
+
+  const loadSavedFilters = async () => {
+    try {
+      const filters = await searchService.getSavedFilters();
+      setSavedFilters(filters);
+    } catch (error) {
+      console.error('Error loading saved filters:', error);
+    }
+  };
+
+  const performSearch = async () => {
     setLoading(true);
-    setSearchInfo(null);
+    setError(null);
     
     try {
-      // ✅ Utiliser les filtres passés en paramètre (pas le state)
-      const params = { ...searchFilters };
-      if (searchQuery && searchQuery.trim()) {
-        params.query = searchQuery.trim();
-      }
-
-      // const res = await searchHousing(params);
-      // setResults(res.data);
-      const res = await searchHousing(params);
-setResults(res.data.results || res.data);
-
-      
-      setSearchInfo({
-        type: 'classic',
-        query: searchQuery,
-        count: res.data.length
+      const results = await searchService.search({
+        ...filters,
+        page: currentPage
       });
+      
+      setHousings(results.housings || []);
+      setTotalPages(Math.ceil((results.total || 0) / 12));
     } catch (error) {
-      console.error("Erreur recherche:", error);
-      alert("Erreur lors de la recherche. Veuillez réessayer.");
+      console.error('Search error:', error);
+      setError('Erreur lors de la recherche. Veuillez réessayer.');
+      setHousings([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // 🤖 Recherche via assistant
-  const handleAssistantSearch = async (message) => {
-    setLoading(true);
-    setSearchInfo(null);
-    
-    try {
-      const res = await assistantSearch(message);
-      setResults(res.data.results || res.data);
-      
-      setSearchInfo({
-        type: 'assistant',
-        message: message,
-        filters: res.data.filters || {},
-        count: (res.data.results || res.data).length,
-        suggestion: res.data.suggestion
-      });
-      
-      // Fermer le chatbot après recherche
-      setShowChatbot(false);
-    } catch (error) {
-      console.error("Erreur recherche assistant:", error);
-      alert("Erreur lors de la recherche assistée.");
-    } finally {
-      setLoading(false);
-    }
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+    setFilters(prev => ({ ...prev }));
+    setCurrentPage(1);
   };
 
-  // 📍 Recherche près de moi
-  const handleNearbySearch = (nearbyResults) => {
-    setResults(nearbyResults);
-    setSearchInfo({
-      type: 'nearby',
-      count: nearbyResults.length
-    });
+  const handleVoiceSearch = (transcript) => {
+    setSearchQuery(transcript);
+    setFilters(prev => ({ ...prev }));
+    setCurrentPage(1);
   };
 
-  // 🔧 Application des filtres - VERSION CORRIGÉE
-  const handleApplyFilters = (newFilters) => {
+  const handleFiltersChange = (newFilters) => {
+    // Mise à jour des filtres SANS appeler performSearch
+    // performSearch sera appelé automatiquement par useEffect
     setFilters(newFilters);
-    setShowFilters(false);
-    // ✅ Passer directement newFilters (pas attendre le state)
-    handleSearch(query, newFilters);
+    setCurrentPage(1);
   };
 
-  // 🧹 Réinitialisation
-  const handleReset = () => {
-    setQuery("");
-    const emptyFilters = {
-      category: "",
-      region: "",
-      city: "",
-      district: "",
-      min_price: "",
-      max_price: "",
-      furnished: "",
-    };
-    setFilters(emptyFilters);
-    setResults([]);
-    setSearchInfo(null);
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Compter les filtres actifs
-  const activeFiltersCount = Object.values(filters).filter(v => v !== "").length;
+  const handleSaveFilters = async () => {
+    try {
+      await searchService.saveFilters(filters);
+      alert('Filtres sauvegardés avec succès!');
+      loadSavedFilters();
+    } catch (error) {
+      console.error('Error saving filters:', error);
+      alert('Erreur lors de la sauvegarde des filtres');
+    }
+  };
+
+  const handleLoadSavedFilter = (savedFilter) => {
+    setFilters(savedFilter.filters);
+    setCurrentPage(1);
+  };
+
+  const handleResetFilters = () => {
+    setFilters({
+      category: '',
+      city: '',
+      district: '',
+      housingType: '',
+      minPrice: '',
+      maxPrice: '',
+      minSurface: '',
+      maxSurface: '',
+      bedrooms: '',
+      bathrooms: '',
+      hasParking: false,
+      hasGarden: false,
+      hasPool: false,
+      isFurnished: false
+    });
+    setSearchQuery('');
+    setCurrentPage(1);
+  };
+
+  const toggleFilters = () => {
+    setShowFilters(!showFilters);
+  };
 
   return (
-    <div className="search-page-modern">
-      {/* 🎨 HEADER */}
-      <header className="page-header">
-        <div className="header-content">
-          <h1>🏠 Trouve ton logement</h1>
-          <p>Recherche intelligente de logements au Cameroun</p>
-        </div>
-      </header>
+    <div className="search-page">
+      <div className="search-page-header">
+        <h1>Recherche de logements</h1>
+        <SearchBar 
+          onSearch={handleSearch}
+          onVoiceSearch={handleVoiceSearch}
+          placeholder="Rechercher un logement..."
+        />
+      </div>
 
-      {/* 🔍 BARRE DE RECHERCHE PRINCIPALE */}
-      <section className="search-main">
-        <div className="search-container">
-          {/* Barre de recherche */}
-          <SearchBar 
-            query={query}
-            setQuery={setQuery}
-            onSearch={() => handleSearch(query, filters)}
+      <div className="search-page-content">
+        <div className={`filters-sidebar ${showFilters ? 'show' : ''}`}>
+          <div className="filters-header">
+            <h2>Filtres</h2>
+            <button 
+              className="close-filters-btn"
+              onClick={toggleFilters}
+            >
+              ✕
+            </button>
+          </div>
+          
+          <AdvancedFilters 
+            filters={filters}
+            onFiltersChange={handleFiltersChange}
           />
-
-          {/* Boutons d'action */}
-          <div className="search-actions">
+          
+          <div className="filters-actions">
             <button 
-              className="btn-action btn-filters"
-              onClick={() => setShowFilters(!showFilters)}
+              className="btn btn-secondary"
+              onClick={handleResetFilters}
             >
-              <span className="btn-icon">🔧</span>
-              <span>Filtres</span>
-              {activeFiltersCount > 0 && (
-                <span className="badge">{activeFiltersCount}</span>
-              )}
+              Réinitialiser
             </button>
-
             <button 
-              className="btn-action btn-assistant"
-              onClick={() => setShowChatbot(!showChatbot)}
+              className="btn btn-primary"
+              onClick={handleSaveFilters}
             >
-              <span className="btn-icon">🤖</span>
-              <span>Assistant</span>
+              Sauvegarder
             </button>
-
-            <NearMeButton onResults={handleNearbySearch} />
-
-            {(query || activeFiltersCount > 0) && (
-              <button 
-                className="btn-action btn-reset"
-                onClick={handleReset}
-              >
-                <span className="btn-icon">🔄</span>
-                <span>Réinitialiser</span>
-              </button>
-            )}
           </div>
+
+          {savedFilters.length > 0 && (
+            <div className="saved-filters">
+              <h3>Recherches sauvegardées</h3>
+              <ul>
+                {savedFilters.map((saved, index) => (
+                  <li key={index}>
+                    <button
+                      onClick={() => handleLoadSavedFilter(saved)}
+                      className="saved-filter-btn"
+                    >
+                      {saved.name || `Recherche ${index + 1}`}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
-      </section>
 
-      {/* 🔧 PANNEAU DE FILTRES */}
-      {showFilters && (
-        <FilterPanel
-          filters={filters}
-          onApply={handleApplyFilters}
-          onClose={() => setShowFilters(false)}
-        />
-      )}
-
-      {/* 🤖 MODAL CHATBOT */}
-      {showChatbot && (
-        <ChatbotModal
-          onSearch={handleAssistantSearch}
-          onClose={() => setShowChatbot(false)}
-        />
-      )}
-
-      {/* 📊 INFORMATIONS SUR LA RECHERCHE */}
-      {searchInfo && (
-        <div className="search-info-bar">
-          <div className="info-content">
-            {searchInfo.type === 'classic' && (
-              <p>
-                📊 <strong>{searchInfo.count}</strong> logement(s) trouvé(s)
-                {searchInfo.query && ` pour "${searchInfo.query}"`}
-              </p>
-            )}
+        <div className="search-results">
+          <div className="results-header">
+            <button 
+              className="toggle-filters-btn"
+              onClick={toggleFilters}
+            >
+              <span className="icon">⚙️</span>
+              Filtres
+            </button>
             
-            {searchInfo.type === 'assistant' && (
-              <div className="assistant-info">
-                <p>
-                  🤖 <strong>{searchInfo.count}</strong> résultat(s) : 
-                  "<em>{searchInfo.message}</em>"
-                </p>
-                {searchInfo.filters && Object.keys(searchInfo.filters).length > 0 && (
-                  <div className="filters-detected">
-                    {searchInfo.filters.category && <span className="filter-tag">📦 {searchInfo.filters.category}</span>}
-                    {searchInfo.filters.city && <span className="filter-tag">📍 {searchInfo.filters.city}</span>}
-                    {searchInfo.filters.district && <span className="filter-tag">🏘️ {searchInfo.filters.district}</span>}
-                    {searchInfo.filters.max_price && <span className="filter-tag">💰 Max {searchInfo.filters.max_price} FCFA</span>}
-                    {searchInfo.filters.furnished !== undefined && (
-                      <span className="filter-tag">🛋️ {searchInfo.filters.furnished ? 'Meublé' : 'Non meublé'}</span>
-                    )}
-                  </div>
-                )}
-                {searchInfo.suggestion && (
-                  <p className="suggestion-text">
-                    💡 {searchInfo.suggestion}
-                  </p>
-                )}
-              </div>
-            )}
-
-            {searchInfo.type === 'nearby' && (
-              <p>
-                📍 <strong>{searchInfo.count}</strong> logement(s) près de vous
-              </p>
-            )}
+            <div className="results-count">
+              {loading ? (
+                'Recherche en cours...'
+              ) : (
+                `${housings.length} logement${housings.length > 1 ? 's' : ''} trouvé${housings.length > 1 ? 's' : ''}`
+              )}
+            </div>
           </div>
+
+          {error && (
+            <div className="error-message">
+              {error}
+            </div>
+          )}
+
+          {loading ? (
+            <div className="loading-spinner">
+              <div className="spinner"></div>
+              <p>Recherche en cours...</p>
+            </div>
+          ) : housings.length > 0 ? (
+            <>
+              <HousingList housings={housings} />
+              
+              {totalPages > 1 && (
+                <Pagination 
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
+              )}
+            </>
+          ) : (
+            <div className="no-results">
+              <div className="no-results-icon">🏠</div>
+              <h3>Aucun logement trouvé</h3>
+              <p>Essayez de modifier vos critères de recherche</p>
+              <button 
+                className="btn btn-primary"
+                onClick={handleResetFilters}
+              >
+                Réinitialiser les filtres
+              </button>
+            </div>
+          )}
+                      <ChatbotAssistant />
+
         </div>
-      )}
-
-      {/* 📦 RÉSULTATS */}
-      <section className="results-section">
-        {loading ? (
-          <div className="loading-state">
-            <div className="spinner"></div>
-            <p>Recherche en cours...</p>
-          </div>
-        ) : results.length === 0 && searchInfo ? (
-          <div className="empty-state">
-            <div className="empty-icon">🔍</div>
-            <h3>Aucun logement trouvé</h3>
-            <p>Essayez de modifier vos critères de recherche</p>
-            <button className="btn-primary" onClick={handleReset}>
-              Nouvelle recherche
-            </button>
-          </div>
-        ) : (
-          <HousingList housings={results} />
-        )}
-      </section>
+      </div>
     </div>
   );
 };

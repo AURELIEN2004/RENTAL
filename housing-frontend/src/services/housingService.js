@@ -202,14 +202,24 @@ export const housingService = {
     return await searchService.searchHousings(filters);
   },
 
+  // ===============================
+  // Recommandations
+  // ===============================
+  //   getRecommendedHousings: async () => {
+  //   try {
+  //     // Cette URL correspond à l'action @action(detail=False) "recommended"
+  //     const response = await api.get('/housings/recommended/');
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error("Erreur lors de la récupération des recommandations", error);
+  //     throw error;
+  //   }
+  // },
 
-
+  // // Optionnel : Récupérer les stats réelles pour le propriétaire
+  // getOwnerStats: async () => {
+  //   const response = await api.get('/housings/owner_statistics/');
+  //   return response.data;
+  // }
   
 };
-
-export const getCategories = () => api.get("housing/categories/");
-export const searchHousing = (params) =>
-  api.get("housing/search/", { params });
-
-// ajout de la fonction pour récupérer les détails d'un logement
-export const getHousingDetails = (id) => api.get(`housing/${id}/`);

@@ -1,0 +1,16 @@
+# pip install spacy==3.7.4
+# pip install scikit-learn==1.4.2
+
+# python -m spacy download fr_core_news_md
+# python -m spacy download en_core_web_md
+# pip install nltk==3.8.1
+
+# # Installer les dépendances essentielles
+# pip install djangorestframework django-filter django-cors-headers
+# pip install spacy numpy scikit-learn nltk
+
+# # Télécharger les modèles spaCy (pour la recherche en langage naturel)
+# python -m spacy download fr_core_news_md
+# python -m spacy download en_core_web_md
+
+

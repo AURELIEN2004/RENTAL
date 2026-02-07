@@ -1,0 +1,212 @@
+/* =========================================
+   SearchBar – Container
+========================================= */
+
+.search-bar-container {
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+/* =========================================
+   Form
+========================================= */
+
+.search-bar-form {
+  width: 100%;
+}
+
+/* =========================================
+   Input Wrapper
+========================================= */
+
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 0.4rem 0.6rem;
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+}
+
+/* =========================================
+   Search Icon
+========================================= */
+
+.search-icon {
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+/* =========================================
+   Input
+========================================= */
+
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 0.95rem;
+  padding: 0.6rem;
+  color: #111827;
+}
+
+.search-input::placeholder {
+  color: #9ca3af;
+}
+
+.search-input:disabled {
+  background: transparent;
+  color: #9ca3af;
+}
+
+/* =========================================
+   Voice Button
+========================================= */
+
+.voice-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: #e5e7eb;
+  border-radius: 999px;
+  width: 38px;
+  height: 38px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.voice-button:hover {
+  background: #d1d5db;
+}
+
+.voice-button.recording {
+  background: #ef4444;
+  color: #fff;
+}
+
+/* Pulse animation when recording */
+.pulse {
+  animation: pulse 1.3s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* =========================================
+   Search Button
+========================================= */
+
+.search-button {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.55rem 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.search-button:hover {
+  background: #1d4ed8;
+}
+
+.search-button:disabled {
+  background: #93c5fd;
+  cursor: not-allowed;
+}
+
+/* Spinner */
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================================
+   Recording Indicator
+========================================= */
+
+.recording-indicator {
+  margin-top: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 0.5rem 0.8rem;
+  border-radius: 10px;
+}
+
+.recording-dot {
+  width: 8px;
+  height: 8px;
+  background: #ef4444;
+  border-radius: 50%;
+  animation: pulse 1.2s infinite;
+}
+
+.recording-text {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #b91c1c;
+}
+
+.cancel-recording {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: #991b1b;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.cancel-recording:hover {
+  text-decoration: underline;
+}
+
+/* =========================================
+   Processing Indicator
+========================================= */
+
+.processing-indicator {
+  margin-top: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #374151;
+}
+
+/* =========================================
+   Responsive
+========================================= */
+
+@media (max-width: 640px) {
+  .search-input-wrapper {
+    flex-wrap: wrap;
+  }
+
+  .search-button {
+    width: 100%;
+  }
+}
