@@ -4,7 +4,7 @@
 
 import { useState } from 'react';
 import { Search, Loader } from 'lucide-react';
-
+import './SearchBar.css';
 /**
  * Barre de recherche principale
  */

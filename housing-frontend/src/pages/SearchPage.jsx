@@ -189,7 +189,7 @@ const SearchPage = () => {
               />
             </div>
             {/* Bouton flottant chatbot */}
-      <ChatbotButton onResultsFound={handleChatbotResults} />
+      {/* <ChatbotButton onResultsFound={handleChatbotResults} /> */}
           </div>
 
           {/* Indicateur de géolocalisation */}
@@ -290,7 +290,7 @@ const SearchPage = () => {
       </div>
 
       {/* Bouton flottant chatbot */}
-      <ChatbotButton onResultsFound={handleChatbotResults} />
+      {/* <ChatbotButton onResultsFound={handleChatbotResults} /> */}
     </div>
   );
 };

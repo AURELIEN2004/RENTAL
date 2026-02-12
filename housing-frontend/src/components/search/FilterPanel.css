@@ -1,0 +1,230 @@
+/* ============================================
+   FILTER PANEL - STYLE GLOBAL
+============================================ */
+
+.filter-panel {
+  position: relative;
+  display: inline-block;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* ============================================
+   BOUTON FILTRES
+============================================ */
+
+.filter-toggle-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.filter-toggle-button:hover {
+  background: #1e4ed8;
+}
+
+.filter-badge {
+  background: #fff;
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 999px;
+}
+
+/* ============================================
+   DROPDOWN
+============================================ */
+
+.filter-dropdown {
+  position: absolute;
+  top: 110%;
+  right: 0;
+  width: 420px;
+  max-height: 80vh;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================================
+   HEADER
+============================================ */
+
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.filter-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #666;
+}
+
+.close-button:hover {
+  color: #000;
+}
+
+/* ============================================
+   CONTENU
+============================================ */
+
+.filter-content {
+  padding: 16px;
+  overflow-y: auto;
+}
+
+/* Groupe */
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 14px;
+}
+
+.filter-group label {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #333;
+}
+
+.filter-group small {
+  font-size: 11px;
+  color: #777;
+}
+
+/* Inputs et selects */
+.filter-group select,
+.filter-group input {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+  transition: border 0.2s;
+}
+
+.filter-group select:focus,
+.filter-group input:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+/* Ligne double */
+.filter-group-row {
+  display: flex;
+  gap: 10px;
+}
+
+.filter-group-row .filter-group {
+  flex: 1;
+}
+
+/* Hint */
+.filter-hint {
+  margin-top: 3px;
+  color: #999;
+}
+
+/* ============================================
+   LOADING
+============================================ */
+
+.filter-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px;
+  color: #666;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ============================================
+   ACTIONS
+============================================ */
+
+.filter-actions {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px;
+  border-top: 1px solid #eee;
+  background: #fafafa;
+}
+
+.reset-button {
+  background: #e5e7eb;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.reset-button:hover {
+  background: #d1d5db;
+}
+
+.apply-button {
+  background: #16a34a;
+  color: #fff;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.apply-button:hover {
+  background: #15803d;
+}
+
+.apply-button:disabled,
+.reset-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   RESPONSIVE
+============================================ */
+
+@media (max-width: 600px) {
+  .filter-dropdown {
+    width: 95vw;
+    right: -10px;
+  }
+
+  .filter-group-row {
+    flex-direction: column;
+  }
+}
