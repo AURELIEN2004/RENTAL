@@ -231,7 +231,7 @@ const SearchPage = () => {
         )}
 
         {/* Tri */}
-        {housings.length > 0 && (
+        {/* {housings.length > 0 && (
           <div className="sort-controls">
             <label>Trier par :</label>
             <select
@@ -246,7 +246,7 @@ const SearchPage = () => {
               {searchType === 'smart' && <option value="score">Pertinence</option>}
             </select>
           </div>
-        )}
+        )} */}
 
         {/* Messages d'état */}
         {loading && (

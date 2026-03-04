@@ -54,9 +54,11 @@ const Home = () => {
   {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-overlay"></div>
-        <video autoPlay loop muted className="hero-video">
+        {/* <video autoPlay loop muted className="hero-video">
           <source src="/video-hero.mp4" type="video/mp4" />
-        </video>
+          
+        </video> */}
+        {/* <img src="assets/scene_1.png"/> */}
         
         <div className="hero-content">
           <h1 className="hero-title">
