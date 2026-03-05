@@ -289,8 +289,6 @@ const SearchPage = () => {
       <ChatbotButton onResultsFound={handleChatbotResults} />
       </div>
 
-      {/* Bouton flottant chatbot */}
-      {/* <ChatbotButton onResultsFound={handleChatbotResults} /> */}
     </div>
   );
 };

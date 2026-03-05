@@ -54,10 +54,10 @@ const Footer = () => {
           <p>Téléchargez notre application</p>
           <div className="app-downloads">
             <a href="#" className="app-badge">
-              <img src="/app-store.png" alt="App Store" />
+              <img src="assets/app-store.png" alt="App Store" />
             </a>
             <a href="#" className="app-badge">
-              <img src="/play-store.png" alt="Play Store" />
+              <img src="assets/play-store.png" alt="Play Store" />
             </a>
           </div>
         </div>

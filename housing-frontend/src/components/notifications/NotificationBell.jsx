@@ -142,11 +142,11 @@ const NotificationBell = () => {
           <div className="dropdown-footer">
             <button 
               className="view-all-btn"
-            //   onClick={() => {
-            //     navigate('/dashboard/notifications');
-            //     setShowDropdown(false);
-            //   }}
-         onClick={() => window.location.href = '/dashboard/notifications'}
+              onClick={() => {
+                navigate('/dashboard/notifications');
+                setShowDropdown(false);
+              }}
+        //  onClick={() => window.location.href = '/dashboard/notifications'}
 
             >
               Voir toutes les notifications
