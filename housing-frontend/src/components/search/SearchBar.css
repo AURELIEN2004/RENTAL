@@ -210,3 +210,204 @@
     width: 100%;
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ============================================
+   📁 src/components/Search/SearchBar.css
+   ============================================ */
+
+.search-bar-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Mode toggle ──────────────────────────────────────── */
+.search-mode-toggle {
+  display: flex;
+  gap: 4px;
+  align-self: flex-start;
+}
+
+.mode-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  background: #fff;
+  color: #64748b;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.mode-btn:hover { border-color: #94a3b8; color: #1e293b; }
+
+.mode-btn.active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+
+/* ── Barre de recherche ───────────────────────────────── */
+.search-bar { width: 100%; }
+
+.search-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0 6px 0 14px;
+  gap: 8px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  height: 52px;
+}
+
+.search-input-wrapper:focus-within {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.search-icon {
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.search-icon.spinning {
+  animation: spin 1s linear infinite;
+  color: #2563eb;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 0.97rem;
+  color: #1e293b;
+  background: transparent;
+  min-width: 0;
+}
+
+.search-input::placeholder { color: #94a3b8; }
+.search-input:disabled { opacity: 0.6; }
+
+.search-clear-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #64748b;
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.search-clear-btn:hover { background: #e2e8f0; color: #1e293b; }
+
+.search-button {
+  padding: 0 18px;
+  height: 38px;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.search-button:hover:not(:disabled) { background: #1d4ed8; }
+.search-button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ── Badge résumé NLP ─────────────────────────────────── */
+.search-nlp-summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: #1d4ed8;
+  flex-wrap: wrap;
+}
+
+.summary-icon {
+  color: #2563eb;
+  flex-shrink: 0;
+}
+
+.summary-text {
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.summary-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 50%;
+  background: #bfdbfe;
+  color: #1d4ed8;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.summary-clear:hover { background: #93c5fd; }
+
+/* ── Responsive ───────────────────────────────────────── */
+@media (max-width: 600px) {
+  .search-button { padding: 0 12px; font-size: 0.82rem; }
+  .search-input  { font-size: 0.9rem; }
+}

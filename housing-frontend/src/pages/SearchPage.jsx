@@ -1,228 +1,281 @@
-// ============================================
-// 📁 src/pages/SearchPage.jsx
-// ============================================
+
 
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import SearchBar from '../components/Search/SearchBar';
-import FilterPanel from '../components/Search/FilterPanel';
+import { Loader, MapPin, TrendingUp, Sparkles } from 'lucide-react';
+
+import SearchBar    from '../components/Search/SearchBar';
+import FilterPanel  from '../components/Search/FilterPanel';
 import NearMeButton from '../components/Search/NearMeButton';
-import ChatbotButton from '../components/Search/ChatbotButton';
-import VoiceSearch from '../components/Search/VoiceSearch';
-import HousingList from '../components/housing/HousingList';
+import VoiceSearch  from '../components/Search/VoiceSearch';
+import HousingList  from '../components/housing/HousingList';
 import searchService from '../services/searchService';
-import { Loader, MapPin, TrendingUp } from 'lucide-react';
 import './SearchPage.css';
 
-/**
- * Page de recherche complète
- */
+// ---------------------------------------------------------------------------
+const LABELS = {
+  fr: {
+    title:        'Rechercher un logement',
+    placeholder:  'Rechercher par titre, ville, quartier…',
+    sortBy:       'Trier par :',
+    sortRecent:   'Plus récents',
+    sortPriceAsc: 'Prix croissant',
+    sortPriceDsc: 'Prix décroissant',
+    sortArea:     'Surface (grande → petite)',
+    sortPopular:  'Popularité',
+    sortScore:    'Pertinence',
+    results:      'Résultats',
+    avgPrice:     'Prix moyen',
+    range:        'Fourchette',
+    fcfa:         'FCFA',
+    loading:      'Recherche en cours…',
+    retry:        'Réessayer',
+    noResult:     'Aucun résultat',
+    noResultSub:  "Essayez d'ajuster vos critères",
+    reset:        'Réinitialiser',
+    nearby:       'Recherche autour de vous',
+    smart:        'Recherche intelligente',
+    error:        'Erreur lors de la recherche. Veuillez réessayer.',
+  },
+  en: {
+    title:        'Find housing',
+    placeholder:  'Search by title, city, district…',
+    sortBy:       'Sort by:',
+    sortRecent:   'Most recent',
+    sortPriceAsc: 'Price ascending',
+    sortPriceDsc: 'Price descending',
+    sortArea:     'Area (large → small)',
+    sortPopular:  'Popularity',
+    sortScore:    'Relevance',
+    results:      'Results',
+    avgPrice:     'Avg. price',
+    range:        'Range',
+    fcfa:         'FCFA',
+    loading:      'Searching…',
+    retry:        'Retry',
+    noResult:     'No results',
+    noResultSub:  'Try adjusting your criteria',
+    reset:        'Reset',
+    nearby:       'Searching near you',
+    smart:        'Smart search',
+    error:        'Search error. Please try again.',
+  },
+};
+
+// ---------------------------------------------------------------------------
+
 const SearchPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(false);
-  const [housings, setHousings] = useState([]);
-  const [stats, setStats] = useState(null);
-  const [filters, setFilters] = useState({});
-  const [searchType, setSearchType] = useState('classic'); // 'classic', 'nearby', 'smart'
+  const language = (localStorage.getItem('i18nextLng') || 'fr').startsWith('en') ? 'en' : 'fr';
+  const t        = LABELS[language];
+
+  const [loading,      setLoading]      = useState(false);
+  const [housings,     setHousings]     = useState([]);
+  const [stats,        setStats]        = useState(null);
+  const [filters,      setFilters]      = useState({});
+  const [searchType,   setSearchType]   = useState('classic'); // 'classic' | 'nlp' | 'nearby'
   const [userLocation, setUserLocation] = useState(null);
-  const [error, setError] = useState(null);
+  const [error,        setError]        = useState(null);
+  const [nlpSummary,   setNlpSummary]   = useState('');
 
-  // Récupérer query params au chargement
+  // ── Init depuis URL params ──
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const initialFilters = {};
-    
-    params.forEach((value, key) => {
-      initialFilters[key] = value;
-    });
+    const params   = new URLSearchParams(location.search);
+    const initial  = {};
+    params.forEach((v, k) => { initial[k] = v; });
 
-    if (Object.keys(initialFilters).length > 0) {
-      setFilters(initialFilters);
-      performSearch(initialFilters);
+    if (Object.keys(initial).length > 0) {
+      setFilters(initial);
+      const type = initial.searchType || 'classic';
+      performSearch(initial, type);
     } else {
-      // Recherche par défaut
-      performSearch({});
+      performSearch({}, 'classic');
     }
-  }, [location.search]);
+  }, []); // eslint-disable-line
 
-  /**
-   * Effectuer la recherche selon le type
-   */
-  const performSearch = async (searchFilters = {}) => {
+  // ────────────────────────────────────────────────────────────────────────
+  // Recherche principale
+  // ────────────────────────────────────────────────────────────────────────
+  const performSearch = async (searchFilters = {}, type = 'classic') => {
     setLoading(true);
     setError(null);
 
     try {
-      let results;
+      let data;
 
-      // Déterminer le type de recherche
-      if (searchFilters.lat && searchFilters.lng) {
-        // Recherche géolocalisée intelligente
-        setSearchType('smart');
-        results = await searchService.smartSearch(searchFilters);
-      } else if (Object.keys(searchFilters).length === 0) {
-        // Recherche par défaut (tous les logements)
-        results = await searchService.searchHousings({ status: 'disponible' });
+      if (type === 'nlp') {
+        setSearchType('nlp');
+        data = await searchService.nlpSearch({
+          query:    searchFilters.query || '',
+          language,
+          user_lat: searchFilters.lat,
+          user_lng: searchFilters.lng,
+        });
+        setNlpSummary(data.criteria_summary || '');
+        setHousings(data.results || []);
+        setStats({ total_results: data.count || 0 });
+
+      } else if (type === 'nearby' || (searchFilters.lat && searchFilters.lng)) {
+        setSearchType('nearby');
+        data = await searchService.searchNearby(
+          parseFloat(searchFilters.lat),
+          parseFloat(searchFilters.lng),
+          parseFloat(searchFilters.radius || 5),
+        );
+        setNlpSummary('');
+        setHousings(data.results || []);
+        setStats({ total_results: data.count || 0 });
+
       } else {
-        // Recherche classique avec filtres
         setSearchType('classic');
-        results = await searchService.searchHousings(searchFilters);
+        data = await searchService.searchHousings(searchFilters);
+        setNlpSummary('');
+        setHousings(data.results || []);
+        setStats(data.stats   || null);
       }
 
-      setHousings(results.results || []);
-      setStats(results.stats || null);
-      
-      // Mettre à jour l'URL
-      updateURL(searchFilters);
+      updateURL({ ...searchFilters, searchType: type });
     } catch (err) {
       console.error('Erreur recherche:', err);
-      setError('Erreur lors de la recherche. Veuillez réessayer.');
+      setError(t.error);
       setHousings([]);
     } finally {
       setLoading(false);
     }
   };
 
-  /**
-   * Mise à jour de l'URL avec les filtres
-   */
-  const updateURL = (searchFilters) => {
+  // ── URL ──
+  const updateURL = (f) => {
     const params = new URLSearchParams();
-    Object.entries(searchFilters).forEach(([key, value]) => {
-      if (value !== '' && value !== null && value !== undefined) {
-        params.set(key, value);
-      }
+    Object.entries(f).forEach(([k, v]) => {
+      if (v !== '' && v != null && v !== false && v !== undefined)
+        params.set(k, String(v));
     });
     navigate(`/search?${params.toString()}`, { replace: true });
   };
 
-  /**
-   * Recherche textuelle
-   */
-  const handleSearch = (searchData) => {
-    const newFilters = { ...filters, ...searchData };
+  // ── Depuis SearchBar (mode classique ou NLP) ──
+  const handleSearch = ({ query, isNLP }) => {
+    const newFilters = { ...filters, query };
     setFilters(newFilters);
-    performSearch(newFilters);
+    performSearch(newFilters, isNLP ? 'nlp' : 'classic');
   };
 
-  /**
-   * Recherche vocale
-   */
+  // ── Depuis VoiceSearch (transcript validé) → toujours NLP ──
   const handleVoiceTranscript = (transcript) => {
-    handleSearch({ query: transcript });
-  };
-
-  /**
-   * Résultats du chatbot
-   */
-  const handleChatbotResults = (results, criteria) => {
-    setHousings(results);
-    setFilters(criteria);
-    setStats({ total_results: results.length });
-  };
-
-  /**
-   * Application des filtres
-   */
-  const handleApplyFilters = (newFilters) => {
+    if (!transcript.trim()) return;
+    const newFilters = { ...filters, query: transcript };
     setFilters(newFilters);
-    performSearch(newFilters);
+    performSearch(newFilters, 'nlp');
   };
 
-  /**
-   * Recherche "Près de moi"
-   */
-  const handleNearbySearch = async (location) => {
-    setUserLocation(location);
-    
-    const nearbyFilters = {
-      ...filters,
-      lat: location.lat,
-      lng: location.lng,
-      radius: 5 // 5 km par défaut
-    };
-    
-    setFilters(nearbyFilters);
-    performSearch(nearbyFilters);
+  // ── Filtres avancés ──
+  const handleApplyFilters = (newFilters) => {
+    const merged = { ...filters, ...newFilters };
+    setFilters(merged);
+    performSearch(merged, 'classic');
   };
 
-  /**
-   * Tri des résultats
-   */
+  // ── Géolocalisation ──
+  const handleNearbySearch = (loc) => {
+    setUserLocation(loc);
+    const f = { ...filters, lat: loc.lat, lng: loc.lng, radius: 5 };
+    setFilters(f);
+    performSearch(f, 'nearby');
+  };
+
+  // ── Tri ──
   const handleSort = (sortBy) => {
-    const sortedFilters = { ...filters, sortBy };
-    setFilters(sortedFilters);
-    performSearch(sortedFilters);
+    const f = { ...filters, sortBy };
+    setFilters(f);
+    performSearch(f, searchType);
   };
 
+  // ── Effacer NLP ──
+  const handleClearNLP = () => {
+    setNlpSummary('');
+    const f = { sortBy: filters.sortBy };
+    setFilters(f);
+    performSearch(f, 'classic');
+  };
+
+  // ────────────────────────────────────────────────────────────────────────
   return (
     <div className="search-page">
-      {/* En-tête de recherche */}
+
+      {/* ── En-tête ── */}
       <div className="search-header">
         <div className="container">
-          <h1>Rechercher un logement</h1>
-          
-          {/* Barre de recherche */}
+          <h1>{t.title}</h1>
+
           <div className="search-controls">
             <SearchBar
               onSearch={handleSearch}
               loading={loading}
-              placeholder="Rechercher par titre, ville, quartier..."
+              placeholder={t.placeholder}
+              criteriaSummary={nlpSummary}
+              onClearNLP={handleClearNLP}
+              language={language}
             />
-            
+
             <div className="search-actions">
+              {/* Vocal : passe la langue pour le bon moteur */}
               <VoiceSearch
                 onTranscript={handleVoiceTranscript}
                 onError={(msg) => setError(msg)}
+                language={language}
               />
-              
+
               <NearMeButton
                 onLocationFound={handleNearbySearch}
                 onError={(msg) => setError(msg)}
               />
-              
+
               <FilterPanel
                 onApplyFilters={handleApplyFilters}
                 initialFilters={filters}
               />
             </div>
-            {/* Bouton flottant chatbot */}
-      {/* <ChatbotButton onResultsFound={handleChatbotResults} /> */}
           </div>
 
-          {/* Indicateur de géolocalisation */}
-          {userLocation && (
-            <div className="location-indicator">
-              <MapPin size={16} />
-              <span>Recherche autour de votre position</span>
+          {/* Badge type de recherche */}
+          {searchType === 'nearby' && (
+            <div className="search-type-badge">
+              <MapPin size={14} /> <span>{t.nearby}</span>
+            </div>
+          )}
+          {searchType === 'nlp' && (
+            <div className="search-type-badge search-type-badge--nlp">
+              <Sparkles size={14} /> <span>{t.smart}</span>
             </div>
           )}
         </div>
       </div>
 
-      {/* Contenu principal */}
+      {/* ── Contenu ── */}
       <div className="container search-content">
-        {/* Statistiques */}
+
+        {/* Stats */}
         {stats && (
           <div className="search-stats">
             <div className="stat-item">
-              <span className="stat-label">Résultats</span>
+              <span className="stat-label">{t.results}</span>
               <span className="stat-value">{stats.total_results}</span>
             </div>
             {stats.avg_price > 0 && (
               <>
                 <div className="stat-item">
-                  <span className="stat-label">Prix moyen</span>
+                  <span className="stat-label">{t.avgPrice}</span>
                   <span className="stat-value">
-                    {Math.round(stats.avg_price).toLocaleString()} FCFA
+                    {Math.round(stats.avg_price).toLocaleString()} {t.fcfa}
                   </span>
                 </div>
                 <div className="stat-item">
-                  <span className="stat-label">Fourchette</span>
+                  <span className="stat-label">{t.range}</span>
                   <span className="stat-value">
-                    {stats.min_price?.toLocaleString()} - {stats.max_price?.toLocaleString()} FCFA
+                    {stats.min_price?.toLocaleString()} – {stats.max_price?.toLocaleString()} {t.fcfa}
                   </span>
                 </div>
               </>
@@ -231,64 +284,57 @@ const SearchPage = () => {
         )}
 
         {/* Tri */}
-        {/* {housings.length > 0 && (
+        {housings.length > 0 && (
           <div className="sort-controls">
-            <label>Trier par :</label>
+            <label>{t.sortBy}</label>
             <select
               value={filters.sortBy || 'recent'}
               onChange={(e) => handleSort(e.target.value)}
             >
-              <option value="recent">Plus récents</option>
-              <option value="price_asc">Prix croissant</option>
-              <option value="price_desc">Prix décroissant</option>
-              <option value="area_desc">Surface (grande → petite)</option>
-              <option value="popular">Popularité</option>
-              {searchType === 'smart' && <option value="score">Pertinence</option>}
+              <option value="recent">{t.sortRecent}</option>
+              <option value="price_asc">{t.sortPriceAsc}</option>
+              <option value="price_desc">{t.sortPriceDsc}</option>
+              <option value="area_desc">{t.sortArea}</option>
+              <option value="popular">{t.sortPopular}</option>
+              {searchType === 'nlp' && (
+                <option value="score">{t.sortScore}</option>
+              )}
             </select>
-          </div>
-        )} */}
-
-        {/* Messages d'état */}
-        {loading && (
-          <div className="loading-state">
-            <Loader className="spinner" size={40} />
-            <p>Recherche en cours...</p>
           </div>
         )}
 
-        {error && (
+        {/* Chargement */}
+        {loading && (
+          <div className="loading-state">
+            <Loader className="spinner" size={40} />
+            <p>{t.loading}</p>
+          </div>
+        )}
+
+        {/* Erreur */}
+        {!loading && error && (
           <div className="error-state">
             <p>{error}</p>
-            <button onClick={() => performSearch(filters)}>
-              Réessayer
+            <button onClick={() => performSearch(filters, searchType)}>
+              {t.retry}
             </button>
           </div>
         )}
 
         {/* Résultats */}
         {!loading && !error && (
-          <>
-            {housings.length > 0 ? (
-              <HousingList housings={housings} />
-            ) : (
-              <div className="empty-state">
-                <TrendingUp size={48} />
-                <h3>Aucun résultat</h3>
-                <p>Essayez d'ajuster vos critères de recherche</p>
-                <button onClick={() => {
-                  setFilters({});
-                  performSearch({});
-                }}>
-                  Réinitialiser la recherche
-                </button>
-              </div>
-            )}
-          </>
+          housings.length > 0 ? (
+            <HousingList housings={housings} />
+          ) : (
+            <div className="empty-state">
+              <TrendingUp size={48} />
+              <h3>{t.noResult}</h3>
+              <p>{t.noResultSub}</p>
+              <button onClick={handleClearNLP}>{t.reset}</button>
+            </div>
+          )
         )}
-        {/* Bouton flottant chatbot */}
-      <ChatbotButton onResultsFound={handleChatbotResults} />
       </div>
-
     </div>
   );
 };

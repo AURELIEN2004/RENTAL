@@ -1,12 +1,14 @@
 // src/components/common/SupportContactButton.jsx
 
 import React, { useState } from 'react';
-import { FaQuestionCircle, FaTimes, FaEnvelope, FaPhone, FaWhatsapp, FaComment } from 'react-icons/fa';
+import {  FaTimes, FaEnvelope, FaPhone, FaWhatsapp, FaComment } from 'react-icons/fa';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
 import './SupportContactButton.css';
+import { MdSupportAgent } from "react-icons/md";
+
 
 const SupportContactButton = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -79,7 +81,7 @@ const handleMessaging = async () => {
         onClick={() => setIsOpen(!isOpen)}
         aria-label="Support"
       >
-        {isOpen ? <FaTimes /> : <FaQuestionCircle />}
+        {isOpen ? <FaTimes /> : <MdSupportAgent />}
       </button>
 
       {/* Menu des options */}
