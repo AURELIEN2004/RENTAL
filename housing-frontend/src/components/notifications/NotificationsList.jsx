@@ -314,6 +314,365 @@
 //     → supprimé, le compteur est calculé en dérivé des notifications
 //  3. Bouton "Voir →" marque aussi la notification comme lue avant de naviguer
 
+// import React, { useState, useEffect } from 'react';
+// import { useNavigate } from 'react-router-dom';
+// import './NotificationsList.css';
+
+// const API_BASE = 'http://localhost:8000/api';
+
+// const getHeaders = () => ({
+//   Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+// });
+
+// const fetchNotificationsAPI = async () => {
+//   const response = await fetch(`${API_BASE}/notifications/`, { headers: getHeaders() });
+//   if (!response.ok) throw new Error('Erreur chargement notifications');
+//   return response.json();
+// };
+
+// const markAsReadAPI = async (id) => {
+//   const response = await fetch(`${API_BASE}/notifications/${id}/mark_read/`, {
+//     method: 'POST',
+//     headers: getHeaders(),
+//   });
+//   if (!response.ok) throw new Error('Erreur marquage notification');
+//   return response.json();
+// };
+
+// const markAllAsReadAPI = async () => {
+//   const response = await fetch(`${API_BASE}/notifications/mark_all_read/`, {
+//     method: 'POST',
+//     headers: getHeaders(),
+//   });
+//   if (!response.ok) throw new Error('Erreur marquage notifications');
+//   return response.json();
+// };
+
+// // ─────────────────────────────────────────────────────────────────
+// const NotificationsList = ({ compact = false }) => {
+//   const [notifications, setNotifications] = useState([]);
+//   const [loading,       setLoading]       = useState(true);
+//   const [filter,        setFilter]        = useState('all'); // all | unread | read
+//   const [error,         setError]         = useState('');
+//   const navigate = useNavigate();
+
+//   // ★ CORRIGÉ : unreadCount calculé en dérivé (pas de state séparé)
+//   const unreadCount = notifications.filter(n => !n.is_read).length;
+
+//   useEffect(() => {
+//     loadNotifications();
+//   }, []);
+
+//   // const loadNotifications = async () => {
+//   //   try {
+//   //     setLoading(true);
+//   //     const data = await fetchNotificationsAPI();
+//   //     const fetched = Array.isArray(data) ? data : (data.results || []);
+//   //     setNotifications(fetched);
+//   //   } catch (err) {
+//   //     setError('Erreur lors du chargement des notifications');
+//   //     console.error(err);
+//   //   } finally {
+//   //     setLoading(false);
+//   //   }
+//   // };
+//   const loadNotifications = async () => {
+//   try {
+//     setLoading(true);
+
+//     const data = await fetchNotificationsAPI();
+//     const fetched = Array.isArray(data) ? data : (data.results || []);
+
+//     // récupérer les notifications supprimées
+//     const deleted = getDeletedNotifications();
+
+//     // filtrer
+//     const filtered = fetched.filter(n => !deleted.includes(n.id));
+
+//     setNotifications(filtered);
+
+//   } catch (err) {
+//     setError('Erreur lors du chargement des notifications');
+//     console.error(err);
+//   } finally {
+//     setLoading(false);
+//   }
+// };
+
+//   const handleMarkAsRead = async (id) => {
+//     try {
+//       await markAsReadAPI(id);
+//       setNotifications(prev =>
+//         prev.map(n => n.id === id ? { ...n, is_read: true } : n)
+//       );
+//     } catch (err) {
+//       setError('Erreur lors du marquage');
+//     }
+//   };
+
+//   const handleMarkAllAsRead = async () => {
+//     try {
+//       await markAllAsReadAPI();
+//       setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+//     } catch (err) {
+//       setError('Erreur lors du marquage');
+//     }
+//   };
+
+//   // ★ CORRIGÉ : "Voir →" marque comme lu puis navigue via React Router
+//   const handleViewNotification = async (notification) => {
+//     if (!notification.is_read) {
+//       await handleMarkAsRead(notification.id);
+//     }
+//     if (notification.link) {
+//       navigate(notification.link);
+//     }
+//   };
+
+//   // Icônes par type
+//   const getNotificationIcon = (type) => {
+//     const icons = {
+//       message: (
+//         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+//              stroke="currentColor" strokeWidth="2">
+//           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+//         </svg>
+//       ),
+//       visit: (
+//         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+//              stroke="currentColor" strokeWidth="2">
+//           <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+//           <line x1="16" y1="2" x2="16" y2="6" />
+//           <line x1="8" y1="2" x2="8" y2="6" />
+//           <line x1="3" y1="10" x2="21" y2="10" />
+//         </svg>
+//       ),
+//       visit_confirmed: (
+//         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+//              stroke="currentColor" strokeWidth="2">
+//           <polyline points="20 6 9 17 4 12" />
+//         </svg>
+//       ),
+//       visit_refused: (
+//         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+//              stroke="currentColor" strokeWidth="2">
+//           <circle cx="12" cy="12" r="10" />
+//           <line x1="15" y1="9" x2="9" y2="15" />
+//           <line x1="9" y1="9" x2="15" y2="15" />
+//         </svg>
+//       ),
+//       new_housing: (
+//         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+//              stroke="currentColor" strokeWidth="2">
+//           <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+//           <polyline points="9 22 9 12 15 12 15 22" />
+//         </svg>
+//       ),
+//       admin: (
+//         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+//              stroke="currentColor" strokeWidth="2">
+//           <circle cx="12" cy="12" r="10" />
+//           <line x1="12" y1="8" x2="12" y2="12" />
+//           <line x1="12" y1="16" x2="12.01" y2="16" />
+//         </svg>
+//       ),
+//     };
+//     return icons[type] || icons.message;
+//   };
+
+//   const getNotificationColor = (type) => ({
+//     message:         '#3b82f6',
+//     visit:           '#f59e0b',
+//     visit_confirmed: '#10b981',
+//     visit_refused:   '#ef4444',
+//     new_housing:     '#8b5cf6',
+//     admin:           '#6366f1',
+//   }[type] || '#6b7280');
+
+//   const formatTime = (timestamp) => {
+//     const date    = new Date(timestamp);
+//     const now     = new Date();
+//     const diffMs  = now - date;
+//     const diffMin = Math.floor(diffMs / 60000);
+//     const diffH   = Math.floor(diffMs / 3600000);
+//     const diffD   = Math.floor(diffMs / 86400000);
+//     if (diffMin < 1)  return "À l'instant";
+//     if (diffMin < 60) return `Il y a ${diffMin}min`;
+//     if (diffH < 24)   return `Il y a ${diffH}h`;
+//     if (diffD < 7)    return `Il y a ${diffD}j`;
+//     return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+//   };
+
+//   const filteredNotifications = notifications.filter(n => {
+//     if (filter === 'unread') return !n.is_read;
+//     if (filter === 'read')   return n.is_read;
+//     return true;
+//   });
+
+//   // ── Chargement ──
+//   if (loading) {
+//     return (
+//       <div className="notifications-loading">
+//         <div className="spinner" />
+//         <p>Chargement des notifications...</p>
+//       </div>
+//     );
+//   }
+
+
+//   // Notifications supprimées stockées dans le navigateur
+
+// const getDeletedNotifications = () => {
+//   return JSON.parse(localStorage.getItem("deleted_notifications") || "[]");
+// };
+
+// const saveDeletedNotification = (id) => {
+//   const deleted = getDeletedNotifications();
+//   if (!deleted.includes(id)) {
+//     localStorage.setItem(
+//       "deleted_notifications",
+//       JSON.stringify([...deleted, id])
+//     );
+//   }
+// };
+
+// const handleDeleteNotification = (id) => {
+
+//   if (!window.confirm("Supprimer cette notification ?")) return;
+
+//   // sauvegarder dans localStorage
+//   saveDeletedNotification(id);
+
+//   // retirer du state
+//   setNotifications(prev => prev.filter(n => n.id !== id));
+// };
+
+//   return (
+//     <div className={`notifications-container ${compact ? 'compact' : ''}`}>
+
+//       {/* En-tête (mode complet seulement) */}
+//       {!compact && (
+//         <div className="notifications-header">
+//           <div className="header-left">
+//             <h2>Notifications</h2>
+//             {unreadCount > 0 && (
+//               <span className="unread-badge">{unreadCount}</span>
+//             )}
+//           </div>
+//           <div className="header-right">
+//             {unreadCount > 0 && (
+//               <button className="btn-mark-all" onClick={handleMarkAllAsRead}>
+//                 Tout marquer comme lu
+//               </button>
+//             )}
+//           </div>
+//         </div>
+//       )}
+
+//       {/* Filtres */}
+//       {!compact && (
+//         <div className="notifications-filters">
+//           <button
+//             className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
+//             onClick={() => setFilter('all')}
+//           >
+//             Toutes ({notifications.length})
+//           </button>
+//           <button
+//             className={`filter-btn ${filter === 'unread' ? 'active' : ''}`}
+//             onClick={() => setFilter('unread')}
+//           >
+//             Non lues ({unreadCount})
+//           </button>
+//           <button
+//             className={`filter-btn ${filter === 'read' ? 'active' : ''}`}
+//             onClick={() => setFilter('read')}
+//           >
+//             Lues ({notifications.length - unreadCount})
+//           </button>
+//         </div>
+//       )}
+
+//       {error && <div className="alert alert-error">{error}</div>}
+
+//       {/* Liste */}
+//       <div className="notifications-list">
+//         {filteredNotifications.length === 0 ? (
+//           <div className="empty-notifications">
+//             <svg width="64" height="64" viewBox="0 0 24 24" fill="none"
+//                  stroke="currentColor" strokeWidth="1">
+//               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+//               <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+//             </svg>
+//             <p>Aucune notification</p>
+//           </div>
+//         ) : (
+//           filteredNotifications.map(notification => (
+//             <div
+//               key={notification.id}
+//               className={`notification-item ${!notification.is_read ? 'unread' : ''}`}
+//               onClick={() => !notification.is_read && handleMarkAsRead(notification.id)}
+//             >
+//               <div
+//                 className="notification-icon"
+//                 style={{ backgroundColor: getNotificationColor(notification.type) }}
+//               >
+//                 {getNotificationIcon(notification.type)}
+//               </div>
+
+//               <div className="notification-content">
+//                 <h4 className="notification-title">{notification.title}</h4>
+//                 <p className="notification-message">{notification.message}</p>
+
+
+//                 <div className="notification-footer">
+
+//   <span className="notification-time">
+//     {formatTime(notification.created_at)}
+//   </span>
+
+//   <div className="notification-actions">
+
+//     {notification.link && (
+//       <button
+//         className="notification-link"
+//         onClick={(e) => {
+//           e.stopPropagation();
+//           handleViewNotification(notification);
+//         }}
+//       >
+//         Voir →
+//       </button>
+//     )}
+
+//     <button
+//       className="notification-delete"
+//       onClick={(e) => {
+//         e.stopPropagation();
+//         handleDeleteNotification(notification.id);
+//       }}
+//     >
+//       ✕
+//     </button>
+
+//   </div>
+
+// </div>
+
+
+//               </div>
+
+//               {!notification.is_read && <div className="unread-indicator" />}
+//             </div>
+//           ))
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default NotificationsList;
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './NotificationsList.css';
@@ -324,9 +683,36 @@ const getHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem('access_token')}`,
 });
 
+/* =====================================
+   LOCAL STORAGE
+===================================== */
+
+const getDeletedNotifications = () => {
+  return JSON.parse(localStorage.getItem("deleted_notifications") || "[]");
+};
+
+const saveDeletedNotification = (id) => {
+  const deleted = getDeletedNotifications();
+
+  if (!deleted.includes(id)) {
+    localStorage.setItem(
+      "deleted_notifications",
+      JSON.stringify([...deleted, id])
+    );
+  }
+};
+
+/* =====================================
+   API
+===================================== */
+
 const fetchNotificationsAPI = async () => {
-  const response = await fetch(`${API_BASE}/notifications/`, { headers: getHeaders() });
+  const response = await fetch(`${API_BASE}/notifications/`, {
+    headers: getHeaders(),
+  });
+
   if (!response.ok) throw new Error('Erreur chargement notifications');
+
   return response.json();
 };
 
@@ -335,7 +721,9 @@ const markAsReadAPI = async (id) => {
     method: 'POST',
     headers: getHeaders(),
   });
+
   if (!response.ok) throw new Error('Erreur marquage notification');
+
   return response.json();
 };
 
@@ -344,150 +732,232 @@ const markAllAsReadAPI = async () => {
     method: 'POST',
     headers: getHeaders(),
   });
+
   if (!response.ok) throw new Error('Erreur marquage notifications');
+
   return response.json();
 };
 
-// ─────────────────────────────────────────────────────────────────
+/* =====================================
+   COMPONENT
+===================================== */
+
 const NotificationsList = ({ compact = false }) => {
+
   const [notifications, setNotifications] = useState([]);
-  const [loading,       setLoading]       = useState(true);
-  const [filter,        setFilter]        = useState('all'); // all | unread | read
-  const [error,         setError]         = useState('');
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState('all');
+  const [error, setError] = useState('');
+
   const navigate = useNavigate();
 
-  // ★ CORRIGÉ : unreadCount calculé en dérivé (pas de state séparé)
   const unreadCount = notifications.filter(n => !n.is_read).length;
 
   useEffect(() => {
     loadNotifications();
   }, []);
 
+  /* =====================================
+     LOAD NOTIFICATIONS
+  ===================================== */
+
   const loadNotifications = async () => {
+
     try {
+
       setLoading(true);
+
       const data = await fetchNotificationsAPI();
       const fetched = Array.isArray(data) ? data : (data.results || []);
-      setNotifications(fetched);
+
+      const deleted = getDeletedNotifications();
+
+      const filtered = fetched.filter(n => !deleted.includes(n.id));
+
+      setNotifications(filtered);
+
     } catch (err) {
-      setError('Erreur lors du chargement des notifications');
+
       console.error(err);
+      setError('Erreur lors du chargement des notifications');
+
     } finally {
+
       setLoading(false);
+
     }
+
   };
 
+  /* =====================================
+     ACTIONS
+  ===================================== */
+
   const handleMarkAsRead = async (id) => {
+
     try {
+
       await markAsReadAPI(id);
+
       setNotifications(prev =>
-        prev.map(n => n.id === id ? { ...n, is_read: true } : n)
+        prev.map(n =>
+          n.id === id ? { ...n, is_read: true } : n
+        )
       );
-    } catch (err) {
+
+    } catch {
+
       setError('Erreur lors du marquage');
+
     }
   };
 
   const handleMarkAllAsRead = async () => {
+
     try {
+
       await markAllAsReadAPI();
-      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
-    } catch (err) {
+
+      setNotifications(prev =>
+        prev.map(n => ({ ...n, is_read: true }))
+      );
+
+    } catch {
+
       setError('Erreur lors du marquage');
+
     }
   };
 
-  // ★ CORRIGÉ : "Voir →" marque comme lu puis navigue via React Router
+  const handleDeleteNotification = (id) => {
+
+    if (!window.confirm("Supprimer cette notification ?")) return;
+
+    saveDeletedNotification(id);
+
+    setNotifications(prev =>
+      prev.filter(n => n.id !== id)
+    );
+  };
+
   const handleViewNotification = async (notification) => {
+
     if (!notification.is_read) {
       await handleMarkAsRead(notification.id);
     }
+
     if (notification.link) {
       navigate(notification.link);
     }
   };
 
-  // Icônes par type
+  /* =====================================
+     ICONS
+  ===================================== */
+
   const getNotificationIcon = (type) => {
+
     const icons = {
+
       message: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" strokeWidth="2">
+          stroke="currentColor" strokeWidth="2">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
         </svg>
       ),
+
       visit: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" strokeWidth="2">
-          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-          <line x1="16" y1="2" x2="16" y2="6" />
-          <line x1="8" y1="2" x2="8" y2="6" />
-          <line x1="3" y1="10" x2="21" y2="10" />
+          stroke="currentColor" strokeWidth="2">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
         </svg>
       ),
+
       visit_confirmed: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" strokeWidth="2">
-          <polyline points="20 6 9 17 4 12" />
+          stroke="currentColor" strokeWidth="2">
+          <polyline points="20 6 9 17 4 12"/>
         </svg>
       ),
+
       visit_refused: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" strokeWidth="2">
-          <circle cx="12" cy="12" r="10" />
-          <line x1="15" y1="9" x2="9" y2="15" />
-          <line x1="9" y1="9" x2="15" y2="15" />
+          stroke="currentColor" strokeWidth="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="15" y1="9" x2="9" y2="15"/>
+          <line x1="9" y1="9" x2="15" y2="15"/>
         </svg>
       ),
+
       new_housing: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" strokeWidth="2">
-          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-          <polyline points="9 22 9 12 15 12 15 22" />
+          stroke="currentColor" strokeWidth="2">
+          <path d="M3 9l9-7 9 7v11H3z"/>
         </svg>
       ),
+
       admin: (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-             stroke="currentColor" strokeWidth="2">
-          <circle cx="12" cy="12" r="10" />
-          <line x1="12" y1="8" x2="12" y2="12" />
-          <line x1="12" y1="16" x2="12.01" y2="16" />
+          stroke="currentColor" strokeWidth="2">
+          <circle cx="12" cy="12" r="10"/>
         </svg>
       ),
     };
+
     return icons[type] || icons.message;
   };
 
   const getNotificationColor = (type) => ({
-    message:         '#3b82f6',
-    visit:           '#f59e0b',
+    message: '#3b82f6',
+    visit: '#f59e0b',
     visit_confirmed: '#10b981',
-    visit_refused:   '#ef4444',
-    new_housing:     '#8b5cf6',
-    admin:           '#6366f1',
+    visit_refused: '#ef4444',
+    new_housing: '#8b5cf6',
+    admin: '#6366f1',
   }[type] || '#6b7280');
 
+  /* =====================================
+     TIME FORMAT
+  ===================================== */
+
   const formatTime = (timestamp) => {
-    const date    = new Date(timestamp);
-    const now     = new Date();
-    const diffMs  = now - date;
-    const diffMin = Math.floor(diffMs / 60000);
-    const diffH   = Math.floor(diffMs / 3600000);
-    const diffD   = Math.floor(diffMs / 86400000);
-    if (diffMin < 1)  return "À l'instant";
-    if (diffMin < 60) return `Il y a ${diffMin}min`;
-    if (diffH < 24)   return `Il y a ${diffH}h`;
-    if (diffD < 7)    return `Il y a ${diffD}j`;
-    return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+
+    const date = new Date(timestamp);
+    const now = new Date();
+
+    const diff = now - date;
+
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return "À l'instant";
+    if (minutes < 60) return `Il y a ${minutes}min`;
+    if (hours < 24) return `Il y a ${hours}h`;
+    if (days < 7) return `Il y a ${days}j`;
+
+    return date.toLocaleDateString('fr-FR', {
+      day: 'numeric',
+      month: 'short'
+    });
   };
 
+  /* =====================================
+     FILTER
+  ===================================== */
+
   const filteredNotifications = notifications.filter(n => {
+
     if (filter === 'unread') return !n.is_read;
-    if (filter === 'read')   return n.is_read;
+    if (filter === 'read') return n.is_read;
+
     return true;
   });
 
-  // ── Chargement ──
+  /* =====================================
+     LOADING
+  ===================================== */
+
   if (loading) {
     return (
       <div className="notifications-loading">
@@ -497,108 +967,165 @@ const NotificationsList = ({ compact = false }) => {
     );
   }
 
+  /* =====================================
+     UI
+  ===================================== */
+
   return (
+
     <div className={`notifications-container ${compact ? 'compact' : ''}`}>
 
-      {/* En-tête (mode complet seulement) */}
       {!compact && (
+
         <div className="notifications-header">
+
           <div className="header-left">
+
             <h2>Notifications</h2>
+
             {unreadCount > 0 && (
-              <span className="unread-badge">{unreadCount}</span>
+              <span className="unread-badge">
+                {unreadCount}
+              </span>
             )}
+
           </div>
-          <div className="header-right">
-            {unreadCount > 0 && (
-              <button className="btn-mark-all" onClick={handleMarkAllAsRead}>
-                Tout marquer comme lu
-              </button>
-            )}
-          </div>
+
+          {unreadCount > 0 && (
+            <button
+              className="btn-mark-all"
+              onClick={handleMarkAllAsRead}
+            >
+              Tout marquer comme lu
+            </button>
+          )}
+
         </div>
       )}
 
-      {/* Filtres */}
       {!compact && (
+
         <div className="notifications-filters">
+
           <button
             className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
             onClick={() => setFilter('all')}
           >
             Toutes ({notifications.length})
           </button>
+
           <button
             className={`filter-btn ${filter === 'unread' ? 'active' : ''}`}
             onClick={() => setFilter('unread')}
           >
             Non lues ({unreadCount})
           </button>
+
           <button
             className={`filter-btn ${filter === 'read' ? 'active' : ''}`}
             onClick={() => setFilter('read')}
           >
             Lues ({notifications.length - unreadCount})
           </button>
+
+        </div>
+
+      )}
+
+      {error && (
+        <div className="alert alert-error">
+          {error}
         </div>
       )}
 
-      {error && <div className="alert alert-error">{error}</div>}
-
-      {/* Liste */}
       <div className="notifications-list">
+
         {filteredNotifications.length === 0 ? (
+
           <div className="empty-notifications">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none"
-                 stroke="currentColor" strokeWidth="1">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-            </svg>
             <p>Aucune notification</p>
           </div>
+
         ) : (
+
           filteredNotifications.map(notification => (
+
             <div
-              key={notification.id}
+              key={`${notification.id}-${notification.created_at}`}
               className={`notification-item ${!notification.is_read ? 'unread' : ''}`}
-              onClick={() => !notification.is_read && handleMarkAsRead(notification.id)}
+              onClick={() =>
+                !notification.is_read && handleMarkAsRead(notification.id)
+              }
             >
+
               <div
                 className="notification-icon"
-                style={{ backgroundColor: getNotificationColor(notification.type) }}
+                style={{
+                  backgroundColor: getNotificationColor(notification.type)
+                }}
               >
                 {getNotificationIcon(notification.type)}
               </div>
 
               <div className="notification-content">
-                <h4 className="notification-title">{notification.title}</h4>
-                <p className="notification-message">{notification.message}</p>
+
+                <h4 className="notification-title">
+                  {notification.title}
+                </h4>
+
+                <p className="notification-message">
+                  {notification.message}
+                </p>
 
                 <div className="notification-footer">
+
                   <span className="notification-time">
                     {formatTime(notification.created_at)}
                   </span>
 
-                  {/* ★ CORRIGÉ : bouton React au lieu de <a href> */}
-                  {/* {notification.link && (
+                  <div className="notification-actions">
+
+                    {notification.link && (
+
+                      <button
+                        className="notification-link"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleViewNotification(notification);
+                        }}
+                      >
+                        Voir →
+                      </button>
+
+                    )}
+
                     <button
-                      className="notification-link"
+                      className="notification-delete"
                       onClick={(e) => {
-                        e.stopPropagation(); // évite de déclencher le onClick parent
-                        handleViewNotification(notification);
+                        e.stopPropagation();
+                        handleDeleteNotification(notification.id);
                       }}
                     >
-                      Voir →
+                      ✕
                     </button>
-                  )} */}
+
+                  </div>
+
                 </div>
+
               </div>
 
-              {!notification.is_read && <div className="unread-indicator" />}
+              {!notification.is_read && (
+                <div className="unread-indicator" />
+              )}
+
             </div>
+
           ))
         )}
+
       </div>
+
     </div>
   );
 };

@@ -212,6 +212,24 @@
   font-size: 12px;
 }
 
+.notification-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.notification-delete{
+  border:none;
+  background:none;
+  font-size:16px;
+  cursor:pointer;
+  color:#ef4444;
+}
+
+.notification-delete:hover{
+  background:#fee2e2;
+  border-radius:4px;
+}
 .notification-time {
   color: var(--text-tertiary, #9ca3af);
 }
