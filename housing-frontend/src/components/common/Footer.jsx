@@ -49,18 +49,28 @@ const Footer = () => {
         </div>
 
         {/* Section 4: Télécharger l'app */}
-        <div className="footer-section">
-          <h4>Application Mobile</h4>
-          <p>Téléchargez notre application</p>
-          <div className="app-downloads">
-            <a href="#" className="app-badge">
-              <img src="assets/app-store.png" alt="App Store" />
-            </a>
-            <a href="#" className="app-badge">
-              <img src="assets/play-store.png" alt="Play Store" />
-            </a>
-          </div>
-        </div>
+       <div className="footer-section">
+  <h4>Application Mobile</h4>
+  <p>Téléchargez notre application (version test)</p>
+  <div className="app-downloads">
+    <a
+      href="https://testflight.apple.com/join/XXXXX"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="app-badge"
+    >
+      <img src="assets/app-store.png" alt="App Store" />
+    </a>
+    <a
+      href="https://play.google.com/apps/testing/com.ton.app"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="app-badge"
+    >
+      <img src="assets/play-store.png" alt="Play Store" />
+    </a>
+  </div>
+</div>
       </div>
 
       {/* Bottom Bar */}
@@ -81,15 +91,5 @@ const Footer = () => {
 export default Footer;
 
 
-// import React from 'react';
-// import { Link } from 'react-router-dom';
-// import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa';
-// import './Footer.css';
 
-// const Footer = () => {
-//   return (
-//     <footer className="footer"></footer>
-//   )
-// }
-// export default Footer;
    

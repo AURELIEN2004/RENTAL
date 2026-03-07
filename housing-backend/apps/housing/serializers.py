@@ -11,7 +11,8 @@ from .models import (
 )
 from apps.location.serializers import RegionSerializer, CitySerializer, DistrictSerializer
 from apps.users.serializers import UserSerializer
-
+from rest_framework import serializers
+from apps.housing.models import UserPreference
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -205,3 +206,11 @@ class TestimonialSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(obj.user.photo.url)
             return obj.user.photo.url
         return None
+
+
+class UserPreferenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = UserPreference
+        fields = ['city','category','min_price','max_price',
+                  'furnished','features','nearby_places','priority','updated_at']
+        read_only_fields = ['updated_at']

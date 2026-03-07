@@ -213,3 +213,43 @@ class Testimonial(models.Model):
     
     class Meta:
         ordering = ['-created_at']
+
+
+
+from django.db import models
+from django.conf import settings
+
+
+class UserPreference(models.Model):
+    """Préférences de logement d'un utilisateur — alimente l'algo génétique."""
+
+    PRIORITY_CHOICES = [
+        ('price',    'Prix'),
+        ('location', 'Emplacement'),
+        ('comfort',  'Confort'),
+        ('security', 'Sécurité'),
+    ]
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='preference'
+    )
+    city          = models.CharField(max_length=100, blank=True, default='')
+    category      = models.CharField(max_length=100, blank=True, default='')
+    min_price     = models.IntegerField(default=0)
+    max_price     = models.IntegerField(default=999999)
+    furnished     = models.BooleanField(null=True, blank=True)
+    features      = models.JSONField(default=list, blank=True)
+    nearby_places = models.JSONField(default=list, blank=True)
+    priority      = models.CharField(
+        max_length=20, choices=PRIORITY_CHOICES, default='price'
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name        = 'Préférence utilisateur'
+        verbose_name_plural = 'Préférences utilisateurs'
+
+    def __str__(self):
+        return f"Préférences de {self.user.username}"
