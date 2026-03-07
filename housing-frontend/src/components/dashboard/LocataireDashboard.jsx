@@ -1,8 +1,7 @@
-
-// ============================================
 // src/components/dashboard/LocataireDashboard.jsx
 // ============================================
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { housingService } from '../../services/housingService';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -24,7 +23,27 @@ import { toast } from 'react-toastify';
 const LocataireDashboard = () => {
   const { user, logout, updateUser } = useAuth();
 
-  const [activeTab, setActiveTab] = useState('profile');
+  const location = useLocation();
+  const navigate  = useNavigate();
+
+  const VALID_TABS = ['profile', 'favorites', 'saved', 'visits', 'messages', 'notifications', 'settings'];
+
+  const getTabFromURL = () => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    return VALID_TABS.includes(tab) ? tab : 'profile';
+  };
+
+  const [activeTab, setActiveTab] = useState(getTabFromURL);
+
+  useEffect(() => {
+    setActiveTab(getTabFromURL());
+  }, [location.search]); // eslint-disable-line
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    navigate(`/dashboard?tab=${tab}`, { replace: true });
+  };
   const [favorites, setFavorites] = useState([]);
   const [saved, setSaved] = useState([]);
   const [visits, setVisits] = useState([]);
@@ -334,49 +353,49 @@ const LocataireDashboard = () => {
         <nav className="sidebar-nav">
           <button
             className={activeTab === 'profile' ? 'active' : ''}
-            onClick={() => setActiveTab('profile')}
+            onClick={() => handleTabChange('profile')}
           >
             <FaUser /> Mon Profil
           </button>
 
           <button
             className={activeTab === 'favorites' ? 'active' : ''}
-            onClick={() => setActiveTab('favorites')}
+            onClick={() => handleTabChange('favorites')}
           >
             <FaHeart /> Favoris
           </button>
 
           <button
             className={activeTab === 'saved' ? 'active' : ''}
-            onClick={() => setActiveTab('saved')}
+            onClick={() => handleTabChange('saved')}
           >
             <FaBookmark /> Enregistrés
           </button>
 
           <button
             className={activeTab === 'visits' ? 'active' : ''}
-            onClick={() => setActiveTab('visits')}
+            onClick={() => handleTabChange('visits')}
           >
             <FaCalendar /> Visites
           </button>
 
           <button
             className={activeTab === 'messages' ? 'active' : ''}
-            onClick={() => setActiveTab('messages')}
+            onClick={() => handleTabChange('messages')}
           >
             <FaEnvelope /> Messages
           </button>
 
           <button
             className={activeTab === 'notifications' ? 'active' : ''}
-            onClick={() => setActiveTab('notifications')}
+            onClick={() => handleTabChange('notifications')}
           >
             <FaBell /> Notifications
           </button>
 
           <button
             className={activeTab === 'settings' ? 'active' : ''}
-            onClick={() => setActiveTab('settings')}
+            onClick={() => handleTabChange('settings')}
           >
             <FaCog /> Paramètres
           </button>

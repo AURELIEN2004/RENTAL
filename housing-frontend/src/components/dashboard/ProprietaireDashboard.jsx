@@ -1,7 +1,8 @@
-// // src/components/dashboard/ProprietaireDashboard.jsx
+// src/components/dashboard/ProprietaireDashboard.jsx
 // // ============================================
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { housingService } from '../../services/housingService';
 import HousingCard from '../housing/HousingCard';
@@ -26,7 +27,27 @@ import api from '../../services/api';
 const ProprietaireDashboard = () => {
   const { user, logout, updateUser } = useAuth();
 
-  const [activeTab, setActiveTab] = useState('profile');
+  const location = useLocation();
+  const navigate  = useNavigate();
+
+  const VALID_TABS = ['profile', 'housings', 'AddHousing', 'stats', 'visibility', 'reservations', 'messages', 'notifications', 'settings'];
+
+  const getTabFromURL = () => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    return VALID_TABS.includes(tab) ? tab : 'profile';
+  };
+
+  const [activeTab, setActiveTab] = useState(getTabFromURL);
+
+  useEffect(() => {
+    setActiveTab(getTabFromURL());
+  }, [location.search]); // eslint-disable-line
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    navigate(`/dashboard?tab=${tab}`, { replace: true });
+  };
   const [housings, setHousings] = useState([]); // ✅ INITIALISATION AVEC TABLEAU VIDE
   const [stats, setStats] = useState({
     total: 0,
@@ -157,7 +178,6 @@ const ProprietaireDashboard = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      
       case 'profile':
         return (
           <div className="dashboard-section">
@@ -223,6 +243,8 @@ const ProprietaireDashboard = () => {
           </div>
         );
 
+
+        
       case 'housings':
         return (
           <div className="dashboard-section">
@@ -500,39 +522,39 @@ const ProprietaireDashboard = () => {
 
         <nav className="sidebar-nav">
           <button className={activeTab === 'profile' ? 'active' : ''}
-                  onClick={() => setActiveTab('profile')}>
+                  onClick={() => handleTabChange('profile')}>
             <FaUser /> Mon Profil
           </button>
           <button className={activeTab === 'housings' ? 'active' : ''}
-                  onClick={() => setActiveTab('housings')}>
+                  onClick={() => handleTabChange('housings')}>
             <FaHome /> Mes Logements
           </button>
           <button className={activeTab === 'AddHousing' ? 'active' : ''}
-                  onClick={() => setActiveTab('AddHousing')}>
+                  onClick={() => handleTabChange('AddHousing')}>
             <FaPlus /> Ajouter un logement
           </button>
           <button className={activeTab === 'stats' ? 'active' : ''}
-                  onClick={() => setActiveTab('stats')}>
+                  onClick={() => handleTabChange('stats')}>
             <FaChartLine /> Statistiques
           </button>
           <button className={activeTab === 'visibility' ? 'active' : ''}
-                  onClick={() => setActiveTab('visibility')}>
+                  onClick={() => handleTabChange('visibility')}>
             <FaEye /> Visibilité
           </button>
           <button className={activeTab === 'reservations' ? 'active' : ''}
-                  onClick={() => setActiveTab('reservations')}>
+                  onClick={() => handleTabChange('reservations')}>
             <FaCalendar /> Réservations
           </button>
           <button className={activeTab === 'messages' ? 'active' : ''}
-                  onClick={() => setActiveTab('messages')}>
+                  onClick={() => handleTabChange('messages')}>
             <FaEnvelope /> Messages
           </button>
           <button className={activeTab === 'notifications' ? 'active' : ''}
-                  onClick={() => setActiveTab('notifications')}>
+                  onClick={() => handleTabChange('notifications')}>
             <FaBell /> Notifications
           </button>
           <button className={activeTab === 'settings' ? 'active' : ''}
-                  onClick={() => setActiveTab('settings')}>
+                  onClick={() => handleTabChange('settings')}>
             <FaCog /> Paramètres
           </button>
         </nav>
