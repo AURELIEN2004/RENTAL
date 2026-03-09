@@ -413,6 +413,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./VisitsList.css";
+import { useTheme } from '../../contexts/ThemeContext';
 
 /* ================= API ================= */
 
@@ -427,7 +428,6 @@ const fetchVisits = async () => {
 
   return response.json();
 };
-
 const confirmVisit = async (id) => {
   const token = localStorage.getItem("access_token");
 
@@ -493,6 +493,7 @@ const VisitsList = ({ userRole = "locataire" }) => {
   const [showRefuseModal, setShowRefuseModal] = useState(false);
   const [selectedVisit, setSelectedVisit] = useState(null);
   const [refuseMessage, setRefuseMessage] = useState("");
+  const { t, language, theme } = useTheme();
 
   const navigate = useNavigate();
 
@@ -636,7 +637,7 @@ const VisitsList = ({ userRole = "locataire" }) => {
     return (
       <div className="visits-loading">
         <div className="spinner"></div>
-        <p>Chargement des visites...</p>
+        <p>{t('visits_loading')}</p>
       </div>
     );
   }
@@ -654,6 +655,9 @@ const VisitsList = ({ userRole = "locataire" }) => {
             ? "Demandes de Visites"
             : "Mes Visites"}
         </h2>
+        <h2>
+  {userRole === "proprietaire" ? t('visits_title_owner') : t("visits_title_tenant")}
+</h2>
 
       </div>
 
@@ -663,33 +667,32 @@ const VisitsList = ({ userRole = "locataire" }) => {
 
         <div className="stat-card" onClick={() => setFilter("all")}>
           <div className="stat-number">{stats.total}</div>
-          <div className="stat-label">Total</div>
+<div className="stat-label">{t("visits.stats.total")}</div>
         </div>
 
         <div className="stat-card orange" onClick={() => setFilter("waiting")}>
           <div className="stat-number">{stats.waiting}</div>
-          <div className="stat-label">En attente</div>
+<div className="stat-label">{t("visits.stats.waiting")}</div>
         </div>
 
         <div className="stat-card green" onClick={() => setFilter("confirmed")}>
           <div className="stat-number">{stats.confirmed}</div>
-          <div className="stat-label">Confirmées</div>
+<div className="stat-label">{t("visits.stats.confirmed")}</div>
         </div>
 
         <div className="stat-card red" onClick={() => setFilter("refused")}>
           <div className="stat-number">{stats.refused}</div>
-          <div className="stat-label">Refusées</div>
+<div className="stat-label">{t("visits.stats.refused")}</div>
         </div>
 
         <div className="stat-card gray" onClick={() => setFilter("cancelled")}>
           <div className="stat-number">{stats.cancelled}</div>
-          <div className="stat-label">Annulées</div>
+<div className="stat-label">{t("visits.stats.cancelled")}</div>
         </div>
 
         <div className="stat-card blue" onClick={() => setFilter("upcoming")}>
           <div className="stat-number">{stats.upcoming}</div>
-          <div className="stat-label">À venir</div>
-        </div>
+<div className="stat-label">{t("visits.stats.upcoming")}</div>        </div>
 
       </div>
 

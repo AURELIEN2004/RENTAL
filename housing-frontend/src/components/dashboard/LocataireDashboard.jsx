@@ -10,6 +10,8 @@ import ChangePassword from '../profile/ChangePassword';
 import NotificationsList from '../notifications/NotificationsList';
 import VisitsList from '../visits/VisitsList';
 import MessagingPage from '../messaging/MessagingPage';
+import { useTheme } from '../../contexts/ThemeContext';
+
 
 import {
   FaHeart, FaBookmark, FaCalendar, FaEnvelope,
@@ -22,6 +24,8 @@ import { toast } from 'react-toastify';
 
 const LocataireDashboard = () => {
   const { user, logout, updateUser } = useAuth();
+    const { t, language, theme } = useTheme();
+  
 
   const location = useLocation();
   const navigate  = useNavigate();

@@ -5,15 +5,17 @@ import { housingService } from '../services/housingService';
 import { toast } from 'react-toastify';
 import { FaEye, FaEyeSlash, FaToggleOn, FaToggleOff } from 'react-icons/fa';
 import './VisibilityManagement.css';
+import { useTheme } from '../contexts/ThemeContext';
 
 const VisibilityManagement = () => {
   const [housings, setHousings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all'); // all, visible, hidden
-
+const { t, language, theme } = useTheme();
   useEffect(() => {
     loadHousings();
   }, []);
+
 
   const loadHousings = async () => {
     try {
@@ -95,8 +97,8 @@ const VisibilityManagement = () => {
   return (
     <div className="visibility-management">
       <div className="visibility-header">
-        <h1>Gestion de la Visibilité</h1>
-        <p>Contrôlez la visibilité et le statut de vos logements</p>
+<h1>{t('visibility_title')}</h1>
+<p>{t('visibility_subtitle')}</p>
       </div>
 
       {/* Stats */}
@@ -105,7 +107,7 @@ const VisibilityManagement = () => {
           <div className="stat-icon">📊</div>
           <div className="stat-info">
             <div className="stat-number">{stats.total}</div>
-            <div className="stat-label">Total</div>
+            <div className="stat-label">{t('total')}</div>
           </div>
         </div>
 
@@ -113,7 +115,7 @@ const VisibilityManagement = () => {
           <div className="stat-icon">👁️</div>
           <div className="stat-info">
             <div className="stat-number">{stats.visible}</div>
-            <div className="stat-label">Visibles</div>
+            <div className="stat-label">{t('visible')}</div>
           </div>
         </div>
 
@@ -121,7 +123,7 @@ const VisibilityManagement = () => {
           <div className="stat-icon">🚫</div>
           <div className="stat-info">
             <div className="stat-number">{stats.hidden}</div>
-            <div className="stat-label">Masqués</div>
+            <div className="stat-label">{t('hidden')}</div>
           </div>
         </div>
 
@@ -129,41 +131,32 @@ const VisibilityManagement = () => {
           <div className="stat-icon">✅</div>
           <div className="stat-info">
             <div className="stat-number">{stats.disponible}</div>
-            <div className="stat-label">Disponibles</div>
+            <div className="stat-label">{t('available')}</div>
           </div>
         </div>
       </div>
 
       {/* Filters */}
       <div className="visibility-filters">
-        <button
-          className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
-          onClick={() => setFilter('all')}
-        >
-          Tous ({stats.total})
-        </button>
-        <button
-          className={`filter-btn ${filter === 'visible' ? 'active' : ''}`}
-          onClick={() => setFilter('visible')}
-        >
-          Visibles ({stats.visible})
-        </button>
-        <button
-          className={`filter-btn ${filter === 'hidden' ? 'active' : ''}`}
-          onClick={() => setFilter('hidden')}
-        >
-          Masqués ({stats.hidden})
-        </button>
+       <button className={`filter-btn ${filter === 'all' ? 'active' : ''}`} onClick={() => setFilter('all')}>
+  {t('filter_all')} ({stats.total})
+</button>
+<button className={`filter-btn ${filter === 'visible' ? 'active' : ''}`} onClick={() => setFilter('visible')}>
+  {t('visible')} ({stats.visible})
+</button>
+<button className={`filter-btn ${filter === 'hidden' ? 'active' : ''}`} onClick={() => setFilter('hidden')}>
+  {t('hidden')} ({stats.hidden})
+</button>
       </div>
 
       {/* Info Box */}
       <div className="info-box">
-        <h3>💡 À savoir</h3>
+        <h3> {t('info_title')}</h3>
         <ul>
-          <li><strong>Visible :</strong> Le logement apparaît dans les résultats de recherche</li>
-          <li><strong>Masqué :</strong> Le logement n'est plus visible publiquement</li>
-          <li><strong>Statut "Occupé" :</strong> Masque automatiquement le logement</li>
-        </ul>
+          <li>{t('info_visible')}</li>
+  <li>{t('info_hidden')}</li>
+  <li>{t('info_occupied')}</li>
+  </ul>
       </div>
 
       {/* Housings List */}
@@ -202,41 +195,35 @@ const VisibilityManagement = () => {
               <div className="housing-controls">
                 {/* Toggle Visibilité */}
                 <div className="control-item">
-                  <label>Visibilité</label>
+                  <label>{t('visibility_label')}</label>
                   <button
                     className={`toggle-btn ${housing.is_visible ? 'active' : ''}`}
                     onClick={() => handleToggleVisibility(housing.id, housing.is_visible)}
                     disabled={housing.status === 'occupe'}
                   >
-                    {housing.is_visible ? (
-                      <>
-                        <FaEye /> Visible
-                      </>
-                    ) : (
-                      <>
-                        <FaEyeSlash /> Masqué
-                      </>
-                    )}
+                    {housing.is_visible ? 
+                    // <FaEyeSlash />  <FaEye />
+                     t('visible_btn') : t('hidden_btn')}
                   </button>
                 </div>
 
                 {/* Change Status */}
                 <div className="control-item">
-                  <label>Statut</label>
+               <label>{t('status_label')}</label>
                   <select
                     value={housing.status}
                     onChange={(e) => handleChangeStatus(housing.id, e.target.value)}
                     className="status-select"
                   >
-                    <option value="disponible">Disponible</option>
-                    <option value="reserve">Réservé</option>
-                    <option value="occupe">Occupé</option>
-                  </select>
+                     <option value="disponible">{t('status_options_disponible')}</option>
+  <option value="reserve">{t('status_options_reserve')}</option>
+  <option value="occupe">{t('status_options_occupe')}</option>
+</select>
                 </div>
 
                 {/* Stats */}
                 <div className="control-item">
-                  <label>Statistiques</label>
+                  <label>{t('stats_label')}</label>
                   <div className="housing-stats">
                     <span>👁️ {housing.views_count}</span>
                     <span>❤️ {housing.likes_count}</span>

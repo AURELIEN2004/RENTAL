@@ -23,9 +23,13 @@ import VisitsList from '../visits/VisitsList';
 import { toast } from 'react-toastify';
 import './Dashboard.css';
 import api from '../../services/api';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const ProprietaireDashboard = () => {
   const { user, logout, updateUser } = useAuth();
+
+  const { t, language, theme } = useTheme();
+
 
   const location = useLocation();
   const navigate  = useNavigate();
@@ -181,7 +185,7 @@ const ProprietaireDashboard = () => {
       case 'profile':
         return (
           <div className="dashboard-section">
-            <h2>Mon Profil</h2>
+            <h2> {t('my_profile')}</h2>
             <div className="profile-card">
               <div className="profile-header">
                 <img
@@ -192,19 +196,19 @@ const ProprietaireDashboard = () => {
                 <div className="profile-info">
                   <h3>{user.first_name} {user.last_name}</h3>
                   <p>@{user.username}</p>
-                  <p className="role-badge">Propriétaire</p>
+                  <p className="role-badge">{t('owner')}</p>
                 </div>
               </div>
 
               <div className="profile-details">
                 <div className="detail-item">
-                  <strong>Email:</strong> {user.email}
+                  <strong>{t('email')}:</strong> {user.email}
                 </div>
                 <div className="detail-item">
-                  <strong>Téléphone:</strong> {user.phone || 'Non renseigné'}
+                  <strong>{t('phone')}:</strong> {user.phone || t('not_provided')}
                 </div>
                 <div className="detail-item">
-                  <strong>Membre depuis:</strong>{' '}
+                  <strong>{t('member_since')}:</strong>{' '}
                   {new Date(user.date_joined).toLocaleDateString()}
                 </div>
               </div>
@@ -214,13 +218,13 @@ const ProprietaireDashboard = () => {
                   className="btn btn-primary"
                   onClick={() => setShowEditProfile(true)}
                 >
-                  Modifier le profil
+                  {t('edit_profile')}
                 </button>
                 <button
                   className="btn btn-outline"
                   onClick={() => setShowChangePassword(true)}
                 >
-                  Changer le mot de passe
+                  {t('change_password')}
                 </button>
               </div>
             </div>
@@ -249,7 +253,7 @@ const ProprietaireDashboard = () => {
         return (
           <div className="dashboard-section">
             <div className="section-header-flex">
-              <h2>Mes Logements</h2>
+             <h2>{t('my_housings')}</h2>
             </div>
 
             <div className="housing-filter-header">
@@ -258,7 +262,7 @@ const ProprietaireDashboard = () => {
                 value={selectedHousingCategory}
                 onChange={(e) => setSelectedHousingCategory(e.target.value)}
               >
-                <option value="all">Toutes les catégories</option>
+                <option value="all">{t('all_categories')}</option>
                 {categories.map(cat => (
                   <option key={cat.id} value={cat.id}>
                     {cat.name}
@@ -271,27 +275,27 @@ const ProprietaireDashboard = () => {
               <div className={`stat-item ${selectedCategory === 'all' ? 'active' : ''}`}
                    onClick={() => setSelectedCategory('all')}>
                 <div className="stat-number">{stats.total}</div>
-                <div className="stat-label">Total</div>
+                <div className="stat-label">{t('total')}</div>
               </div>
               <div className={`stat-item ${selectedCategory === 'disponible' ? 'active' : ''}`}
                    onClick={() => setSelectedCategory('disponible')}>
                 <div className="stat-number">{stats.disponible}</div>
-                <div className="stat-label">Disponibles</div>
+                <div className="stat-label">{t('available_plural')}</div>
               </div>
               <div className={`stat-item ${selectedCategory === 'reserve' ? 'active' : ''}`}
                    onClick={() => setSelectedCategory('reserve')}>
                 <div className="stat-number">{stats.reserve}</div>
-                <div className="stat-label">Réservés</div>
+                <div className="stat-label">{t('reserved_plural')}</div>
               </div>
               <div className={`stat-item ${selectedCategory === 'occupe' ? 'active' : ''}`}
                    onClick={() => setSelectedCategory('occupe')}>
                 <div className="stat-number">{stats.occupe}</div>
-                <div className="stat-label">Occupés</div>
+                <div className="stat-label">{t('occupied_plural')}</div>
               </div>
             </div>
 
             {loading ? (
-              <div className="loading">Chargement...</div>
+              <div className="loading">{t('loading')}</div>
             ) : (
               <div className="housing-list">
                 {filterHousings().map(housing => (
@@ -302,13 +306,13 @@ const ProprietaireDashboard = () => {
                         className="btn btn-sm btn-primary"
                         onClick={() => handleUpdateHousing(housing.id)}
                       >
-                        <FaEdit /> Modifier
+                        <FaEdit /> {t('edit')}
                       </button>
                       <button
                         className="btn btn-sm btn-danger"
                         onClick={() => handleDeleteHousing(housing.id)}
                       >
-                        <FaTrash /> Supprimer
+                        <FaTrash /> {t('delete')}
                       </button>
                     </div>
                   </div>
@@ -339,44 +343,44 @@ const ProprietaireDashboard = () => {
       case 'stats':
         return (
           <div className="dashboard-section">
-            <h2>📊 Statistiques de mes logements</h2>
+            <h2>📊 {t('stats_title')}</h2>
 
             <div className="stats-grid">
               <div className="stat-card blue">
                 <div className="stat-icon">🏠</div>
                 <div className="stat-info">
                   <div className="stat-number">{stats.total}</div>
-                  <div className="stat-label">Total logements</div>
+                  <div className="stat-label">{t('total_housings')} </div>
                 </div>
               </div>
               <div className="stat-card green">
                 <div className="stat-icon">✅</div>
                 <div className="stat-info">
                   <div className="stat-number">{stats.disponible}</div>
-                  <div className="stat-label">Disponibles</div>
+                  <div className="stat-label">{t('available')}</div>
                 </div>
               </div>
               <div className="stat-card orange">
                 <div className="stat-icon">⏳</div>
                 <div className="stat-info">
                   <div className="stat-number">{stats.reserve}</div>
-                  <div className="stat-label">Réservés</div>
+                  <div className="stat-label">{t('reserved')}</div>
                 </div>
               </div>
               <div className="stat-card red">
                 <div className="stat-icon">🔒</div>
                 <div className="stat-info">
                   <div className="stat-number">{stats.occupe}</div>
-                  <div className="stat-label">Occupés</div>
+                  <div className="stat-label">{t('occupied')}</div>
                 </div>
               </div>
             </div>
 
             <div className="chart-section">
-              <h3>Répartition par statut</h3>
+              <h3>{t('status_distribution')}</h3>
               <div className="status-chart">
                 <div className="chart-bar">
-                  <div className="bar-label">Disponibles</div>
+                  <div className="bar-label">{t('available')}</div>
                   <div className="bar-container">
                     <div
                       className="bar-fill available"
@@ -391,7 +395,7 @@ const ProprietaireDashboard = () => {
                   </div>
                 </div>
                 <div className="chart-bar">
-                  <div className="bar-label">Réservés</div>
+                  <div className="bar-label">{t('reserved')}</div>
                   <div className="bar-container">
                     <div
                       className="bar-fill reserved"
@@ -406,7 +410,7 @@ const ProprietaireDashboard = () => {
                   </div>
                 </div>
                 <div className="chart-bar">
-                  <div className="bar-label">Occupés</div>
+                  <div className="bar-label">{t('occupied')}</div>
                   <div className="bar-container">
                     <div
                       className="bar-fill occupied"
@@ -425,7 +429,7 @@ const ProprietaireDashboard = () => {
 
             {/* ✅ CORRECTION : Protection contre housings non-tableau */}
             <div className="top-housings-section">
-              <h3>📈 Logements les plus vus</h3>
+              <h3>📈 {t('top_housings')}</h3>
               <div className="top-housings-list">
                 {Array.isArray(housings) && housings.length > 0 ? (
                   [...housings] // ✅ Créer une copie pour ne pas muter l'original
@@ -450,7 +454,7 @@ const ProprietaireDashboard = () => {
                       </div>
                     ))
                 ) : (
-                  <p className="no-data">Aucun logement disponible pour les statistiques</p>
+                  <p className="no-data">{t('no_housings_stats')}</p>
                 )}
               </div>
             </div>

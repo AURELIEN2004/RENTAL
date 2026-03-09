@@ -1,76 +1,911 @@
 
-// ============================================
-// src/contexts/ThemeContext.jsx
-// ============================================
+// // ============================================
+// // src/contexts/ThemeContext.jsx
+// // ============================================
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+// import React, { createContext, useContext, useState, useEffect } from 'react';
+
+// const ThemeContext = createContext(null);
+
+// export const useTheme = () => {
+//   const context = useContext(ThemeContext);
+//   if (!context) {
+//     throw new Error('useTheme must be used within ThemeProvider');
+//   }
+//   return context;
+// };
+
+// export const ThemeProvider = ({ children }) => {
+//   const [theme, setTheme] = useState('light');
+//   const [language, setLanguage] = useState('fr');
+
+//   useEffect(() => {
+//     const savedTheme = localStorage.getItem('theme') || 'light';
+//     const savedLang = localStorage.getItem('language') || 'fr';
+//     setTheme(savedTheme);
+//     setLanguage(savedLang);
+//     document.documentElement.setAttribute('data-theme', savedTheme);
+//   }, []);
+
+//   const toggleTheme = () => {
+//     const newTheme = theme === 'light' ? 'dark' : 'light';
+//     setTheme(newTheme);
+//     localStorage.setItem('theme', newTheme);
+//     document.documentElement.setAttribute('data-theme', newTheme);
+//   };
+
+//   const toggleLanguage = () => {
+//     const newLang = language === 'fr' ? 'en' : 'fr';
+//     setLanguage(newLang);
+//     localStorage.setItem('language', newLang);
+//   };
+
+//   const t = (key) => {
+//     // Fonction de traduction simple (peut être améliorée avec i18n)
+//     const translations = {
+//       fr: {
+//         home: 'Accueil',
+//         search: 'Rechercher',
+//         about: 'À propos',
+//         services: 'Services',
+//         contact: 'Contact',
+//         login: 'Connexion',
+//         register: 'Inscription',
+//         logout: 'Déconnexion',
+//         dashboard: 'Tableau de bord',
+//         // ... autres traductions
+//       },
+//       en: {
+//         home: 'Home',
+//         search: 'Search',
+//         about: 'About',
+//         services: 'Services',
+//         contact: 'Contact',
+//         login: 'Login',
+//         register: 'Register',
+//         logout: 'Logout',
+//         dashboard: 'Dashboard',
+//         // ... autres traductions
+//       },
+//     };
+
+//     return translations[language][key] || key;
+//   };
+
+//   return (
+//     <ThemeContext.Provider value={{ theme, toggleTheme, language, toggleLanguage, t }}>
+//       {children}
+//     </ThemeContext.Provider>
+//   );
+// };
+
+
+// src/contexts/ThemeContext.jsx
+// ============================================================
+// Gestion centralisée : mode sombre/clair + traduction FR/EN
+// Utilisation : const { theme, toggleTheme, language, t } = useTheme();
+// ============================================================
+
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 const ThemeContext = createContext(null);
 
 export const useTheme = () => {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error('useTheme must be used within ThemeProvider');
-  }
-  return context;
+  const ctx = useContext(ThemeContext);
+  if (!ctx) throw new Error('useTheme must be used within ThemeProvider');
+  return ctx;
 };
 
+// ─── Dictionnaire de traductions ────────────────────────────────────────────
+const TRANSLATIONS = {
+  fr: {
+    // ── Navbar ──────────────────────────────────────────────
+    home:               'Accueil',
+    search:             'Rechercher',
+    about:              'À propos',
+    services:           'Services',
+    contact:            'Contact',
+    login:              'Connexion',
+    register:           'Inscription',
+    logout:             'Déconnexion',
+    dashboard:          'Tableau de bord',
+    theme_toggle:       'Changer le thème',
+    lang_toggle:        'Switch to English',
+
+    // ── Footer ──────────────────────────────────────────────
+    footer_about:       'À propos',
+    footer_desc:        'Plateforme innovante de location de logements au Cameroun. Trouvez le logement idéal grâce à notre algorithme intelligent.',
+    footer_quick_links: 'Liens Rapides',
+    footer_testimonials:'Témoignages',
+    footer_contact:     'Contact',
+    footer_mobile_app:  'Application Mobile',
+    footer_mobile_desc: 'Téléchargez notre application (version test)',
+    footer_rights:      'Tous droits réservés.',
+    footer_privacy:     'Politique de confidentialité',
+    footer_terms:       "Conditions d'utilisation",
+    footer_legal:       'Mentions légales',
+
+    // ── Home ────────────────────────────────────────────────
+    hero_title:         'Trouvez Votre Logement Idéal',
+    hero_subtitle:      'Plateforme intelligente de location de logements au Cameroun',
+    hero_cta:           'Rechercher un logement',
+    hero_refine:        'Affiner mes recommandations',
+    stats_housings:     'Logements disponibles',
+    stats_cities:       'Villes couvertes',
+    stats_clients:      'Clients satisfaits',
+    stats_support:      'Support disponible',
+    featured_title:     'Logements en Vedette',
+    featured_subtitle:  'Sélectionnés par notre algorithme génétique intelligent',
+    featured_refine:    '· Affiner mes préférences',
+    featured_empty:     'Aucune recommandation disponible pour le moment.',
+    featured_browse:    'Parcourir les logements',
+    view_all:           'Voir tous les logements',
+    how_title:          'Comment Ça Marche ?',
+    step1_title:        'Recherchez',
+    step1_desc:         'Utilisez notre recherche intelligente ou la voix',
+    step2_title:        'Comparez',
+    step2_desc:         'Consultez les détails, photos et localisation',
+    step3_title:        'Contactez',
+    step3_desc:         'Discutez directement avec le propriétaire',
+    step4_title:        'Visitez',
+    step4_desc:         'Planifiez une visite et trouvez votre logement',
+    cta_owner_title:    'Vous êtes propriétaire ?',
+    cta_owner_desc:     'Publiez vos logements gratuitement et touchez des milliers de locataires',
+    cta_start:          'Commencer Maintenant',
+
+    // ── About ───────────────────────────────────────────────
+    about_title:        'À Propos de RentAL',
+    about_subtitle:     'Votre partenaire de confiance pour trouver le logement idéal au Cameroun',
+    about_mission_title:'Notre Mission',
+    about_mission_text: "RentAL a pour mission de faciliter la recherche et la location de logements au Cameroun en utilisant les technologies les plus innovantes. Nous croyons que trouver un logement ne devrait pas être compliqué.",
+    about_innov_title:  'Notre Innovation',
+    innov_genetic:      'Algorithme Génétique',
+    innov_genetic_desc: 'Notre système utilise un algorithme génétique avancé pour vous recommander les logements les plus pertinents selon vos préférences et votre budget.',
+    innov_geo:          'Géolocalisation',
+    innov_geo_desc:     'Visualisez les logements sur une carte interactive et trouvez ceux qui sont proches de vos lieux d\'intérêt.',
+    innov_msg:          'Messagerie Intégrée',
+    innov_msg_desc:     'Communiquez directement avec les propriétaires via notre messagerie sécurisée.',
+    innov_mobile:       'Multiplateforme',
+    innov_mobile_desc:  'Accédez à nos services sur le web et via notre application mobile iOS et Android.',
+    about_values_title: 'Nos Valeurs',
+    val_transparency:   '🎯 Transparence',
+    val_transparency_d: 'Toutes les informations sur les logements sont vérifiées et transparentes.',
+    val_trust:          '🤝 Confiance',
+    val_trust_d:        'Nous vérifions l\'identité de tous nos propriétaires et modérons activement les annonces.',
+    val_speed:          '⚡ Rapidité',
+    val_speed_d:        'Notre plateforme vous permet de trouver et contacter des propriétaires en quelques clics.',
+    val_access:         '🌍 Accessibilité',
+    val_access_d:       'Service gratuit pour les locataires, interface multilingue et support 24/7.',
+    about_stats_title:  'RentAL en Chiffres',
+    stat_housings_label:'Logements disponibles',
+    stat_cities_label:  'Villes couvertes',
+    stat_users_label:   'Utilisateurs actifs',
+    stat_satisfaction:  'Taux de satisfaction',
+    about_team_title:   'Notre Équipe',
+    about_team_text:    'RentAL est développé par une équipe passionnée de développeurs et de professionnels de l\'immobilier basés à Yaoundé, Cameroun.',
+    about_cta_title:    'Prêt à trouver votre logement idéal ?',
+    about_cta_register: 'Créer un compte gratuitement',
+    about_cta_browse:   'Parcourir les logements',
+
+    // ── Contact ─────────────────────────────────────────────
+    contact_title:      'Contactez-nous',
+    contact_subtitle:   'Nous sommes là pour vous aider',
+    contact_name:       'Nom complet',
+    contact_email:      'Adresse email',
+    contact_subject:    'Sujet',
+    contact_message:    'Message',
+    contact_send:       'Envoyer le message',
+    contact_sending:    'Envoi en cours...',
+    contact_success:    'Message envoyé avec succès !',
+    contact_info_title: 'Informations de contact',
+    contact_hours:      'Lundi - Vendredi : 8h - 18h',
+    contact_location:   'Yaoundé, Cameroun',
+    contact_whatsapp:   'Discuter sur WhatsApp',
+
+    // ── Services ────────────────────────────────────────────
+    services_title:     'Nos Services',
+    services_subtitle:  'Des solutions complètes pour locataires et propriétaires',
+    services_tenant:    'Pour les Locataires',
+    services_tenant_sub:'Trouvez votre logement idéal en toute simplicité',
+    services_owner:     'Pour les Propriétaires',
+    services_owner_sub: 'Louez vos logements rapidement et efficacement',
+    svc_search:         'Recherche Intelligente',
+    svc_search_d:       'Trouvez rapidement le logement idéal grâce à notre algorithme de recommandation.',
+    svc_geo:            'Géolocalisation',
+    svc_geo_d:          'Visualisez les logements sur une carte et calculez les itinéraires.',
+    svc_msg:            'Messagerie Sécurisée',
+    svc_msg_d:          'Communiquez directement avec les propriétaires via notre messagerie intégrée.',
+    svc_visit:          'Planification de Visites',
+    svc_visit_d:        'Planifiez vos visites en ligne et recevez des confirmations instantanées.',
+    svc_virtual:        'Visites Virtuelles',
+    svc_virtual_d:      'Découvrez les logements à distance grâce aux vidéos et visites 360°.',
+    svc_notif:          'Notifications',
+    svc_notif_d:        'Recevez des alertes instantanées pour les nouveaux logements correspondant à vos critères.',
+    svc_manage:         'Gestion Complète',
+    svc_manage_d:       'Dashboard intuitif pour gérer tous vos logements, visites et réservations.',
+    svc_stats:          'Statistiques Détaillées',
+    svc_stats_d:        'Suivez les performances de vos annonces : vues, likes, taux de conversion.',
+    svc_comm:           'Communication Facilitée',
+    svc_comm_d:         'Répondez rapidement aux demandes des locataires via notre messagerie.',
+    svc_media:          'Médias Enrichis',
+    svc_media_d:        'Ajoutez des photos, vidéos et visites virtuelles pour valoriser vos logements.',
+    svc_alert:          'Alertes en Temps Réel',
+    svc_alert_d:        'Recevez des notifications pour chaque nouvelle demande de visite.',
+    svc_mobile:         'Gestion Mobile',
+    svc_mobile_d:       'Gérez vos logements depuis votre smartphone avec notre application.',
+    process_title:      'Comment ça marche ?',
+    process_step1:      'Inscription',
+    process_step1_d:    'Créez votre compte gratuitement en quelques clics',
+    process_step2:      'Recherche',
+    process_step2_d:    'Parcourez ou publiez des logements',
+    process_step3:      'Contact',
+    process_step3_d:    'Échangez via notre messagerie sécurisée',
+    process_step4:      'Visite',
+    process_step4_d:    'Planifiez et effectuez une visite',
+    svc_cta_title:      'Prêt à commencer ?',
+    svc_cta_sub:        'Rejoignez des milliers d\'utilisateurs satisfaits',
+    svc_cta_register:   'Créer un compte',
+    svc_cta_browse:     'Voir les logements',
+
+    // ── Auth ────────────────────────────────────────────────
+    login_title:        'Connexion',
+    login_subtitle:     'Accédez à votre espace personnel',
+    login_username:     "Nom d'utilisateur ou Email",
+    login_password:     'Mot de passe',
+    login_remember:     'Se souvenir de moi',
+    login_forgot:       'Mot de passe oublié ?',
+    login_btn:          'Se connecter',
+    login_loading:      'Connexion...',
+    login_or:           'OU',
+    login_google:       'Continuer avec Google',
+    login_facebook:     'Continuer avec Facebook',
+    login_no_account:   "Vous n'avez pas de compte ?",
+    login_signup:       'Inscrivez-vous',
+    register_title:     'Inscription',
+    register_subtitle:  'Créez votre compte gratuitement',
+    register_firstname: 'Prénom',
+    register_lastname:  'Nom',
+    register_username:  "Nom d'utilisateur",
+    register_email:     'Adresse email',
+    register_phone:     'Téléphone',
+    register_password:  'Mot de passe',
+    register_confirm:   'Confirmer le mot de passe',
+    register_role:      'Je suis',
+    register_tenant:    'Locataire',
+    register_owner:     'Propriétaire',
+    register_btn:       'Créer mon compte',
+    register_loading:   'Inscription...',
+    register_have_acct: 'Déjà un compte ?',
+    register_login:     'Connectez-vous',
+
+    // ── Dashboard commun ────────────────────────────────────
+    my_profile:         'Mon Profil',
+    my_housings:        'Mes Logements',
+    add_housing:        'Ajouter un logement',
+    statistics:         'Statistiques',
+    visibility:         'Visibilité',
+    reservations:       'Réservations',
+    messages:           'Messages',
+    notifications:      'Notifications',
+    settings:           'Paramètres',
+    favorites:          'Favoris',
+    saved:              'Sauvegardés',
+    visits:             'Visites',
+    overview:           'Vue d\'ensemble',
+    users:              'Utilisateurs',
+    disconnect:         'Déconnexion',
+
+    email: 'Email',
+phone: 'Téléphone',
+not_provided: 'Non renseigné',
+member_since: 'Membre depuis',
+edit_profile: 'Modifier le profil',
+change_password: 'Changer le mot de passe',
+owner: 'Propriétaire',
+
+all_categories: 'Toutes les catégories',
+total: 'Total',
+available_plural: 'Disponibles',
+reserved_plural: 'Réservés',
+occupied_plural: 'Occupés',
+
+add_housing_title: 'Ajouter un logement',
+edit_housing_title: 'Modifier le logement',
+general_information: 'Informations générales',
+title: 'Titre',
+category: 'Catégorie',
+type: 'Type',
+select_option: 'Sélectionner',
+description: 'Description',
+features: 'Caractéristiques',
+monthly_price: 'Prix mensuel',
+area_label: 'Superficie',
+rooms_label: 'Chambres',
+bathrooms_label: 'Douches',
+additional_features: 'Caractéristiques supplémentaires',
+location: 'Localisation',
+region: 'Région',
+city: 'Ville',
+district: 'Quartier',
+enable_gps: 'Activer GPS',
+capturing_gps: 'Capture...',
+media: 'Médias',
+photos: 'Photos',
+video: 'Vidéo',
+virtual_visit: 'Visite 360° URL',
+publish: 'Publier',
+processing: 'En cours...',
+optionnal: 'Optionnel',
+
+edit_housing: 'Modifier',
+basic_information: 'Informations de base',
+features: 'Caractéristiques',
+price: 'Prix',
+status: 'Statut',
+location: 'Localisation',
+region: 'Région',
+city: 'Ville',
+district: 'Quartier',
+update_gps: 'Mettre à jour GPS',
+gps_location: 'Localisation...',
+media: 'Médias',
+new_photos: 'Nouvelles photos',
+video: 'Vidéo',
+virtual_visit_url: 'URL visite virtuelle',
+saving: 'Enregistrement...',
+update: 'Mettre à jour',
+
+stats_title: '📊 Statistiques de mes logements',
+total_housings: 'Total logements',
+available: 'Disponibles',
+reserved: 'Réservés',
+occupied: 'Occupés',
+status_distribution: 'Répartition par statut',
+top_housings: '📈 Logements les plus vus',
+no_housings_stats: 'Aucun logement disponible pour les statistiques',
+
+visibility_title: 'Gestion de la Visibilité',
+visibility_subtitle: 'Contrôlez la visibilité et le statut de vos logements',
+total: 'Total',
+visible: 'Visibles',
+hidden: 'Masqués',
+available: 'Disponibles',
+filter_all: 'Tous',
+empty_housing: 'Aucun logement à afficher',
+info_title: '💡 À savoir',
+info_visible: 'Visible : Le logement apparaît dans les résultats de recherche',
+info_hidden: 'Masqué : Le logement n\'est plus visible publiquement',
+info_occupied: 'Statut "Occupé" : Masque automatiquement le logement',
+visibility_label: 'Visibilité',
+status_label: 'Statut',
+visible_btn: 'Visible',
+hidden_btn: 'Masqué',
+status_options: {
+  disponible: 'Disponible',
+  reserve: 'Réservé',
+  occupe: 'Occupé'
+},
+stats_label: 'Statistiques',
+
+// pour la visite
+visits_loading: "Chargement des visites...",
+visits_title_owner: "Demandes de Visites",
+visits_title_tenant: "Mes Visites",
+
+visits_stats_total: "Total",
+visits_stats_waiting: "En attente",
+visits_stats_confirmed: "Confirmées",
+visits_stats_refused: "Refusées",
+visits_stats_cancelled: "Annulées",
+visits_stats_upcoming: "À venir",
+
+visits_filter_all: "Toutes",
+visits_filter_waiting: "En attente",
+visits_filter_confirmed: "Confirmées",
+visits_filter_refused: "Refusées",
+visits_filter_cancelled: "Annulées",
+visits_filter_upcoming: "À venir",
+visits_filter_past: "Passées",
+
+visits_empty: "Aucune visite",
+
+visits_label_owner: "Propriétaire",
+visits_label_tenant: "Locataire",
+visits_label_view_housing: "Voir logement",
+visits_label_confirm: "Confirmer",
+visits_label_refuse: "Refuser",
+visits_label_cancel: "Annuler",
+
+visits_modal_title: "Refuser la visite",
+visits_modal_placeholder: "Message optionnel",
+visits_modal_submit: "Confirmer refus",
+visits_modal_cancel: "Annuler"
+,
+
+    // ── Logement / Carte ─────────────────────────────────────
+    available:          'Disponible',
+    reserved:           'Réservé',
+    occupied:           'Occupé',
+    per_month:          '/mois',
+    rooms:              'ch.',
+    bathrooms:          'sdb.',
+    area:               'm²',
+    see_detail:         'Voir le détail',
+    contact_owner:      'Contacter le propriétaire',
+    schedule_visit:     'Planifier une visite',
+
+    // ── Notifications ────────────────────────────────────────
+    notif_title:        'Notifications',
+    notif_view_all:     'Voir toutes les notifications',
+    notif_empty:        'Aucune notification',
+    notif_new_msg:      'Nouveau message',
+    notif_new_conv:     'Nouvelle conversation',
+    notif_visit_req:    'Nouvelle demande de visite',
+    mark_read:          'Marquer comme lu',
+
+    // ── Recherche ────────────────────────────────────────────
+    search_placeholder: 'Rechercher un logement...',
+    search_voice:       'Recherche vocale',
+    search_filters:     'Filtres',
+    search_results:     'résultats trouvés',
+    search_no_results:  'Aucun logement trouvé',
+    search_loading:     'Recherche en cours...',
+
+    // ── Quiz ─────────────────────────────────────────────────
+    quiz_title:         'Personnalisez vos recommandations',
+    quiz_desc:          'Notre algorithme génétique analyse vos préférences pour vous proposer les logements les plus adaptés.',
+    quiz_time:          '⏱️ 2 minutes · 7 questions',
+    quiz_start:         'Commencer le quiz',
+    quiz_skip:          'Passer pour l\'instant',
+    quiz_next:          'Suivant →',
+    quiz_prev:          '← Précédent',
+    quiz_summary_title: 'Voir le résumé',
+    quiz_confirm:       '🚀 Affiner mes suggestions',
+    quiz_saving:        '⏳ Enregistrement…',
+    quiz_edit:          '✏️ Modifier',
+    quiz_profile_title: 'Votre profil de recherche',
+    quiz_profile_desc:  'Voici ce que nous avons retenu. Confirmez pour affiner vos recommandations.',
+    quiz_multi_hint:    'Sélectionnez une ou plusieurs réponses',
+
+    // ── Messages génériques ──────────────────────────────────
+    loading:            'Chargement...',
+    save:               'Enregistrer',
+    cancel:             'Annuler',
+    delete:             'Supprimer',
+    edit:               'Modifier',
+    confirm:            'Confirmer',
+    back:               'Retour',
+    yes:                'Oui',
+    no:                 'Non',
+    error_generic:      'Une erreur est survenue. Veuillez réessayer.',
+  },
+
+  en: {
+    // ── Navbar ──────────────────────────────────────────────
+    home:               'Home',
+    search:             'Search',
+    about:              'About',
+    services:           'Services',
+    contact:            'Contact',
+    login:              'Login',
+    register:           'Sign Up',
+    logout:             'Logout',
+    dashboard:          'Dashboard',
+    theme_toggle:       'Toggle theme',
+    lang_toggle:        'Passer en Français',
+
+    // ── Footer ──────────────────────────────────────────────
+    footer_about:       'About',
+    footer_desc:        'Innovative housing rental platform in Cameroon. Find your ideal home with our smart algorithm.',
+    footer_quick_links: 'Quick Links',
+    footer_testimonials:'Testimonials',
+    footer_contact:     'Contact',
+    footer_mobile_app:  'Mobile App',
+    footer_mobile_desc: 'Download our app (test version)',
+    footer_rights:      'All rights reserved.',
+    footer_privacy:     'Privacy Policy',
+    footer_terms:       'Terms of Use',
+    footer_legal:       'Legal Notice',
+
+    // ── Home ────────────────────────────────────────────────
+    hero_title:         'Find Your Ideal Home',
+    hero_subtitle:      'Smart housing rental platform in Cameroon',
+    hero_cta:           'Search Housing',
+    hero_refine:        'Refine my recommendations',
+    stats_housings:     'Available housings',
+    stats_cities:       'Cities covered',
+    stats_clients:      'Satisfied clients',
+    stats_support:      'Support available',
+    featured_title:     'Featured Housings',
+    featured_subtitle:  'Selected by our smart genetic algorithm',
+    featured_refine:    '· Refine my preferences',
+    featured_empty:     'No recommendations available at the moment.',
+    featured_browse:    'Browse housings',
+    view_all:           'View all housings',
+    how_title:          'How It Works?',
+    step1_title:        'Search',
+    step1_desc:         'Use our smart search or voice recognition',
+    step2_title:        'Compare',
+    step2_desc:         'View details, photos and location',
+    step3_title:        'Contact',
+    step3_desc:         'Chat directly with the landlord',
+    step4_title:        'Visit',
+    step4_desc:         'Schedule a visit and find your home',
+    cta_owner_title:    'Are you a landlord?',
+    cta_owner_desc:     'List your properties for free and reach thousands of tenants',
+    cta_start:          'Get Started',
+
+    // ── About ───────────────────────────────────────────────
+    about_title:        'About RentAL',
+    about_subtitle:     'Your trusted partner to find the ideal housing in Cameroon',
+    about_mission_title:'Our Mission',
+    about_mission_text: 'RentAL\'s mission is to simplify the search and rental of housing in Cameroon using the most innovative technologies. We believe finding a home should not be complicated.',
+    about_innov_title:  'Our Innovation',
+    innov_genetic:      'Genetic Algorithm',
+    innov_genetic_desc: 'Our system uses an advanced genetic algorithm to recommend the most relevant housings based on your preferences and budget.',
+    innov_geo:          'Geolocation',
+    innov_geo_desc:     'View housings on an interactive map and find those closest to your points of interest.',
+    innov_msg:          'Integrated Messaging',
+    innov_msg_desc:     'Communicate directly with landlords via our secure messaging system.',
+    innov_mobile:       'Multiplatform',
+    innov_mobile_desc:  'Access our services on the web and via our iOS and Android mobile app.',
+    about_values_title: 'Our Values',
+    val_transparency:   '🎯 Transparency',
+    val_transparency_d: 'All housing information is verified and transparent. No surprises, no hidden fees.',
+    val_trust:          '🤝 Trust',
+    val_trust_d:        'We verify the identity of all landlords and actively moderate listings for your safety.',
+    val_speed:          '⚡ Speed',
+    val_speed_d:        'Our platform lets you find and contact landlords in just a few clicks.',
+    val_access:         '🌍 Accessibility',
+    val_access_d:       'Free service for tenants, multilingual interface and 24/7 support.',
+    about_stats_title:  'RentAL in Numbers',
+    stat_housings_label:'Available housings',
+    stat_cities_label:  'Cities covered',
+    stat_users_label:   'Active users',
+    stat_satisfaction:  'Satisfaction rate',
+    about_team_title:   'Our Team',
+    about_team_text:    'RentAL is developed by a passionate team of developers and real estate professionals based in Yaoundé, Cameroon.',
+    about_cta_title:    'Ready to find your ideal housing?',
+    about_cta_register: 'Create a free account',
+    about_cta_browse:   'Browse housings',
+
+    // ── Contact ─────────────────────────────────────────────
+    contact_title:      'Contact Us',
+    contact_subtitle:   'We are here to help you',
+    contact_name:       'Full name',
+    contact_email:      'Email address',
+    contact_subject:    'Subject',
+    contact_message:    'Message',
+    contact_send:       'Send message',
+    contact_sending:    'Sending...',
+    contact_success:    'Message sent successfully!',
+    contact_info_title: 'Contact information',
+    contact_hours:      'Monday - Friday: 8am - 6pm',
+    contact_location:   'Yaoundé, Cameroon',
+    contact_whatsapp:   'Chat on WhatsApp',
+
+    // ── Services ────────────────────────────────────────────
+    services_title:     'Our Services',
+    services_subtitle:  'Complete solutions for tenants and landlords',
+    services_tenant:    'For Tenants',
+    services_tenant_sub:'Find your ideal housing with ease',
+    services_owner:     'For Landlords',
+    services_owner_sub: 'Rent your properties quickly and efficiently',
+    svc_search:         'Smart Search',
+    svc_search_d:       'Quickly find your ideal housing with our recommendation algorithm.',
+    svc_geo:            'Geolocation',
+    svc_geo_d:          'View housings on a map and calculate routes to your destinations.',
+    svc_msg:            'Secure Messaging',
+    svc_msg_d:          'Communicate directly with landlords via our integrated messaging system.',
+    svc_visit:          'Visit Planning',
+    svc_visit_d:        'Schedule visits online and receive instant confirmations from landlords.',
+    svc_virtual:        'Virtual Tours',
+    svc_virtual_d:      'Discover housings remotely through videos and 360° virtual tours.',
+    svc_notif:          'Notifications',
+    svc_notif_d:        'Receive instant alerts for new housings matching your criteria.',
+    svc_manage:         'Complete Management',
+    svc_manage_d:       'Intuitive dashboard to manage all your housings, visits and reservations.',
+    svc_stats:          'Detailed Statistics',
+    svc_stats_d:        'Track the performance of your listings: views, likes, conversion rate.',
+    svc_comm:           'Easy Communication',
+    svc_comm_d:         'Quickly respond to tenant requests via our integrated messaging.',
+    svc_media:          'Rich Media',
+    svc_media_d:        'Add photos, videos and virtual tours to showcase your housings.',
+    svc_alert:          'Real-Time Alerts',
+    svc_alert_d:        'Receive notifications for each new visit request.',
+    svc_mobile:         'Mobile Management',
+    svc_mobile_d:       'Manage your housings from your smartphone with our app.',
+    process_title:      'How does it work?',
+    process_step1:      'Sign Up',
+    process_step1_d:    'Create your account for free in a few clicks',
+    process_step2:      'Search',
+    process_step2_d:    'Browse or list housings',
+    process_step3:      'Contact',
+    process_step3_d:    'Chat via our secure messaging',
+    process_step4:      'Visit',
+    process_step4_d:    'Schedule and conduct a visit',
+    svc_cta_title:      'Ready to get started?',
+    svc_cta_sub:        'Join thousands of satisfied users',
+    svc_cta_register:   'Create an account',
+    svc_cta_browse:     'View housings',
+
+    // ── Auth ────────────────────────────────────────────────
+    login_title:        'Login',
+    login_subtitle:     'Access your personal space',
+    login_username:     'Username or Email',
+    login_password:     'Password',
+    login_remember:     'Remember me',
+    login_forgot:       'Forgot password?',
+    login_btn:          'Sign In',
+    login_loading:      'Signing in...',
+    login_or:           'OR',
+    login_google:       'Continue with Google',
+    login_facebook:     'Continue with Facebook',
+    login_no_account:   "Don't have an account?",
+    login_signup:       'Sign up',
+    register_title:     'Sign Up',
+    register_subtitle:  'Create your account for free',
+    register_firstname: 'First name',
+    register_lastname:  'Last name',
+    register_username:  'Username',
+    register_email:     'Email address',
+    register_phone:     'Phone number',
+    register_password:  'Password',
+    register_confirm:   'Confirm password',
+    register_role:      'I am a',
+    register_tenant:    'Tenant',
+    register_owner:     'Landlord',
+    register_btn:       'Create my account',
+    register_loading:   'Creating account...',
+    register_have_acct: 'Already have an account?',
+    register_login:     'Sign in',
+
+    // ── Dashboard commun ────────────────────────────────────
+    my_profile:         'My Profile',
+    my_housings:        'My Housings',
+    add_housing:        'Add a housing',
+    statistics:         'Statistics',
+    visibility:         'Visibility',
+    reservations:       'Reservations',
+    messages:           'Messages',
+    notifications:      'Notifications',
+    settings:           'Settings',
+    favorites:          'Favorites',
+    saved:              'Saved',
+    visits:             'Visits',
+    overview:           'Overview',
+    users:              'Users',
+    disconnect:         'Logout',
+    email: 'Email',
+phone: 'Phone',
+not_provided: 'Not provided',
+member_since: 'Member since',
+edit_profile: 'Edit profile',
+change_password: 'Change password',
+owner: 'owner',
+
+all_categories: 'All categories',
+total: 'Total',
+available_plural: 'Available',
+reserved_plural: 'Reserved',
+occupied_plural: 'Occupied',
+
+add_housing_title: 'Add housing',
+edit_housing_title: 'Edit housing',
+general_information: 'General information',
+title: 'Title',
+category: 'Category',
+type: 'Type',
+select_option: 'Select',
+description: 'Description',
+features: 'Features',
+monthly_price: 'Monthly price',
+area_label: 'Area',
+rooms_label: 'Rooms',
+bathrooms_label: 'Bathrooms',
+additional_features: 'Additional features',
+location: 'Location',
+region: 'Region',
+city: 'City',
+district: 'District',
+enable_gps: 'Enable GPS',
+capturing_gps: 'Capturing...',
+media: 'Media',
+photos: 'Photos',
+video: 'Video',
+virtual_visit: '360° tour URL',
+publish: 'Publish',
+processing: 'Processing...',
+optionnal: 'Optional',
+
+edit_housing: 'Edit',
+basic_information: 'Basic information',
+features: 'Features',
+price: 'Price',
+status: 'Status',
+location: 'Location',
+region: 'Region',
+city: 'City',
+district: 'District',
+update_gps: 'Update GPS',
+gps_location: 'Locating...',
+media: 'Media',
+new_photos: 'New photos',
+video: 'Video',
+virtual_visit_url: 'Virtual tour URL',
+saving: 'Saving...',
+update: 'Update',
+
+stats_title: '📊 My housing statistics',
+total_housings: 'Total housings',
+available: 'Available',
+reserved: 'Reserved',
+occupied: 'Occupied',
+status_distribution: 'Status distribution',
+top_housings: '📈 Most viewed housings',
+no_housings_stats: 'No housings available for statistics',
+
+visibility_title: 'Visibility Management',
+visibility_subtitle: 'Control the visibility and status of your housings',
+total: 'Total',
+visible: 'Visible',
+hidden: 'Hidden',
+available: 'Available',
+filter_all: 'All',
+empty_housing: 'No housings to display',
+info_title: '💡 Info',
+info_visible: 'Visible: The housing appears in search results',
+info_hidden: 'Hidden: The housing is no longer publicly visible',
+info_occupied: 'Status "Occupied": Automatically hides the housing',
+visibility_label: 'Visibility',
+status_label: 'Status',
+visible_btn: 'Visible',
+hidden_btn: 'Hidden',
+  status_options_disponible: 'Available',
+  status_options_reserve: 'Reserved',
+  status_options_occupe: 'Occupied'
+,
+stats_label: 'Statistics',
+
+// pour les visite 
+visits_loading: "Loading visits...",
+visits_title_owner: "Visit Requests",
+visits_title_tenant: "My Visits",
+
+visits_stats_total: "Total",
+visits_stats_waiting: "Pending",
+visits_stats_confirmed: "Confirmed",
+visits_stats_refused: "Refused",
+visits_stats_cancelled: "Cancelled",
+visits_stats_upcoming: "Upcoming",
+
+visits_filter_all: "All",
+visits_filter_waiting: "Pending",
+visits_filter_confirmed: "Confirmed",
+visits_filter_refused: "Refused",
+visits_filter_cancelled: "Cancelled",
+visits_filter_upcoming: "Upcoming",
+visits_filter_past: "Past",
+
+visits_empty: "No visits",
+
+visits_label_owner: "Owner",
+visits_label_tenant: "Tenant",
+visits_label_view_housing: "View Housing",
+visits_label_confirm: "Confirm",
+visits_label_refuse: "Refuse",
+visits_label_cancel: "Cancel",
+
+visits_modal_title: "Refuse Visit",
+visits_modal_placeholder: "Optional message",
+visits_modal_submit: "Confirm Refusal",
+visits_modal_cancel: "Cancel",
+
+
+
+    // ── Logement / Carte ─────────────────────────────────────
+    available:          'Available',
+    reserved:           'Reserved',
+    occupied:           'Occupied',
+    per_month:          '/month',
+    rooms:              'bed.',
+    bathrooms:          'bath.',
+    area:               'm²',
+    see_detail:         'See details',
+    contact_owner:      'Contact landlord',
+    schedule_visit:     'Schedule a visit',
+
+    // ── Notifications ────────────────────────────────────────
+    notif_title:        'Notifications',
+    notif_view_all:     'View all notifications',
+    notif_empty:        'No notifications',
+    notif_new_msg:      'New message',
+    notif_new_conv:     'New conversation',
+    notif_visit_req:    'New visit request',
+    mark_read:          'Mark as read',
+
+    // ── Recherche ────────────────────────────────────────────
+    search_placeholder: 'Search for a housing...',
+    search_voice:       'Voice search',
+    search_filters:     'Filters',
+    search_results:     'results found',
+    search_no_results:  'No housing found',
+    search_loading:     'Searching...',
+
+    // ── Quiz ─────────────────────────────────────────────────
+    quiz_title:         'Personalize your recommendations',
+    quiz_desc:          'Our genetic algorithm analyzes your preferences to suggest the most suitable housings.',
+    quiz_time:          '⏱️ 2 minutes · 7 questions',
+    quiz_start:         'Start the quiz',
+    quiz_skip:          'Skip for now',
+    quiz_next:          'Next →',
+    quiz_prev:          '← Previous',
+    quiz_summary_title: 'View summary',
+    quiz_confirm:       '🚀 Refine my suggestions',
+    quiz_saving:        '⏳ Saving…',
+    quiz_edit:          '✏️ Edit',
+    quiz_profile_title: 'Your search profile',
+    quiz_profile_desc:  'Here is what we noted. Confirm to refine your recommendations.',
+    quiz_multi_hint:    'Select one or more answers',
+
+    // ── Messages génériques ──────────────────────────────────
+    loading:            'Loading...',
+    save:               'Save',
+    cancel:             'Cancel',
+    delete:             'Delete',
+    edit:               'Edit',
+    confirm:            'Confirm',
+    back:               'Back',
+    yes:                'Yes',
+    no:                 'No',
+    error_generic:      'An error occurred. Please try again.',
+  },
+};
+
+// ─── Provider ────────────────────────────────────────────────────────────────
 export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState('light');
+  const [theme,    setTheme]    = useState('light');
   const [language, setLanguage] = useState('fr');
 
+  // Charger depuis localStorage au démarrage
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    const savedLang = localStorage.getItem('language') || 'fr';
-    setTheme(savedTheme);
+    const savedTheme = localStorage.getItem('theme')    || 'light';
+    const savedLang  = localStorage.getItem('language') || 'fr';
+    applyTheme(savedTheme);
     setLanguage(savedLang);
-    document.documentElement.setAttribute('data-theme', savedTheme);
   }, []);
 
-  const toggleTheme = () => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-    document.documentElement.setAttribute('data-theme', newTheme);
+  // Appliquer le thème au <html>
+  const applyTheme = (t) => {
+    setTheme(t);
+    document.documentElement.setAttribute('data-theme', t);
+    // Pour compatibilité Tailwind
+    if (t === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   };
 
-  const toggleLanguage = () => {
-    const newLang = language === 'fr' ? 'en' : 'fr';
-    setLanguage(newLang);
-    localStorage.setItem('language', newLang);
-  };
+  const toggleTheme = useCallback(() => {
+    const next = theme === 'light' ? 'dark' : 'light';
+    localStorage.setItem('theme', next);
+    applyTheme(next);
+  }, [theme]);
 
-  const t = (key) => {
-    // Fonction de traduction simple (peut être améliorée avec i18n)
-    const translations = {
-      fr: {
-        home: 'Accueil',
-        search: 'Rechercher',
-        about: 'À propos',
-        services: 'Services',
-        contact: 'Contact',
-        login: 'Connexion',
-        register: 'Inscription',
-        logout: 'Déconnexion',
-        dashboard: 'Tableau de bord',
-        // ... autres traductions
-      },
-      en: {
-        home: 'Home',
-        search: 'Search',
-        about: 'About',
-        services: 'Services',
-        contact: 'Contact',
-        login: 'Login',
-        register: 'Register',
-        logout: 'Logout',
-        dashboard: 'Dashboard',
-        // ... autres traductions
-      },
-    };
+  const toggleLanguage = useCallback(() => {
+    const next = language === 'fr' ? 'en' : 'fr';
+    setLanguage(next);
+    localStorage.setItem('language', next);
+  }, [language]);
 
-    return translations[language][key] || key;
-  };
+  // Fonction de traduction : t('key') → string traduit
+  const t = useCallback((key, fallback) => {
+    return TRANSLATIONS[language]?.[key]
+        ?? TRANSLATIONS['fr']?.[key]
+        ?? fallback
+        ?? key;
+  }, [language]);
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme, language, toggleLanguage, t }}>
@@ -78,3 +913,6 @@ export const ThemeProvider = ({ children }) => {
     </ThemeContext.Provider>
   );
 };
+
+export default ThemeContext;
+

@@ -7,6 +7,8 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from django.conf.urls.i18n import i18n_patterns
+from django.utils.translation import gettext_lazy as _
 
 urlpatterns = [
     # ==================== ADMIN ====================
@@ -40,7 +42,18 @@ urlpatterns = [
     
     # ==================== DRF AUTH (Browsable API) ====================
     path('api-auth/', include('rest_framework.urls')),
+
+    path('i18n/', include('django.conf.urls.i18n')),  # ← endpoint set_language
+
 ]
+
+
+# Les URLs API restent sans préfixe de langue
+# urlpatterns += [
+#     path('api/', include('apps.housing.urls')),
+#     path('api/users/', include('apps.users.urls')),
+#     ...
+# ]
 
 # ==================== MEDIA & STATIC FILES ====================
 if settings.DEBUG:

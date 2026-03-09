@@ -63,6 +63,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.locale.LocaleMiddleware',   # ← ajouter
+    'config.middleware.LanguageFromHeaderMiddleware',
+
 ]
 
 AUTH_USER_MODEL = 'users.User'
@@ -248,6 +251,11 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
 ]
 
+from corsheaders.defaults import default_headers
+
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "x-language",
+]
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800
 
@@ -278,4 +286,24 @@ SEARCH_MAX_RESULTS = 100
 #     # Remplacez par votre chemin d'installation
 #     os.environ['PATH'] = r"C:\OSGeo4W\bin" + ';' + os.environ['PATH']
 #     GDAL_LIBRARY_PATH = r"C:\OSGeo4W\bin\gdal310.dll" # Vérifiez le numéro du dll
+
+# Langues disponibles
+from django.utils.translation import gettext_lazy as _
+
+LANGUAGES = [
+    ('fr', _('Français')),
+    ('en', _('English')),
+]
+
+LANGUAGE_CODE = 'fr'   # langue par défaut
+
+USE_I18N = True
+USE_L10N = True
+
+
+
+# Répertoire des fichiers de traduction .po
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',
+]
 

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 import { toast } from 'react-toastify';
 import './HousingEditModal.css';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const HousingEditModal = ({ housing, onClose, onUpdate }) => {
   const [formData, setFormData] = useState({
@@ -36,6 +37,8 @@ const HousingEditModal = ({ housing, onClose, onUpdate }) => {
     cities: [],
     districts: []
   });
+
+  const { t, language, theme } = useTheme();
 
   const [imageFiles, setImageFiles] = useState([]);
   const [imagePreviews, setImagePreviews] = useState(housing.images?.map(img => img.image) || []);
@@ -184,105 +187,105 @@ const HousingEditModal = ({ housing, onClose, onUpdate }) => {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content housing-edit-modal" onClick={e => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Modifier : {housing.title}</h2>
+          <h2>{t('edit_housing')} : {housing.title}</h2>
           <button className="close-btn" onClick={onClose}>✕</button>
         </div>
 
         <form onSubmit={handleSubmit} className="edit-form">
           {/* 1️⃣ INFOS DE BASE */}
           <div className="form-section">
-            <h3>📝 Informations de base</h3>
+            <h3>📝 {t('basic_information')}</h3>
             <div className="form-group">
-              <label>Titre *</label>
+              <label>{t('title')} *</label>
               <input type="text" name="title" value={formData.title} onChange={handleChange} required />
             </div>
             <div className="form-row">
               <div className="form-group">
-                <label>Catégorie</label>
+                <label>{t('category')}</label>
                 <select name="category" value={formData.category} onChange={handleChange}>
-                  <option value="">Sélectionner</option>
+                  <option value="">{t('choose_option')}</option>
                   {options.categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
               <div className="form-group">
-                <label>Type</label>
+                <label>{t('housing_type')}</label>
                 <select name="housing_type" value={formData.housing_type} onChange={handleChange}>
-                  <option value="">Sélectionner</option>
+                  <option value="">{t('choose_option')}</option>
                   {options.types.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                 </select>
               </div>
             </div>
             <div className="form-group">
-              <label>Description *</label>
+              <label>{t('description')} *</label>
               <textarea name="description" value={formData.description} onChange={handleChange} rows="4" required />
             </div>
           </div>
 
           {/* 2️⃣ CARACTÉRISTIQUES */}
           <div className="form-section">
-            <h3>📊 Caractéristiques</h3>
+            <h3>📊 {t('features')}</h3>
             <div className="form-row">
               <div className="form-group">
-                <label>Prix (FCFA) *</label>
+                <label>{t('price')} (FCFA) *</label>
                 <input type="number" name="price" value={formData.price} onChange={handleChange} min="0" required />
               </div>
               <div className="form-group">
-                <label>Superficie (m²) *</label>
+                <label>{t('area_label')} (m²) *</label>
                 <input type="number" name="area" value={formData.area} onChange={handleChange} min="1" required />
               </div>
             </div>
             <div className="form-row">
               <div className="form-group">
-                <label>Chambres *</label>
+                <label>{t('rooms_label')} *</label>
                 <input type="number" name="rooms" value={formData.rooms} onChange={handleChange} min="1" required />
               </div>
               <div className="form-group">
-                <label>Douches *</label>
+                <label>{t('bathrooms_label')} *</label>
                 <input type="number" name="bathrooms" value={formData.bathrooms} onChange={handleChange} min="1" required />
               </div>
             </div>
             <div className="form-group">
-              <label>Statut</label>
+              <label>{t('status')}</label>
               <select name="status" value={formData.status} onChange={handleChange}>
-                <option value="disponible">Disponible</option>
-                <option value="reserve">Réservé</option>
-                <option value="occupe">Occupé</option>
+                <option value="disponible">{t('available')}</option>
+                <option value="reserve">{t('reserved')}</option>
+                <option value="occupe">{t('occupied')}</option>
               </select>
             </div>
             <div className="form-group">
-              <label>Caractéristiques supplémentaires</label>
+              <label>{t('additional_features')}</label>
               <textarea name="additional_features" value={formData.additional_features} onChange={handleChange} rows="3" />
             </div>
           </div>
 
           {/* 3️⃣ LOCALISATION */}
           <div className="form-section">
-            <h3>📍 Localisation</h3>
+            <h3>📍 {t('location')}</h3>
             <div className="form-group">
-              <label>Région</label>
+              <label>{t('region')}</label>
               <select name="region" value={formData.region} onChange={handleRegionChange}>
-                <option value="">Sélectionner</option>
+                <option value="">{t('choose_option')}</option>
                 {options.regions.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
               </select>
             </div>
             <div className="form-row">
               <div className="form-group">
-                <label>Ville</label>
+                <label>{t('city')}</label>
                 <select name="city" value={formData.city} onChange={handleCityChange} disabled={!formData.region}>
-                  <option value="">Sélectionner</option>
+                  <option value="">{t('choose_option')}</option>
                   {options.cities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
               <div className="form-group">
-                <label>Quartier</label>
+                <label>{t('district')}</label>
                 <select name="district" value={formData.district} onChange={handleChange} disabled={!formData.city}>
-                  <option value="">Sélectionner</option>
+                  <option value="">{t('choose_option')}</option>
                   {options.districts.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
                 </select>
               </div>
             </div>
             <button type="button" className="gps-btn" onClick={handleGPSClick} disabled={useGPS}>
-              {useGPS ? '📍 Localisation...' : '📍 Mettre à jour GPS'}
+  {useGPS ? `📍 ${t('gps_location')}` : `📍 ${t('update_gps')}`}
             </button>
             {formData.latitude && formData.longitude && (
               <p className="gps-coords">✅ {formData.latitude}, {formData.longitude}</p>
@@ -291,9 +294,9 @@ const HousingEditModal = ({ housing, onClose, onUpdate }) => {
 
           {/* 4️⃣ MÉDIAS */}
           <div className="form-section">
-            <h3>📸 Médias</h3>
+            <h3>📸 {t('media')}</h3>
             <div className="form-group">
-              <label>Nouvelles Photos</label>
+              <label>{t('new_photos')}</label>
               <input type="file" multiple accept="image/*" onChange={handleImageChange} />
               {imagePreviews.length > 0 && (
                 <div className="image-preview-grid">
@@ -302,19 +305,19 @@ const HousingEditModal = ({ housing, onClose, onUpdate }) => {
               )}
             </div>
             <div className="form-group">
-              <label>Vidéo</label>
+              <label>{t('video')}</label>
               <input type="file" accept="video/*" onChange={(e) => setFormData({...formData, video: e.target.files[0]})} />
             </div>
             <div className="form-group">
-              <label>URL Visite Virtuelle</label>
+              <label>{t('virtual_visit_url')}</label>
               <input type="url" name="virtual_360" value={formData.virtual_360} onChange={handleChange} placeholder="https://..." />
             </div>
           </div>
 
           <div className="modal-actions">
-            <button type="button" className="btn btn-outline" onClick={onClose}>Annuler</button>
+            <button type="button" className="btn btn-outline" onClick={onClose}>{t('cancel')}</button>
             <button type="submit" className="btn btn-primary" disabled={loading}>
-              {loading ? 'Enregistrement...' : 'Mettre à jour'}
+              {loading ? t('saving') : t('update')}
             </button>
           </div>
         </form>

@@ -214,3 +214,19 @@ class UserPreferenceSerializer(serializers.ModelSerializer):
         fields = ['city','category','min_price','max_price',
                   'furnished','features','nearby_places','priority','updated_at']
         read_only_fields = ['updated_at']
+
+
+
+
+# # Pour retourner les deux langues si besoin :
+# class HousingBilingualSerializer(serializers.ModelSerializer):
+#     title_fr = serializers.CharField(read_only=True)
+#     title_en = serializers.CharField(read_only=True)
+#     description_fr = serializers.CharField(read_only=True)
+#     description_en = serializers.CharField(read_only=True)
+
+#     class Meta:
+#         model = Housing
+#         fields = ['id', 'title', 'title_fr', 'title_en',
+#                   'description', 'description_fr', 'description_en', ...]
+# """

@@ -41,4 +41,9 @@ urlpatterns = [
     path('create-support-conversation/', 
          views.create_support_conversation, 
          name='create_support_conversation'),
+
+    #  path('api/set-language/', set_language, name='set-language'),
+     path('api/set-language/', views.set_language, name='set-language'),
+
+
 ]

@@ -28,6 +28,29 @@ from .models import PasswordResetToken
 
 User = get_user_model()
 
+# ajout pour la traduction
+
+# apps/users/views.py — ajouter
+
+from django.utils.translation import activate
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def set_language(request):
+    lang = request.data.get('language', 'fr')
+    if lang not in ('fr', 'en'):
+        return Response({'error': 'Langue non supportée'}, status=400)
+    activate(lang)
+    return Response({'language': lang, 'status': 'ok'})
+
+
+
+
+
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()

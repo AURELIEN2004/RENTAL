@@ -9,11 +9,14 @@ import api from '../../services/api';
 import Loading from '../common/Loading';
 import { toast } from 'react-toastify';
 // import './HousingForm.css';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const HousingForm = ({ isEdit = false }) => {
   const navigate = useNavigate();
   const { id } = useParams();
   
+  const { t, language, theme } = useTheme();
+
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [housingTypes, setHousingTypes] = useState([]);
@@ -295,15 +298,14 @@ const HousingForm = ({ isEdit = false }) => {
 
   return (
     <div className="housing-form-container">
-      <h1>{isEdit ? 'Modifier le logement' : 'Ajouter un logement'}</h1>
+<h1>{isEdit ? t('edit_housing_title') : t('add_housing_title')}</h1>
       
       <form onSubmit={handleSubmit} className="housing-form">
         {/* Section 1 */}
         <div className="form-section">
-          <h2>1. Informations GÃ©nÃ©rales</h2>
-          
+<h2>1. {t('general_information')}</h2>          
           <div className="form-group">
-            <label>Titre *</label>
+            <label>{t('title')} *</label>
             <input
               type="text"
               name="title"
@@ -317,14 +319,14 @@ const HousingForm = ({ isEdit = false }) => {
 
           <div className="form-row">
             <div className="form-group">
-              <label>CatÃ©gorie *</label>
+              <label>{t('category')} </label>
               <select 
                 name="category" 
                 value={formData.category} 
                 onChange={handleChange}
                 className={errors.category ? 'error' : ''}
               >
-                <option value="">SÃ©lectionner</option>
+                <option value="">{t('choose_option')}</option>
                 {categories?.map(cat => (
                   <option key={cat.id} value={cat.id}>{cat.name}</option>
                 ))}
@@ -333,14 +335,14 @@ const HousingForm = ({ isEdit = false }) => {
             </div>
 
             <div className="form-group">
-              <label>Type *</label>
+              <label>{t('type')} *</label>
               <select 
                 name="housing_type" 
                 value={formData.housing_type} 
                 onChange={handleChange}
                 className={errors.housing_type ? 'error' : ''}
               >
-                <option value="">SÃ©lectionner</option>
+                <option value="">{t('choose_option')}</option>
                 {housingTypes.map(type => (
                   <option key={type.id} value={type.id}>{type.name}</option>
                 ))}
@@ -350,13 +352,13 @@ const HousingForm = ({ isEdit = false }) => {
           </div>
 
           <div className="form-group">
-            <label>Description *</label>
+            <label>{t('description')} *</label>
             <textarea
               name="description"
               value={formData.description}
               onChange={handleChange}
               rows="5"
-              placeholder="DÃ©crivez votre logement..."
+              placeholder={t('description_placeholder')}
               className={errors.description ? 'error' : ''}
             />
             {errors.description && <span className="error-text">{errors.description}</span>}
@@ -365,12 +367,11 @@ const HousingForm = ({ isEdit = false }) => {
 
         {/* Section 2 */}
         <div className="form-section">
-          <h2>2. CaractÃ©ristiques</h2>
-          
+          <h2>2. {t('features')}</h2>
           <div className="form-row">
             <div className="form-group">
-              <label>Prix mensuel (FCFA) *</label>
-              <input
+         <label>{t('monthly_price')} (FCFA) *</label>      
+        <input
                 type="number"
                 name="price"
                 value={formData.price}
@@ -382,7 +383,7 @@ const HousingForm = ({ isEdit = false }) => {
             </div>
 
             <div className="form-group">
-              <label>Superficie (mÂ²) *</label>
+             <label>{t('area_label')} (m²) *</label>
               <input
                 type="number"
                 name="area"
@@ -397,7 +398,7 @@ const HousingForm = ({ isEdit = false }) => {
 
           <div className="form-row">
             <div className="form-group">
-              <label>Chambres *</label>
+              <label>{t('rooms_label')} *</label>
               <input
                 type="number"
                 name="rooms"
@@ -408,7 +409,7 @@ const HousingForm = ({ isEdit = false }) => {
             </div>
 
             <div className="form-group">
-              <label>Douches *</label>
+              <label>{t('bathrooms_label')} *</label>
               <input
                 type="number"
                 name="bathrooms"
@@ -420,7 +421,7 @@ const HousingForm = ({ isEdit = false }) => {
           </div>
 
           <div className="form-group">
-            <label>CaractÃ©ristiques supplÃ©mentaires</label>
+            <label>{t('additional_features')}</label>
             <textarea
               name="additional_features"
               value={formData.additional_features}
@@ -433,17 +434,17 @@ const HousingForm = ({ isEdit = false }) => {
 
         {/* Section 3 */}
         <div className="form-section">
-          <h2>3. Localisation</h2>
+          <h2>3. {t('location')}</h2>
           
           <div className="form-group">
-            <label>RÃ©gion *</label>
+            <label>{t('region')} *</label>
             <select 
               name="region" 
               value={formData.region} 
               onChange={handleRegionChange}
               className={errors.region ? 'error' : ''}
             >
-              <option value="">SÃ©lectionner</option>
+              <option value=""> {t('choose_option')} </option>
               {regions.map(region => (
                 <option key={region.id} value={region.id}>{region.name}</option>
               ))}
@@ -453,7 +454,7 @@ const HousingForm = ({ isEdit = false }) => {
 
           <div className="form-row">
             <div className="form-group">
-              <label>Ville *</label>
+              <label>{t('city')} *</label>
               <select 
                 name="city" 
                 value={formData.city} 
@@ -461,7 +462,7 @@ const HousingForm = ({ isEdit = false }) => {
                 disabled={!formData.region}
                 className={errors.city ? 'error' : ''}
               >
-                <option value="">Selectionner</option>
+                <option value="">{t('choose_option')}</option>
                 {cities?.map(city => (
                   <option key={city.id} value={city.id}>{city.name}</option>
                 ))}
@@ -470,7 +471,7 @@ const HousingForm = ({ isEdit = false }) => {
             </div>
 
             <div className="form-group">
-              <label>Quartier *</label>
+              <label>{t('district')} *</label>
               <select 
                 name="district" 
                 value={formData.district} 
@@ -478,7 +479,7 @@ const HousingForm = ({ isEdit = false }) => {
                 disabled={!formData.city}
                 className={errors.district ? 'error' : ''}
               >
-                <option value="">Selectionner</option>
+                <option value=""> {t('choose_option')} </option>
                 {districts?.map(district => (
                   <option key={district.id} value={district.id}>{district.name}</option>
                 ))}
@@ -494,7 +495,7 @@ const HousingForm = ({ isEdit = false }) => {
               onClick={handleGPSClick} 
               disabled={useGPS}
             >
-              {useGPS ? 'ðŸ" Capture...' : 'ðŸ" Activer GPS'}
+             {useGPS ? t('capturing_gps') : t('enable_gps')}
             </button>
             {formData.latitude && formData.longitude && (
               <p className="gps-coords">
@@ -506,10 +507,10 @@ const HousingForm = ({ isEdit = false }) => {
 
         {/* Section 4 */}
         <div className="form-section">
-          <h2>4. Médias</h2>
+          <h2>4. {t('media')}</h2>
           
           <div className="form-group">
-            <label>Photos * (min. 3)</label>
+            <label>{t('photos')} * (min. 3)</label>
             <input
               type="file"
               accept="image/*"
@@ -529,12 +530,12 @@ const HousingForm = ({ isEdit = false }) => {
           )}
 
           <div className="form-group">
-            <label>VidÃ©o (optionnel)</label>
+            <label>{t('video')} ({t('optionnal')})</label>
             <input type="file" accept="video/*" onChange={handleVideoChange} />
           </div>
 
           <div className="form-group">
-            <label>Visite 360Â° URL (optionnel)</label>
+            <label>{t('virtual_visit')} ({t('optionnal')})</label>
             <input
               type="url"
               name="virtual_360"
@@ -552,14 +553,14 @@ const HousingForm = ({ isEdit = false }) => {
             className="btn btn-outline" 
             onClick={() => navigate('/dashboard')}
           >
-            Annuler
+            {t('cancel')}
           </button>
           <button 
             type="submit" 
             className="btn btn-primary" 
             disabled={loading}
           >
-            {loading ? 'En cours...' : (isEdit ? 'Modifier' : 'Publier')}
+  {loading ? t('processing') : (isEdit ? t('edit') : t('publish'))}
           </button>
         </div>
       </form>

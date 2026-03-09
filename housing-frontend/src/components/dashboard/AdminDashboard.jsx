@@ -708,12 +708,15 @@ import {
 } from 'react-icons/fa';
 import './AdminDashboard.css';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTheme } from '../../contexts/ThemeContext';
+
 
 
 
 const AdminDashboard = ({ user }) => {
   const location = useLocation();
   const navigate  = useNavigate();
+  const { t, language, theme } = useTheme();
 
   const VALID_TABS = ['overview', 'users', 'housings', 'profile', 'messages', 'notifications', 'user-detail'];
 
