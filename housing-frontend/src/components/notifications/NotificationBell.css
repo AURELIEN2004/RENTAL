@@ -1,5 +1,10 @@
 /* src/components/notifications/NotificationBell.css */
-
+.notification-message {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 300px;
+}
 .notification-bell-container {
   position: relative;
 }

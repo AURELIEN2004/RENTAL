@@ -7,6 +7,7 @@ import ConversationList from './ConversationList';
 import MessageThread from './MessageThread';
 import { toast } from 'react-toastify';
 import './MessagingPage.css';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const MessagingPage = () => {
   const { user } = useAuth();
@@ -14,6 +15,8 @@ const MessagingPage = () => {
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
+
+  const { t, language, theme } = useTheme();
 
   useEffect(() => {
     loadConversations();
@@ -54,7 +57,7 @@ const MessagingPage = () => {
     return (
       <div className="messaging-loading">
         <div className="spinner"></div>
-        <p>Chargement des conversations...</p>
+       <p>{t("messages_loading")}</p>
       </div>
     );
   }
@@ -82,8 +85,8 @@ const MessagingPage = () => {
           ) : (
             <div className="no-conversation-selected">
               <div className="empty-icon">💬</div>
-              <h3>Sélectionnez une conversation</h3>
-              <p>Choisissez une conversation dans la liste pour commencer à échanger</p>
+              <h3>{t("messages_select_conversation")}</h3>
+              <p>{t("messages_choose_conversation")}</p>
             </div>
           )}
         </main>

@@ -295,6 +295,20 @@ const TRANSLATIONS = {
     users:              'Utilisateurs',
     disconnect:         'Déconnexion',
 
+    admin_panel: "Admin",
+
+dashboard_overview: "Vue d'ensemble",
+
+users: "Utilisateurs",
+
+housings: "Logements",
+
+profile: "Profil",
+
+support: "Support",
+
+notifications: "Notifications",
+
     email: 'Email',
 phone: 'Téléphone',
 not_provided: 'Non renseigné',
@@ -302,6 +316,72 @@ member_since: 'Membre depuis',
 edit_profile: 'Modifier le profil',
 change_password: 'Changer le mot de passe',
 owner: 'Propriétaire',
+tenant: 'Locataire',
+
+admin_profile_title: "Mon Profil Admin",
+admin_role: "Administrateur",
+
+email: "Email",
+phone: "Téléphone",
+
+member_since: "Membre depuis",
+not_provided: "Non renseigné",
+
+edit_profile: "Modifier le profil",
+change_password: "Changer le mot de passe",
+
+// edit profle
+profile_edit_title: "Modifier mon profil",
+
+profile_remove_photo: "Supprimer la photo",
+
+profile_personal_info: "Informations personnelles",
+
+profile_first_name: "Prénom",
+profile_last_name: "Nom",
+
+profile_first_name_placeholder: "Votre prénom",
+profile_last_name_placeholder: "Votre nom",
+
+profile_email: "Email",
+profile_email_placeholder: "votre@email.com",
+
+profile_phone: "Téléphone",
+profile_phone_placeholder: "+237 6XX XXX XXX",
+
+profile_search_preferences: "Préférences de recherche",
+
+profile_max_budget: "Budget maximum (FCFA)",
+profile_budget_placeholder: "Ex: 50000",
+
+profile_saving: "Enregistrement...",
+
+save: "Enregistrer",
+cancel: "Annuler",
+
+// change_password
+change_password_title: "Changer le mot de passe",
+
+old_password: "Ancien mot de passe",
+old_password_placeholder: "Entrez votre ancien mot de passe",
+
+new_password: "Nouveau mot de passe",
+new_password_placeholder: "Minimum 8 caractères",
+
+confirm_new_password: "Confirmer le nouveau mot de passe",
+confirm_password_placeholder: "Répétez le nouveau mot de passe",
+
+password_tips_title: "Conseils pour un mot de passe sécurisé :",
+
+password_tip_1: "Au moins 8 caractères",
+password_tip_2: "Combiner lettres majuscules et minuscules",
+password_tip_3: "Inclure des chiffres et des caractères spéciaux",
+password_tip_4: "Ne pas utiliser d'informations personnelles",
+
+changing_password: "Modification...",
+change_password: "Modifier",
+cancel: "Annuler",
+
 
 all_categories: 'Toutes les catégories',
 total: 'Total',
@@ -380,11 +460,11 @@ visibility_label: 'Visibilité',
 status_label: 'Statut',
 visible_btn: 'Visible',
 hidden_btn: 'Masqué',
-status_options: {
-  disponible: 'Disponible',
-  reserve: 'Réservé',
-  occupe: 'Occupé'
-},
+
+  status_options_disponible: 'Disponible',
+  status_options_reserve: 'Réservé',
+  status_options_occupe: 'Occupé'
+,
 stats_label: 'Statistiques',
 
 // pour la visite
@@ -421,6 +501,176 @@ visits_modal_placeholder: "Message optionnel",
 visits_modal_submit: "Confirmer refus",
 visits_modal_cancel: "Annuler"
 ,
+
+// pour les message
+messages_loading: "Chargement des conversations...",
+messages_select_conversation: "Sélectionnez une conversation",
+messages_choose_conversation: "Choisissez une conversation dans la liste pour commencer à échanger",
+
+messages_header_title: "Messages",
+messages_search_placeholder: "🔍 Rechercher une conversation...",
+
+messages_empty_search: "Aucune conversation trouvée",
+messages_empty_conversations: "Vous n'avez pas encore de conversations",
+
+messages_user_default: "Utilisateur",
+
+messages_view_housing: "Voir le logement",
+messages_call: "Appeler",
+messages_more_options: "Plus d'options",
+
+messages_housing_details: "Voir les détails →",
+
+messages_loading_messages: "Chargement des messages...",
+messages_no_messages: "Aucun message pour le moment",
+messages_start_conversation: "Envoyez le premier message pour commencer la conversation",
+
+messages_you_prefix: "Vous: ",
+messages_photo: "📷 Photo",
+messages_video: "🎥 Vidéo",
+messages_start: "Commencer la conversation",
+
+messages_write_message: "Écrivez votre message...",
+messages_add_image: "Ajouter une image",
+messages_add_video: "Ajouter une vidéo",
+
+
+// pour notification
+notifications_loading: "Chargement des notifications...",
+notif_mark_all: "Tout marquer comme lu",
+notif_filter_all: "Toutes",
+notif_filter_unread: "Non lues",
+notif_filter_read: "Lues",
+notif_view: "Voir →",
+notif_unread_label: "non lue",
+notif_unread_single: "non lue",
+notif_unread_plural: "non lues",
+notif_error_load: "Erreur lors du chargement des notifications",
+notif_error_mark: "Erreur lors du marquage",
+notif_delete_confirm: "Supprimer cette notification ?",
+
+// pour parametre
+settings_title: "Paramètres",
+settings_email_notifications: "Notifications par email",
+settings_push_notifications: "Notifications push",
+settings_language: "Langue",
+settings_theme: "Thème",
+settings_danger_zone: "Zone de danger",
+settings_delete_account: "Supprimer mon compte",
+confirm_delete_account: "Êtes-vous sûr de vouloir supprimer votre compte ?",
+theme_light: "Clair",
+theme_dark: "Sombre",  
+
+// dashbord
+owner_dashboard: "Dashboard Propriétaire",
+menu_profile: "Mon Profil",
+menu_housings: "Mes Logements",
+menu_add_housing: "Ajouter un logement",
+menu_stats: "Statistiques",
+menu_visibility: "Visibilité",
+menu_reservations: "Réservations",
+menu_messages: "Messages",
+menu_notifications: "Notifications",
+menu_settings: "Paramètres",
+logout: "Déconnexion",
+
+tenant_dashboard: "Dashboard Locataire",
+menu_profile: "Mon profil",
+menu_favorites: "Favoris",
+menu_saved: "Enregistrés",
+menu_visits: "Visites",
+menu_messages: "Messages",
+menu_notifications: "Notifications",
+menu_settings: "Paramètres",
+logout: "Déconnexion",
+
+// favoris save
+favorites_title: "Mes favoris",
+favorites_empty: "Vous n'avez pas encore de favoris",
+
+saved_title: "Logements enregistrés",
+saved_empty: "Vous n'avez pas encore enregistré de logements",
+
+browse_housings: "Parcourir les logements",
+
+remove: "Retirer",
+confirm_remove: "Retirer ce logement ?",
+
+loading: "Chargement...",
+
+// dashbord admin
+dashboard_overview: "Vue d'ensemble",
+
+users: "Utilisateurs",
+
+total: "Total",
+
+owners: "Propriétaires",
+
+tenants: "Locataires",
+
+blocked: "Bloqués",
+
+housings: "Logements",
+
+visible: "Visibles",
+
+hidden: "Masqués",
+
+available: "Disponibles",
+
+top_owners: "Top Propriétaires",
+
+// user
+users_management: "Gestion des utilisateurs",
+
+photo: "Photo",
+name: "Nom",
+email: "Email",
+role: "Rôle",
+housings: "Logements",
+status: "Statut",
+registered_on: "Inscrit le",
+actions: "Actions",
+
+owner: "Propriétaire",
+tenant: "Locataire",
+
+blocked: "Bloqué",
+active: "Actif",
+
+view_details: "Voir détails",
+block: "Bloquer",
+unblock: "Débloquer",
+delete: "Supprimer",
+
+back: "Retour",
+
+user_details: "Détails utilisateur",
+
+phone: "Téléphone",
+not_provided: "Non renseigné",
+
+
+// logement
+housings_management: "Gestion des logements",
+
+all_owners: "Tous les propriétaires",
+
+all: "Tous",
+
+visible: "Visibles",
+hidden: "Masqués",
+
+hide: "Masquer",
+activate: "Activer",
+
+delete: "Supprimer",
+
+support_client: "Support client",
+user_conversations: "Conversations avec les utilisateurs",
+
+
 
     // ── Logement / Carte ─────────────────────────────────────
     available:          'Disponible',
@@ -676,6 +926,21 @@ visits_modal_cancel: "Annuler"
     overview:           'Overview',
     users:              'Users',
     disconnect:         'Logout',
+
+    admin_panel: "Admin",
+
+dashboard_overview: "Overview",
+
+users: "Users",
+
+housings: "Housings",
+
+profile: "Profile",
+
+support: "Support",
+
+notifications: "Notifications",
+
     email: 'Email',
 phone: 'Phone',
 not_provided: 'Not provided',
@@ -683,6 +948,71 @@ member_since: 'Member since',
 edit_profile: 'Edit profile',
 change_password: 'Change password',
 owner: 'owner',
+tenant: 'tenant',
+
+admin_profile_title: "My Admin Profile",
+admin_role: "Administrator",
+
+email: "Email",
+phone: "Phone",
+
+member_since: "Member since",
+not_provided: "Not provided",
+
+edit_profile: "Edit profile",
+change_password: "Change password",
+
+// edit profle
+profile_edit_title: "Edit profile",
+
+profile_remove_photo: "Remove photo",
+
+profile_personal_info: "Personal information",
+
+profile_first_name: "First name",
+profile_last_name: "Last name",
+
+profile_first_name_placeholder: "Your first name",
+profile_last_name_placeholder: "Your last name",
+
+profile_email: "Email",
+profile_email_placeholder: "your@email.com",
+
+profile_phone: "Phone",
+profile_phone_placeholder: "+237 6XX XXX XXX",
+
+profile_search_preferences: "Search preferences",
+
+profile_max_budget: "Maximum budget (FCFA)",
+profile_budget_placeholder: "Example: 50000",
+
+profile_saving: "Saving...",
+
+save: "Save",
+cancel: "Cancel",
+
+// change_password
+change_password_title: "Change password",
+
+old_password: "Old password",
+old_password_placeholder: "Enter your old password",
+
+new_password: "New password",
+new_password_placeholder: "Minimum 8 characters",
+
+confirm_new_password: "Confirm new password",
+confirm_password_placeholder: "Repeat the new password",
+
+password_tips_title: "Tips for a secure password:",
+
+password_tip_1: "At least 8 characters",
+password_tip_2: "Use uppercase and lowercase letters",
+password_tip_3: "Include numbers and special characters",
+password_tip_4: "Do not use personal information",
+
+changing_password: "Updating...",
+change_password: "Change password",
+cancel: "Cancel",
 
 all_categories: 'All categories',
 total: 'Total',
@@ -800,6 +1130,173 @@ visits_modal_title: "Refuse Visit",
 visits_modal_placeholder: "Optional message",
 visits_modal_submit: "Confirm Refusal",
 visits_modal_cancel: "Cancel",
+
+// pour les message
+messages_loading: "Loading conversations...",
+messages_select_conversation: "Select a conversation",
+messages_choose_conversation: "Choose a conversation from the list to start chatting",
+
+messages_header_title: "Messages",
+messages_search_placeholder: "🔍 Search conversation...",
+
+messages_empty_search: "No conversation found",
+messages_empty_conversations: "You don't have any conversations yet",
+
+messages_user_default: "User",
+
+messages_view_housing: "View housing",
+messages_call: "Call",
+messages_more_options: "More options",
+
+messages_housing_details: "View details →",
+
+messages_loading_messages: "Loading messages...",
+messages_no_messages: "No messages yet",
+messages_start_conversation: "Send the first message to start the conversation",
+
+messages_you_prefix: "You: ",
+messages_photo: "📷 Photo",
+messages_video: "🎥 Video",
+messages_start: "Start the conversation",
+
+messages_write_message: "Write your message...",
+messages_add_image: "Add image",
+messages_add_video: "Add video",
+
+// pour les notification
+notifications_loading: "Loading notifications...",
+notif_mark_all: "Mark all as read",
+notif_filter_all: "All",
+notif_filter_unread: "Unread",
+notif_filter_read: "Read",
+notif_view: "View →",
+notif_unread_single: "unread",
+notif_unread_plural: "unread",
+notif_unread_label: "unread",
+notif_error_load: "Error loading notifications",
+notif_error_mark: "Error while marking notification",
+notif_delete_confirm: "Delete this notification?",
+
+// pour les parametre
+settings_title: "Settings",
+settings_email_notifications: "Email notifications",
+settings_push_notifications: "Push notifications",
+settings_language: "Language",
+settings_theme: "Theme",
+settings_danger_zone: "Danger zone",
+settings_delete_account: "Delete my account",
+confirm_delete_account: "Are you sure you want to delete your account?",
+theme_light: "Light",
+theme_dark: "Dark",
+
+// dashbord
+owner_dashboard: "Owner Dashboard",
+menu_profile: "My Profile",
+menu_housings: "My Housings",
+menu_add_housing: "Add Housing",
+menu_stats: "Statistics",
+menu_visibility: "Visibility",
+menu_reservations: "Reservations",
+menu_messages: "Messages",
+menu_notifications: "Notifications",
+menu_settings: "Settings",
+logout: "Logout",
+
+tenant_dashboard: "Tenant Dashboard",
+menu_profile: "My profile",
+menu_favorites: "Favorites",
+menu_saved: "Saved",
+menu_visits: "Visits",
+menu_messages: "Messages",
+menu_notifications: "Notifications",
+menu_settings: "Settings",
+logout: "Logout",
+
+// favoris save
+favorites_title: "My favorites",
+favorites_empty: "You don't have any favorites yet",
+
+saved_title: "Saved housings",
+saved_empty: "You haven't saved any housings yet",
+
+browse_housings: "Browse housings",
+
+remove: "Remove",
+confirm_remove: "Remove this housing?",
+
+loading: "Loading...",
+
+// dashbord admin
+dashboard_overview: "Overview",
+
+users: "Users",
+
+total: "Total",
+
+owners: "Owners",
+
+tenants: "Tenants",
+
+blocked: "Blocked",
+
+housings: "Housings",
+
+visible: "Visible",
+
+hidden: "Hidden",
+
+available: "Available",
+
+top_owners: "Top Owners",
+
+
+// user
+users_management: "User Management",
+
+photo: "Photo",
+name: "Name",
+email: "Email",
+role: "Role",
+housings: "Housings",
+status: "Status",
+registered_on: "Registered on",
+actions: "Actions",
+
+owner: "Owner",
+tenant: "Tenant",
+
+blocked: "Blocked",
+active: "Active",
+
+view_details: "View details",
+block: "Block",
+unblock: "Unblock",
+delete: "Delete",
+
+back: "Back",
+
+user_details: "User details",
+
+phone: "Phone",
+not_provided: "Not provided",
+
+// logement
+housings_management: "Housing Management",
+
+all_owners: "All owners",
+
+all: "All",
+
+visible: "Visible",
+hidden: "Hidden",
+
+hide: "Hide",
+activate: "Activate",
+
+delete: "Delete",
+
+support_client: "Customer Support",
+user_conversations: "Conversations with users",
 
 
 

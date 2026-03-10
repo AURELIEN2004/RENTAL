@@ -676,6 +676,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './NotificationsList.css';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const API_BASE = 'http://localhost:8000/api';
 
@@ -748,7 +749,7 @@ const NotificationsList = ({ compact = false }) => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [error, setError] = useState('');
-
+const { t, language, theme } = useTheme();
   const navigate = useNavigate();
 
   const unreadCount = notifications.filter(n => !n.is_read).length;
@@ -831,8 +832,7 @@ const NotificationsList = ({ compact = false }) => {
 
   const handleDeleteNotification = (id) => {
 
-    if (!window.confirm("Supprimer cette notification ?")) return;
-
+if (!window.confirm(t('notif_delete_confirm'))) return;
     saveDeletedNotification(id);
 
     setNotifications(prev =>
@@ -931,16 +931,27 @@ const NotificationsList = ({ compact = false }) => {
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
 
-    if (minutes < 1) return "À l'instant";
-    if (minutes < 60) return `Il y a ${minutes}min`;
-    if (hours < 24) return `Il y a ${hours}h`;
-    if (days < 7) return `Il y a ${days}j`;
+    if (minutes < 1) return language === 'fr' ? "À l'instant" : "Just now";
+     if (minutes < 60)
+    return language === 'fr'
+      ? `Il y a ${minutes} min`
+      : `${minutes} min ago`;
 
-    return date.toLocaleDateString('fr-FR', {
-      day: 'numeric',
-      month: 'short'
-    });
-  };
+  if (hours < 24)
+    return language === 'fr'
+      ? `Il y a ${hours} h`
+      : `${hours} h ago`;
+
+  if (days < 7)
+    return language === 'fr'
+      ? `Il y a ${days} j`
+      : `${days} d ago`;
+
+     return date.toLocaleDateString(
+    language === 'fr' ? 'fr-FR' : 'en-US',
+    { day: 'numeric', month: 'short' }
+  );
+};
 
   /* =====================================
      FILTER
@@ -962,7 +973,7 @@ const NotificationsList = ({ compact = false }) => {
     return (
       <div className="notifications-loading">
         <div className="spinner" />
-        <p>Chargement des notifications...</p>
+<p>{t('notifications_loading')}</p>
       </div>
     );
   }
@@ -981,7 +992,8 @@ const NotificationsList = ({ compact = false }) => {
 
           <div className="header-left">
 
-            <h2>Notifications</h2>
+<h2>{t('notif_title')}</h2>
+  {notifications.length > 0 && ` (${notifications.length})`}
 
             {unreadCount > 0 && (
               <span className="unread-badge">
@@ -996,7 +1008,7 @@ const NotificationsList = ({ compact = false }) => {
               className="btn-mark-all"
               onClick={handleMarkAllAsRead}
             >
-              Tout marquer comme lu
+{t('notif_mark_all')}
             </button>
           )}
 
@@ -1011,23 +1023,23 @@ const NotificationsList = ({ compact = false }) => {
             className={`filter-btn ${filter === 'all' ? 'active' : ''}`}
             onClick={() => setFilter('all')}
           >
-            Toutes ({notifications.length})
+{t('notif_filter_all')} ({notifications.length})
           </button>
 
           <button
             className={`filter-btn ${filter === 'unread' ? 'active' : ''}`}
             onClick={() => setFilter('unread')}
           >
-            Non lues ({unreadCount})
+            {t('notif_filter_unread')} ({unreadCount})
           </button>
 
           <button
             className={`filter-btn ${filter === 'read' ? 'active' : ''}`}
             onClick={() => setFilter('read')}
           >
-            Lues ({notifications.length - unreadCount})
+            {t('notif_filter_read')} ({notifications.length - unreadCount})
           </button>
-
+{/* {unreadCount} {t(unreadCount > 1 ? 'notif_unread_plural' : 'notif_unread_single')} */}
         </div>
 
       )}
@@ -1043,7 +1055,7 @@ const NotificationsList = ({ compact = false }) => {
         {filteredNotifications.length === 0 ? (
 
           <div className="empty-notifications">
-            <p>Aucune notification</p>
+<p>{t('notif_empty')}</p>
           </div>
 
         ) : (
@@ -1094,7 +1106,7 @@ const NotificationsList = ({ compact = false }) => {
                           handleViewNotification(notification);
                         }}
                       >
-                        Voir →
+{t('notif_view')}
                       </button>
 
                     )}

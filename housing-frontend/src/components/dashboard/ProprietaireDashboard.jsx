@@ -489,28 +489,102 @@ const ProprietaireDashboard = () => {
           </div>
         );
 
+    
       case 'settings':
-        return (
-          <div className="dashboard-section">
-            <h2>Paramètres</h2>
-            <div className="settings-form">
-              <div className="setting-item">
-                <label>Notifications par email</label>
-                <input type="checkbox" defaultChecked />
-              </div>
-              <div className="setting-item">
-                <label>Notifications push</label>
-                <input type="checkbox" defaultChecked />
-              </div>
-              <div className="setting-item danger-zone">
-                <h3>Zone de danger</h3>
-                <button className="btn btn-danger">
-                  <FaTrash /> Supprimer mon compte
-                </button>
-              </div>
-            </div>
-          </div>
-        );
+  return (
+    <div className="dashboard-section">
+
+      <h2>{t('settings_title')}</h2>
+
+      <div className="settings-form">
+
+        {/* EMAIL NOTIFICATIONS */}
+        <div className="setting-item">
+
+          <label htmlFor="emailNotif">
+            {t('settings_email_notifications')}
+          </label>
+
+          <input
+            id="emailNotif"
+            type="checkbox"
+            defaultChecked
+          />
+
+        </div>
+
+
+        {/* PUSH NOTIFICATIONS */}
+        <div className="setting-item">
+
+          <label htmlFor="pushNotif">
+            {t('settings_push_notifications')}
+          </label>
+
+          <input
+            id="pushNotif"
+            type="checkbox"
+            defaultChecked
+          />
+
+        </div>
+
+
+        {/* LANGUAGE */}
+        <div className="setting-item">
+
+          <label>{t('settings_language')}</label>
+
+          <select
+            value={language}
+            onChange={(e) => changeLanguage(e.target.value)}
+          >
+            <option value="fr">Français</option>
+            <option value="en">English</option>
+          </select>
+
+        </div>
+
+
+        {/* THEME */}
+        <div className="setting-item">
+
+          <label>{t('settings_theme')}</label>
+
+          <select
+            value={theme}
+            onChange={(e) => changeTheme(e.target.value)}
+          >
+            <option value="light">{t('theme_light')}</option>
+            <option value="dark">{t('theme_dark')}</option>
+          </select>
+
+        </div>
+
+
+        {/* DANGER ZONE */}
+        <div className="setting-item danger-zone">
+
+          <h3>{t('settings_danger_zone')}</h3>
+
+          <button
+            className="btn btn-danger"
+            onClick={() => {
+              if (window.confirm(t('confirm_delete_account'))) {
+                console.log("Delete account");
+              }
+            }}
+          >
+            <FaTrash />
+            {t('settings_delete_account')}
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+  );
 
       default:
         return null;
@@ -518,61 +592,118 @@ const ProprietaireDashboard = () => {
   };
 
   return (
-    <div className="dashboard-layout">
-      <aside className="dashboard-sidebar">
-        <div className="sidebar-header">
-          <h2>Dashboard Propriétaire</h2>
-        </div>
+  <div className="dashboard-layout">
 
-        <nav className="sidebar-nav">
-          <button className={activeTab === 'profile' ? 'active' : ''}
-                  onClick={() => handleTabChange('profile')}>
-            <FaUser /> Mon Profil
-          </button>
-          <button className={activeTab === 'housings' ? 'active' : ''}
-                  onClick={() => handleTabChange('housings')}>
-            <FaHome /> Mes Logements
-          </button>
-          <button className={activeTab === 'AddHousing' ? 'active' : ''}
-                  onClick={() => handleTabChange('AddHousing')}>
-            <FaPlus /> Ajouter un logement
-          </button>
-          <button className={activeTab === 'stats' ? 'active' : ''}
-                  onClick={() => handleTabChange('stats')}>
-            <FaChartLine /> Statistiques
-          </button>
-          <button className={activeTab === 'visibility' ? 'active' : ''}
-                  onClick={() => handleTabChange('visibility')}>
-            <FaEye /> Visibilité
-          </button>
-          <button className={activeTab === 'reservations' ? 'active' : ''}
-                  onClick={() => handleTabChange('reservations')}>
-            <FaCalendar /> Réservations
-          </button>
-          <button className={activeTab === 'messages' ? 'active' : ''}
-                  onClick={() => handleTabChange('messages')}>
-            <FaEnvelope /> Messages
-          </button>
-          <button className={activeTab === 'notifications' ? 'active' : ''}
-                  onClick={() => handleTabChange('notifications')}>
-            <FaBell /> Notifications
-          </button>
-          <button className={activeTab === 'settings' ? 'active' : ''}
-                  onClick={() => handleTabChange('settings')}>
-            <FaCog /> Paramètres
-          </button>
-        </nav>
+    {/* SIDEBAR */}
+    <aside className="dashboard-sidebar">
 
-        <button className="btn btn-danger btn-block mt-auto" onClick={logout}>
-          Déconnexion
+      <div className="sidebar-header">
+        <h2>{t('owner_dashboard')}</h2>
+      </div>
+
+      <nav className="sidebar-nav">
+
+        <button
+          className={activeTab === 'profile' ? 'active' : ''}
+          onClick={() => handleTabChange('profile')}
+        >
+          <FaUser />
+          {t('menu_profile')}
         </button>
-      </aside>
 
-      <main className="dashboard-main">
-        {renderContent()}
-      </main>
-    </div>
-  );
+
+        <button
+          className={activeTab === 'housings' ? 'active' : ''}
+          onClick={() => handleTabChange('housings')}
+        >
+          <FaHome />
+          {t('menu_housings')}
+        </button>
+
+
+        <button
+          className={activeTab === 'AddHousing' ? 'active' : ''}
+          onClick={() => handleTabChange('AddHousing')}
+        >
+          <FaPlus />
+          {t('menu_add_housing')}
+        </button>
+
+
+        <button
+          className={activeTab === 'stats' ? 'active' : ''}
+          onClick={() => handleTabChange('stats')}
+        >
+          <FaChartLine />
+          {t('menu_stats')}
+        </button>
+
+
+        <button
+          className={activeTab === 'visibility' ? 'active' : ''}
+          onClick={() => handleTabChange('visibility')}
+        >
+          <FaEye />
+          {t('menu_visibility')}
+        </button>
+
+
+        <button
+          className={activeTab === 'reservations' ? 'active' : ''}
+          onClick={() => handleTabChange('reservations')}
+        >
+          <FaCalendar />
+          {t('menu_reservations')}
+        </button>
+
+
+        <button
+          className={activeTab === 'messages' ? 'active' : ''}
+          onClick={() => handleTabChange('messages')}
+        >
+          <FaEnvelope />
+          {t('menu_messages')}
+        </button>
+
+
+        <button
+          className={activeTab === 'notifications' ? 'active' : ''}
+          onClick={() => handleTabChange('notifications')}
+        >
+          <FaBell />
+          {t('menu_notifications')}
+        </button>
+
+
+        <button
+          className={activeTab === 'settings' ? 'active' : ''}
+          onClick={() => handleTabChange('settings')}
+        >
+          <FaCog />
+          {t('menu_settings')}
+        </button>
+
+      </nav>
+
+
+      {/* LOGOUT */}
+      <button
+        className="btn btn-danger btn-block mt-auto"
+        onClick={logout}
+      >
+        {t('logout')}
+      </button>
+
+    </aside>
+
+
+    {/* MAIN CONTENT */}
+    <main className="dashboard-main">
+      {renderContent()}
+    </main>
+
+  </div>
+);
 };
 
 export default ProprietaireDashboard;

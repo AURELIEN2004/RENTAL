@@ -8,12 +8,16 @@ import MessageInput from './MessageInput';
 import { FaPhone, FaVideo, FaEllipsisV, FaHome } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import './MessageThread.css';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const MessageThread = ({ conversation, onNewMessage }) => {
   const { user } = useAuth();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef(null);
+
+
+  const { t, language, theme } = useTheme();
 
   useEffect(() => {
     if (conversation) {
@@ -108,7 +112,8 @@ const MessageThread = ({ conversation, onNewMessage }) => {
         <div className="header-user-info">
           <img 
             src={otherUser?.photo || '/default-avatar.png'} 
-            alt={otherUser?.username || 'Utilisateur'}
+            // alt={otherUser?.username || 'Utilisateur'}
+            alt={otherUser?.username || t("messages_user_default")}
             className="header-avatar"
             onError={(e) => e.target.src = '/default-avatar.png'}
           />
@@ -126,7 +131,7 @@ const MessageThread = ({ conversation, onNewMessage }) => {
             <button 
               className="action-icon-btn"
               onClick={() => window.open(`/housing/${conversation.housing.id}`, '_blank')}
-              title="Voir le logement"
+              title={t("messages_view_housing")}
             >
               <FaHome />
             </button>
@@ -135,14 +140,14 @@ const MessageThread = ({ conversation, onNewMessage }) => {
             <button 
               className="action-icon-btn"
               onClick={() => window.open(`tel:${otherUser.phone}`)}
-              title="Appeler"
+              title={t("messages_call")}
             >
               <FaPhone />
             </button>
           )}
           <button 
             className="action-icon-btn"
-            title="Plus d'options"
+            title={t("messages_more_options")}
           >
             <FaEllipsisV />
           </button>
@@ -173,7 +178,7 @@ const MessageThread = ({ conversation, onNewMessage }) => {
               rel="noopener noreferrer"
               className="view-details-btn"
             >
-              Voir les détails →
+              {t("messages_housing_details")} →
             </a>
           </div>
         </div>
@@ -184,14 +189,17 @@ const MessageThread = ({ conversation, onNewMessage }) => {
         {loading ? (
           <div className="messages-loading">
             <div className="spinner"></div>
-            <p>Chargement des messages...</p>
+            <p>{t("messages_loading_messages")}</p>
           </div>
         ) : messages.length === 0 ? (
           <div className="no-messages">
             <div className="empty-icon">💬</div>
-            <p>Aucun message pour le moment</p>
-            <p className="text-muted">Envoyez le premier message pour commencer la conversation</p>
-          </div>
+            {/* <p>Aucun message pour le moment</p> */}
+            <p>{t("messages_no_messages")}</p>
+
+<p className="text-muted">
+{t("messages_start_conversation")}
+</p>          </div>
         ) : (
           <>
             {messages.map((message, index) => {
@@ -254,7 +262,7 @@ const MessageThread = ({ conversation, onNewMessage }) => {
                     {isMine && (
                       <img 
                         src={user.photo || '/default-avatar.png'}
-                        alt="Vous"
+                        alt={t("messages_you_prefix")}
                         className="message-avatar"
                         onError={(e) => e.target.src = '/default-avatar.png'}
                       />

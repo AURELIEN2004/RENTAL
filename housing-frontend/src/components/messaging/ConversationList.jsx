@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { FaSearch, FaCircle } from 'react-icons/fa';
 import './ConversationList.css';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const ConversationList = ({ 
   conversations = [], 
@@ -18,6 +19,9 @@ const ConversationList = ({
   const getOtherParticipant = (conversation) => {
     return conversation.participants?.find(p => p.id !== user.id) || {};
   };
+
+
+  const { t, language, theme } = useTheme();
 
   const formatLastMessageTime = (timestamp) => {
     if (!timestamp) return '';
@@ -54,7 +58,8 @@ const ConversationList = ({
   return (
     <div className="conversation-list">
       <div className="conversations-header">
-        <h2>💬 Messages</h2>
+        {/* <h2>💬 Messages</h2> */}
+        <h2>💬 {t("messages_header_title")}</h2>
         {unreadCount > 0 && (
           <span className="unread-badge">{unreadCount}</span>
         )}
@@ -64,7 +69,8 @@ const ConversationList = ({
         <FaSearch className="search-icon" />
         <input
           type="text"
-          placeholder="🔍 Rechercher une conversation..."
+          // placeholder="🔍 Rechercher une conversation..."
+          placeholder={t("messages_search_placeholder")}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -74,11 +80,16 @@ const ConversationList = ({
         {filteredConversations.length === 0 ? (
           <div className="empty-conversations">
             <div className="empty-icon">💬</div>
-            <p>
+            {/* <p>
               {searchTerm 
                 ? 'Aucune conversation trouvée' 
                 : 'Vous n\'avez pas encore de conversations'}
-            </p>
+            </p> */}
+            <p>
+{searchTerm
+ ? t("messages_empty_search")
+ : t("messages_empty_conversations")}
+</p>
           </div>
         ) : (
           filteredConversations.map(conversation => {
@@ -96,7 +107,8 @@ const ConversationList = ({
                 <div className="conv-avatar">
                   <img 
                     src={otherUser?.photo || '/default-avatar.png'} 
-                    alt={otherUser?.username || 'Utilisateur'}
+                    // alt={otherUser?.username || 'Utilisateur'}
+                    alt={otherUser?.username || t("messages_user_default")}
                     onError={(e) => e.target.src = '/default-avatar.png'}
                   />
                   {conversation.is_online && (
@@ -126,7 +138,7 @@ const ConversationList = ({
                   {/* Dernier message */}
                   <div className="conv-last-message">
                     {conversation.last_message?.sender === user.id && (
-                      <span className="you-prefix">Vous: </span>
+                      <span className="you-prefix">{t('messages_you_prefix')}: </span>
                     )}
                     {conversation.last_message?.content ? (
                       truncateMessage(conversation.last_message.content)
@@ -135,7 +147,7 @@ const ConversationList = ({
                     ) : conversation.last_message?.video ? (
                       <span className="media-indicator">🎥 Vidéo</span>
                     ) : (
-                      <span className="no-message">Commencer la conversation</span>
+                      <span className="no-message"> {t('messages_start')}</span>
                     )}
                   </div>
                 </div>

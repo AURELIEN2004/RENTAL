@@ -867,341 +867,802 @@ const AdminDashboard = ({ user }) => {
   
   const renderContent = () => {
     switch (activeTab) {
+      // case 'overview':
+      //   return (
+      //     <div className="overview-section">
+      //       <h1><FaChartBar /> Vue d'ensemble</h1>
+            
+      //       {loading ? <Loading /> : stats && (
+      //         <>
+      //           {/* Statistiques Utilisateurs */}
+      //           <section className="stats-section">
+      //             <h2><FaUsers /> Utilisateurs</h2>
+      //             <div className="stats-grid">
+      //               <div className="stat-card blue">
+      //                 <div className="stat-icon"><FaUsers /></div>
+      //                 <div className="stat-number">{stats.users.total}</div>
+      //                 <div className="stat-label">Total</div>
+      //               </div>
+      //               <div className="stat-card green">
+      //                 <div className="stat-icon"><FaHome /></div>
+      //                 <div className="stat-number">{stats.users.proprietaires}</div>
+      //                 <div className="stat-label">Propriétaires</div>
+      //               </div>
+      //               <div className="stat-card purple">
+      //                 <div className="stat-icon"><FaSearch /></div>
+      //                 <div className="stat-number">{stats.users.locataires}</div>
+      //                 <div className="stat-label">Locataires</div>
+      //               </div>
+      //               <div className="stat-card orange">
+      //                 <div className="stat-icon"><FaBan /></div>
+      //                 <div className="stat-number">{stats.users.blocked}</div>
+      //                 <div className="stat-label">Bloqués</div>
+      //               </div>
+      //             </div>
+      //           </section>
+
+      //           {/* Statistiques Logements */}
+      //           <section className="stats-section">
+      //             <h2><FaHome /> Logements</h2>
+      //             <div className="stats-grid">
+      //               <div className="stat-card blue">
+      //                 <div className="stat-icon"><FaChartBar /></div>
+      //                 <div className="stat-number">{stats.housings.total}</div>
+      //                 <div className="stat-label">Total</div>
+      //               </div>
+      //               <div className="stat-card green">
+      //                 <div className="stat-icon"><FaEye /></div>
+      //                 <div className="stat-number">{stats.housings.visible}</div>
+      //                 <div className="stat-label">Visibles</div>
+      //               </div>
+      //               <div className="stat-card orange">
+      //                 <div className="stat-icon"><FaLock /></div>
+      //                 <div className="stat-number">{stats.housings.hidden}</div>
+      //                 <div className="stat-label">Masqués</div>
+      //               </div>
+      //               <div className="stat-card purple">
+      //                 <div className="stat-icon"><FaCheckCircle /></div>
+      //                 <div className="stat-number">{stats.housings.disponible}</div>
+      //                 <div className="stat-label">Disponibles</div>
+      //               </div>
+      //             </div>
+      //           </section>
+
+      //           {/* Top Propriétaires */}
+      //           <section className="stats-section">
+      //             <h2><FaTrophy /> Top Propriétaires</h2>
+      //             <div className="top-users-list">
+      //               {stats.users.top_owners.map((owner, idx) => (
+      //                 <div key={owner.id} className="top-user-item">
+      //                   <div className="rank">#{idx + 1}</div>
+      //                   <img 
+      //                     src={owner.photo || '/default-avatar.png'} 
+      //                     alt={owner.username}
+      //                     onError={(e) => { e.target.src = '/default-avatar.png'; }}
+      //                   />
+      //                   <div className="user-info">
+      //                     <h4>{owner.username}</h4>
+      //                     <p>{owner.email}</p>
+      //                   </div>
+      //                   <div className="user-stats">
+      //                     <span><FaHome /> {owner.housings_count}</span>
+      //                   </div>
+      //                 </div>
+      //               ))}
+      //             </div>
+      //           </section>
+      //         </>
+      //       )}
+      //     </div>
+      //   );
       case 'overview':
-        return (
-          <div className="overview-section">
-            <h1><FaChartBar /> Vue d'ensemble</h1>
-            
-            {loading ? <Loading /> : stats && (
-              <>
-                {/* Statistiques Utilisateurs */}
-                <section className="stats-section">
-                  <h2><FaUsers /> Utilisateurs</h2>
-                  <div className="stats-grid">
-                    <div className="stat-card blue">
-                      <div className="stat-icon"><FaUsers /></div>
-                      <div className="stat-number">{stats.users.total}</div>
-                      <div className="stat-label">Total</div>
-                    </div>
-                    <div className="stat-card green">
-                      <div className="stat-icon"><FaHome /></div>
-                      <div className="stat-number">{stats.users.proprietaires}</div>
-                      <div className="stat-label">Propriétaires</div>
-                    </div>
-                    <div className="stat-card purple">
-                      <div className="stat-icon"><FaSearch /></div>
-                      <div className="stat-number">{stats.users.locataires}</div>
-                      <div className="stat-label">Locataires</div>
-                    </div>
-                    <div className="stat-card orange">
-                      <div className="stat-icon"><FaBan /></div>
-                      <div className="stat-number">{stats.users.blocked}</div>
-                      <div className="stat-label">Bloqués</div>
-                    </div>
-                  </div>
-                </section>
+  return (
+    <div className="overview-section">
 
-                {/* Statistiques Logements */}
-                <section className="stats-section">
-                  <h2><FaHome /> Logements</h2>
-                  <div className="stats-grid">
-                    <div className="stat-card blue">
-                      <div className="stat-icon"><FaChartBar /></div>
-                      <div className="stat-number">{stats.housings.total}</div>
-                      <div className="stat-label">Total</div>
-                    </div>
-                    <div className="stat-card green">
-                      <div className="stat-icon"><FaEye /></div>
-                      <div className="stat-number">{stats.housings.visible}</div>
-                      <div className="stat-label">Visibles</div>
-                    </div>
-                    <div className="stat-card orange">
-                      <div className="stat-icon"><FaLock /></div>
-                      <div className="stat-number">{stats.housings.hidden}</div>
-                      <div className="stat-label">Masqués</div>
-                    </div>
-                    <div className="stat-card purple">
-                      <div className="stat-icon"><FaCheckCircle /></div>
-                      <div className="stat-number">{stats.housings.disponible}</div>
-                      <div className="stat-label">Disponibles</div>
-                    </div>
-                  </div>
-                </section>
+      <h1><FaChartBar /> {t('dashboard_overview')}</h1>
 
-                {/* Top Propriétaires */}
-                <section className="stats-section">
-                  <h2><FaTrophy /> Top Propriétaires</h2>
-                  <div className="top-users-list">
-                    {stats.users.top_owners.map((owner, idx) => (
-                      <div key={owner.id} className="top-user-item">
-                        <div className="rank">#{idx + 1}</div>
-                        <img 
-                          src={owner.photo || '/default-avatar.png'} 
-                          alt={owner.username}
-                          onError={(e) => { e.target.src = '/default-avatar.png'; }}
-                        />
-                        <div className="user-info">
-                          <h4>{owner.username}</h4>
-                          <p>{owner.email}</p>
-                        </div>
-                        <div className="user-stats">
-                          <span><FaHome /> {owner.housings_count}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              </>
-            )}
-          </div>
-        );
+      {loading ? <Loading /> : stats && (
+        <>
+          
+          {/* Statistiques Utilisateurs */}
+          <section className="stats-section">
 
-      case 'users':
-        return (
-          <div className="users-section">
-            <h1><FaUsers /> Gestion des Utilisateurs</h1>
-            
-            {loading ? <Loading /> : (
-              <div className="users-table-container">
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Photo</th>
-                      <th>Nom</th>
-                      <th>Email</th>
-                      <th>Rôle</th>
-                      <th>Logements</th>
-                      <th>Statut</th>
-                      <th>Inscrit le</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {users.map(user => (
-                      <tr key={user.id}>
-                        <td>
-                          <img 
-                            src={user.photo || '/default-avatar.png'} 
-                            alt={user.username}
-                            className="user-avatar-sm"
-                            onError={(e) => { e.target.src = '/default-avatar.png'; }}
-                          />
-                        </td>
-                        <td>{user.username}</td>
-                        <td>{user.email}</td>
-                        <td>
-                          <span className={`role-badge ${user.is_proprietaire ? 'proprietaire' : 'locataire'}`}>
-                            {user.is_proprietaire ? 'Propriétaire' : 'Locataire'}
-                          </span>
-                        </td>
-                        <td>
-                          <button 
-                            className="btn-link"
-                            onClick={() => handleViewUserDetail(user.id)}
-                          >
-                            <FaHome /> {user.housings_count || 0}
-                          </button>
-                        </td>
-                        <td>
-                          <span className={`status-badge ${user.is_blocked ? 'blocked' : 'active'}`}>
-                            {user.is_blocked ? 'Bloqué' : 'Actif'}
-                          </span>
-                        </td>
-                        <td>{new Date(user.date_joined).toLocaleDateString('fr-FR')}</td>
-                        <td>
-                          <div className="action-buttons">
-                            <button 
-                              className="btn-icon"
-                              onClick={() => handleViewUserDetail(user.id)}
-                              title="Voir détails"
-                            >
-                              <FaEye />
-                            </button>
-                            
-                            {!user.is_blocked ? (
-                              <button 
-                                className="btn-icon danger"
-                                onClick={() => handleBlockUser(user.id, 'permanent')}
-                                title="Bloquer"
-                              >
-                                <FaBan />
-                              </button>
-                            ) : (
-                              <button 
-                                className="btn-icon success"
-                                onClick={() => handleUnblockUser(user.id)}
-                                title="Débloquer"
-                              >
-                                <FaCheck />
-                              </button>
-                            )}
-                            
-                            <button 
-                              className="btn-icon danger"
-                              onClick={() => handleDeleteUser(user.id)}
-                              title="Supprimer"
-                            >
-                              <FaTrash />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+            <h2><FaUsers /> {t('users')}</h2>
+
+            <div className="stats-grid">
+
+              <div className="stat-card blue">
+                <div className="stat-icon"><FaUsers /></div>
+                <div className="stat-number">{stats.users.total}</div>
+                <div className="stat-label">{t('total')}</div>
               </div>
-            )}
-          </div>
-        );
 
-      case 'user-detail':
-        return selectedUser && (
-          <div className="user-detail-section">
-            <button 
-              className="btn btn-outline"
-              onClick={() => handleTabChange('users')}
-            >
-              <FaArrowLeft /> Retour
-            </button>
-            
-            <h1>Détails: {selectedUser.username}</h1>
-            
-            <div className="user-detail-card">
-              <img 
-                src={selectedUser.photo || '/default-avatar.png'} 
-                alt={selectedUser.username}
-                className="user-avatar-large"
-                onError={(e) => { e.target.src = '/default-avatar.png'; }}
-              />
-              <div className="user-info">
-                <p><strong><FaEnvelope /> Email:</strong> {selectedUser.email}</p>
-                <p><strong>Téléphone:</strong> {selectedUser.phone || 'Non renseigné'}</p>
-                <p><strong><FaUser /> Rôle:</strong> {selectedUser.is_proprietaire ? 'Propriétaire' : 'Locataire'}</p>
+              <div className="stat-card green">
+                <div className="stat-icon"><FaHome /></div>
+                <div className="stat-number">{stats.users.proprietaires}</div>
+                <div className="stat-label">{t('owners')}</div>
               </div>
+
+              <div className="stat-card purple">
+                <div className="stat-icon"><FaSearch /></div>
+                <div className="stat-number">{stats.users.locataires}</div>
+                <div className="stat-label">{t('tenants')}</div>
+              </div>
+
+              <div className="stat-card orange">
+                <div className="stat-icon"><FaBan /></div>
+                <div className="stat-number">{stats.users.blocked}</div>
+                <div className="stat-label">{t('blocked')}</div>
+              </div>
+
             </div>
+          </section>
 
-            <h2><FaHome /> Logements ({selectedUser.housings_count})</h2>
-            <div className="housing-grid">
-              {selectedUser.housings && selectedUser.housings.map(housing => (
-                <HousingCard key={housing.id} housing={housing} />
+
+          {/* Statistiques Logements */}
+          <section className="stats-section">
+
+            <h2><FaHome /> {t('housings')}</h2>
+
+            <div className="stats-grid">
+
+              <div className="stat-card blue">
+                <div className="stat-icon"><FaChartBar /></div>
+                <div className="stat-number">{stats.housings.total}</div>
+                <div className="stat-label">{t('total')}</div>
+              </div>
+
+              <div className="stat-card green">
+                <div className="stat-icon"><FaEye /></div>
+                <div className="stat-number">{stats.housings.visible}</div>
+                <div className="stat-label">{t('visible')}</div>
+              </div>
+
+              <div className="stat-card orange">
+                <div className="stat-icon"><FaLock /></div>
+                <div className="stat-number">{stats.housings.hidden}</div>
+                <div className="stat-label">{t('hidden')}</div>
+              </div>
+
+              <div className="stat-card purple">
+                <div className="stat-icon"><FaCheckCircle /></div>
+                <div className="stat-number">{stats.housings.disponible}</div>
+                <div className="stat-label">{t('available')}</div>
+              </div>
+
+            </div>
+          </section>
+
+
+          {/* Top Propriétaires */}
+          <section className="stats-section">
+
+            <h2><FaTrophy /> {t('top_owners')}</h2>
+
+            <div className="top-users-list">
+
+              {stats.users.top_owners.map((owner, idx) => (
+                <div key={owner.id} className="top-user-item">
+
+                  <div className="rank">#{idx + 1}</div>
+
+                  <img
+                    src={owner.photo || '/default-avatar.png'}
+                    alt={owner.username}
+                    onError={(e) => { e.target.src = '/default-avatar.png'; }}
+                  />
+
+                  <div className="user-info">
+                    <h4>{owner.username}</h4>
+                    <p>{owner.email}</p>
+                  </div>
+
+                  <div className="user-stats">
+                    <span><FaHome /> {owner.housings_count}</span>
+                  </div>
+
+                </div>
               ))}
-            </div>
-          </div>
-        );
 
-      case 'housings':
-        return (
-          <div className="housings-section">
-            <h1><FaHome /> Gestion des Logements</h1>
+            </div>
+
+          </section>
+
+        </>
+      )}
+
+    </div>
+  );
+
+      // case 'users':
+      //   return (
+      //     <div className="users-section">
+      //       <h1><FaUsers /> Gestion des Utilisateurs</h1>
             
-            <div className="filters-bar">
-              {/* 🔧 FIX: Filtre uniquement sur les propriétaires */}
-              <select 
-                value={filterOwner}
-                onChange={(e) => setFilterOwner(e.target.value)}
-              >
-                <option value="">Tous les propriétaires</option>
-                {proprietaires.map(proprio => (
-                  <option key={proprio.id} value={proprio.id}>
-                    {proprio.username} ({proprio.housings_count} logements)
-                  </option>
-                ))}
-              </select>
+      //       {loading ? <Loading /> : (
+      //         <div className="users-table-container">
+      //           <table className="admin-table">
+      //             <thead>
+      //               <tr>
+      //                 <th>Photo</th>
+      //                 <th>Nom</th>
+      //                 <th>Email</th>
+      //                 <th>Rôle</th>
+      //                 <th>Logements</th>
+      //                 <th>Statut</th>
+      //                 <th>Inscrit le</th>
+      //                 <th>Actions</th>
+      //               </tr>
+      //             </thead>
+      //             <tbody>
+      //               {users.map(user => (
+      //                 <tr key={user.id}>
+      //                   <td>
+      //                     <img 
+      //                       src={user.photo || '/default-avatar.png'} 
+      //                       alt={user.username}
+      //                       className="user-avatar-sm"
+      //                       onError={(e) => { e.target.src = '/default-avatar.png'; }}
+      //                     />
+      //                   </td>
+      //                   <td>{user.username}</td>
+      //                   <td>{user.email}</td>
+      //                   <td>
+      //                     <span className={`role-badge ${user.is_proprietaire ? 'proprietaire' : 'locataire'}`}>
+      //                       {user.is_proprietaire ? 'Propriétaire' : 'Locataire'}
+      //                     </span>
+      //                   </td>
+      //                   <td>
+      //                     <button 
+      //                       className="btn-link"
+      //                       onClick={() => handleViewUserDetail(user.id)}
+      //                     >
+      //                       <FaHome /> {user.housings_count || 0}
+      //                     </button>
+      //                   </td>
+      //                   <td>
+      //                     <span className={`status-badge ${user.is_blocked ? 'blocked' : 'active'}`}>
+      //                       {user.is_blocked ? 'Bloqué' : 'Actif'}
+      //                     </span>
+      //                   </td>
+      //                   <td>{new Date(user.date_joined).toLocaleDateString('fr-FR')}</td>
+      //                   <td>
+      //                     <div className="action-buttons">
+      //                       <button 
+      //                         className="btn-icon"
+      //                         onClick={() => handleViewUserDetail(user.id)}
+      //                         title="Voir détails"
+      //                       >
+      //                         <FaEye />
+      //                       </button>
+                            
+      //                       {!user.is_blocked ? (
+      //                         <button 
+      //                           className="btn-icon danger"
+      //                           onClick={() => handleBlockUser(user.id, 'permanent')}
+      //                           title="Bloquer"
+      //                         >
+      //                           <FaBan />
+      //                         </button>
+      //                       ) : (
+      //                         <button 
+      //                           className="btn-icon success"
+      //                           onClick={() => handleUnblockUser(user.id)}
+      //                           title="Débloquer"
+      //                         >
+      //                           <FaCheck />
+      //                         </button>
+      //                       )}
+                            
+      //                       <button 
+      //                         className="btn-icon danger"
+      //                         onClick={() => handleDeleteUser(user.id)}
+      //                         title="Supprimer"
+      //                       >
+      //                         <FaTrash />
+      //                       </button>
+      //                     </div>
+      //                   </td>
+      //                 </tr>
+      //               ))}
+      //             </tbody>
+      //           </table>
+      //         </div>
+      //       )}
+      //     </div>
+      //   );
 
-              <select 
-                value={filterVisibility}
-                onChange={(e) => setFilterVisibility(e.target.value)}
-              >
-                <option value="all">Tous</option>
-                <option value="visible">Visibles</option>
-                <option value="hidden">Masqués</option>
-              </select>
-            </div>
+      // case 'user-detail':
+      //   return selectedUser && (
+      //     <div className="user-detail-section">
+      //       <button 
+      //         className="btn btn-outline"
+      //         onClick={() => handleTabChange('users')}
+      //       >
+      //         <FaArrowLeft /> Retour
+      //       </button>
+            
+      //       <h1>Détails: {selectedUser.username}</h1>
+            
+      //       <div className="user-detail-card">
+      //         <img 
+      //           src={selectedUser.photo || '/default-avatar.png'} 
+      //           alt={selectedUser.username}
+      //           className="user-avatar-large"
+      //           onError={(e) => { e.target.src = '/default-avatar.png'; }}
+      //         />
+      //         <div className="user-info">
+      //           <p><strong><FaEnvelope /> Email:</strong> {selectedUser.email}</p>
+      //           <p><strong>Téléphone:</strong> {selectedUser.phone || 'Non renseigné'}</p>
+      //           <p><strong><FaUser /> Rôle:</strong> {selectedUser.is_proprietaire ? 'Propriétaire' : 'Locataire'}</p>
+      //         </div>
+      //       </div>
 
-            {loading ? <Loading /> : (
-              <div className="housings-list">
-                {housings.map(housing => (
-                  <div key={housing.id} className="housing-admin-item">
-                    <HousingCard housing={housing} />
-                    
-                    <div className="housing-admin-actions">
-                      <button 
-                        className={`btn btn-sm ${housing.is_visible ? 'btn-warning' : 'btn-success'}`}
-                        onClick={() => handleToggleVisibility(housing.id)}
+      //       <h2><FaHome /> Logements ({selectedUser.housings_count})</h2>
+      //       <div className="housing-grid">
+      //         {selectedUser.housings && selectedUser.housings.map(housing => (
+      //           <HousingCard key={housing.id} housing={housing} />
+      //         ))}
+      //       </div>
+      //     </div>
+      //   );
+      case 'users':
+  return (
+    <div className="users-section">
+
+      <h1><FaUsers /> {t('users_management')}</h1>
+
+      {loading ? <Loading /> : (
+        <div className="users-table-container">
+
+          <table className="admin-table">
+
+            <thead>
+              <tr>
+                <th>{t('photo')}</th>
+                <th>{t('name')}</th>
+                <th>{t('email')}</th>
+                <th>{t('role')}</th>
+                <th>{t('housings')}</th>
+                <th>{t('status')}</th>
+                <th>{t('registered_on')}</th>
+                <th>{t('actions')}</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {users.map(user => (
+                <tr key={user.id}>
+
+                  <td>
+                    <img
+                      src={user.photo || '/default-avatar.png'}
+                      alt={user.username}
+                      className="user-avatar-sm"
+                      onError={(e) => { e.target.src = '/default-avatar.png'; }}
+                    />
+                  </td>
+
+                  <td>{user.username}</td>
+
+                  <td>{user.email}</td>
+
+                  <td>
+                    <span className={`role-badge ${user.is_proprietaire ? 'proprietaire' : 'locataire'}`}>
+                      {user.is_proprietaire ? t('owner') : t('tenant')}
+                    </span>
+                  </td>
+
+                  <td>
+                    <button
+                      className="btn-link"
+                      onClick={() => handleViewUserDetail(user.id)}
+                    >
+                      <FaHome /> {user.housings_count || 0}
+                    </button>
+                  </td>
+
+                  <td>
+                    <span className={`status-badge ${user.is_blocked ? 'blocked' : 'active'}`}>
+                      {user.is_blocked ? t('blocked') : t('active')}
+                    </span>
+                  </td>
+
+                  <td>
+                    {new Date(user.date_joined).toLocaleDateString(
+                      language === 'fr' ? 'fr-FR' : 'en-US'
+                    )}
+                  </td>
+
+                  <td>
+                    <div className="action-buttons">
+
+                      <button
+                        className="btn-icon"
+                        onClick={() => handleViewUserDetail(user.id)}
+                        title={t('view_details')}
                       >
-                        {housing.is_visible ? (
-                          <><FaEyeSlash /> Masquer</>
-                        ) : (
-                          <><FaEye /> Activer</>
-                        )}
+                        <FaEye />
                       </button>
-                      
-                      <button 
-                        className="btn btn-sm btn-danger"
-                        onClick={() => handleDeleteHousing(housing.id)}
+
+                      {!user.is_blocked ? (
+                        <button
+                          className="btn-icon danger"
+                          onClick={() => handleBlockUser(user.id, 'permanent')}
+                          title={t('block')}
+                        >
+                          <FaBan />
+                        </button>
+                      ) : (
+                        <button
+                          className="btn-icon success"
+                          onClick={() => handleUnblockUser(user.id)}
+                          title={t('unblock')}
+                        >
+                          <FaCheck />
+                        </button>
+                      )}
+
+                      <button
+                        className="btn-icon danger"
+                        onClick={() => handleDeleteUser(user.id)}
+                        title={t('delete')}
                       >
-                        <FaTrash /> Supprimer
+                        <FaTrash />
                       </button>
+
                     </div>
-                  </div>
-                ))}
+                  </td>
+
+                </tr>
+              ))}
+            </tbody>
+
+          </table>
+
+        </div>
+      )}
+
+    </div>
+  );
+
+  case 'user-detail':
+  return selectedUser && (
+
+    <div className="user-detail-section">
+
+      <button
+        className="btn btn-outline"
+        onClick={() => handleTabChange('users')}
+      >
+        <FaArrowLeft /> {t('back')}
+      </button>
+
+      <h1>{t('user_details')} : {selectedUser.username}</h1>
+
+      <div className="user-detail-card">
+
+        <img
+          src={selectedUser.photo || '/default-avatar.png'}
+          alt={selectedUser.username}
+          className="user-avatar-large"
+          onError={(e) => { e.target.src = '/default-avatar.png'; }}
+        />
+
+        <div className="user-info">
+
+          <p>
+            <strong><FaEnvelope /> {t('email')}:</strong> {selectedUser.email}
+          </p>
+
+          <p>
+            <strong>{t('phone')}:</strong> {selectedUser.phone || t('not_provided')}
+          </p>
+
+          <p>
+            <strong><FaUser /> {t('role')}:</strong>
+            {selectedUser.is_proprietaire ? t('owner') : t('tenant')}
+          </p>
+
+        </div>
+
+      </div>
+
+      <h2><FaHome /> {t('housings')} ({selectedUser.housings_count})</h2>
+
+      <div className="housing-grid">
+        {selectedUser.housings && selectedUser.housings.map(housing => (
+          <HousingCard key={housing.id} housing={housing} />
+        ))}
+      </div>
+
+    </div>
+  );
+
+      // case 'housings':
+      //   return (
+      //     <div className="housings-section">
+      //       <h1><FaHome /> Gestion des Logements</h1>
+            
+      //       <div className="filters-bar">
+      //         {/* 🔧 FIX: Filtre uniquement sur les propriétaires */}
+      //         <select 
+      //           value={filterOwner}
+      //           onChange={(e) => setFilterOwner(e.target.value)}
+      //         >
+      //           <option value="">Tous les propriétaires</option>
+      //           {proprietaires.map(proprio => (
+      //             <option key={proprio.id} value={proprio.id}>
+      //               {proprio.username} ({proprio.housings_count} logements)
+      //             </option>
+      //           ))}
+      //         </select>
+
+      //         <select 
+      //           value={filterVisibility}
+      //           onChange={(e) => setFilterVisibility(e.target.value)}
+      //         >
+      //           <option value="all">Tous</option>
+      //           <option value="visible">Visibles</option>
+      //           <option value="hidden">Masqués</option>
+      //         </select>
+      //       </div>
+
+      //       {loading ? <Loading /> : (
+      //         <div className="housings-list">
+      //           {housings.map(housing => (
+      //             <div key={housing.id} className="housing-admin-item">
+      //               <HousingCard housing={housing} />
+                    
+      //               <div className="housing-admin-actions">
+      //                 <button 
+      //                   className={`btn btn-sm ${housing.is_visible ? 'btn-warning' : 'btn-success'}`}
+      //                   onClick={() => handleToggleVisibility(housing.id)}
+      //                 >
+      //                   {housing.is_visible ? (
+      //                     <><FaEyeSlash /> Masquer</>
+      //                   ) : (
+      //                     <><FaEye /> Activer</>
+      //                   )}
+      //                 </button>
+                      
+      //                 <button 
+      //                   className="btn btn-sm btn-danger"
+      //                   onClick={() => handleDeleteHousing(housing.id)}
+      //                 >
+      //                   <FaTrash /> Supprimer
+      //                 </button>
+      //               </div>
+      //             </div>
+      //           ))}
+      //         </div>
+      //       )}
+      //     </div>
+      //   );
+      case 'housings':
+  return (
+    <div className="housings-section">
+
+      <h1><FaHome /> {t('housings_management')}</h1>
+
+      <div className="filters-bar">
+
+        {/* Filtre propriétaires */}
+        <select
+          value={filterOwner}
+          onChange={(e) => setFilterOwner(e.target.value)}
+        >
+          <option value="">{t('all_owners')}</option>
+
+          {proprietaires.map(proprio => (
+            <option key={proprio.id} value={proprio.id}>
+              {proprio.username} ({proprio.housings_count} {t('housings')})
+            </option>
+          ))}
+        </select>
+
+
+        {/* Filtre visibilité */}
+        <select
+          value={filterVisibility}
+          onChange={(e) => setFilterVisibility(e.target.value)}
+        >
+          <option value="all">{t('all')}</option>
+          <option value="visible">{t('visible')}</option>
+          <option value="hidden">{t('hidden')}</option>
+        </select>
+
+      </div>
+
+
+      {loading ? <Loading /> : (
+        <div className="housings-list">
+
+          {housings.map(housing => (
+            <div key={housing.id} className="housing-admin-item">
+
+              <HousingCard housing={housing} />
+
+              <div className="housing-admin-actions">
+
+                <button
+                  className={`btn btn-sm ${housing.is_visible ? 'btn-warning' : 'btn-success'}`}
+                  onClick={() => handleToggleVisibility(housing.id)}
+                >
+                  {housing.is_visible ? (
+                    <>
+                      <FaEyeSlash /> {t('hide')}
+                    </>
+                  ) : (
+                    <>
+                      <FaEye /> {t('activate')}
+                    </>
+                  )}
+                </button>
+
+
+                <button
+                  className="btn btn-sm btn-danger"
+                  onClick={() => handleDeleteHousing(housing.id)}
+                >
+                  <FaTrash /> {t('delete')}
+                </button>
+
               </div>
-            )}
-          </div>
-        );
+
+            </div>
+          ))}
+
+        </div>
+      )}
+
+    </div>
+  );
+
+
 
       // AdminDashboard.jsx - SECTION PROFIL
 
+// case 'profile':
+//   return (
+//     <div className="profile-section">
+//       <h1><FaUser /> Mon Profil Admin</h1>
+      
+//       {/* Carte profil */}
+//       <div className="profile-card">
+//         <div className="profile-header">
+//           <img
+//             src={user?.photo || '/default-avatar.png'}
+//             alt={user?.username}
+//             className="profile-avatar-large"
+//             onError={(e) => { e.target.src = '/default-avatar.png'; }}
+//           />
+//           <div className="profile-info">
+//             <h3>{user?.first_name} {user?.last_name}</h3>
+//             <p>@{user?.username}</p>
+//             <p className="role-badge admin">Administrateur</p>
+//           </div>
+//         </div>
+
+//         <div className="profile-details">
+//           <div className="detail-item">
+//             <strong>Email:</strong> {user?.email}
+//           </div>
+//           <div className="detail-item">
+//             <strong>Téléphone:</strong> {user?.phone || 'Non renseigné'}
+//           </div>
+//           <div className="detail-item">
+//             <strong>Membre depuis:</strong>{' '}
+//             {new Date(user?.date_joined).toLocaleDateString('fr-FR')}
+//           </div>
+//         </div>
+
+//         <div className="profile-actions">
+//           <button
+//             className="btn btn-primary"
+//             onClick={() => setShowEditProfile(true)}
+//           >
+//             <FaEdit /> Modifier le profil
+//           </button>
+
+//           <button
+//             className="btn btn-outline"
+//             onClick={() => setShowChangePassword(true)}
+//           >
+//             <FaLock /> Changer le mot de passe
+//           </button>
+//         </div>
+//       </div>
+
+//       {/* Modals */}
+//       {showEditProfile && (
+//         <ProfileEdit
+//           onClose={() => setShowEditProfile(false)}
+//           onUpdate={(updatedUser) => {
+//             if (typeof updateUser === 'function') {
+//               updateUser(updatedUser);
+//             }
+//             setShowEditProfile(false);
+//           }}
+//         />
+//       )}
+
+//       {showChangePassword && (
+//         <ChangePassword
+//           onClose={() => setShowChangePassword(false)}
+//         />
+//       )}
+//     </div>
+//   );
 case 'profile':
   return (
     <div className="profile-section">
-      <h1><FaUser /> Mon Profil Admin</h1>
-      
+      <h1><FaUser /> {t('admin_profile_title')}</h1>
+
       {/* Carte profil */}
       <div className="profile-card">
+
         <div className="profile-header">
+
           <img
             src={user?.photo || '/default-avatar.png'}
             alt={user?.username}
             className="profile-avatar-large"
             onError={(e) => { e.target.src = '/default-avatar.png'; }}
           />
+
           <div className="profile-info">
             <h3>{user?.first_name} {user?.last_name}</h3>
             <p>@{user?.username}</p>
-            <p className="role-badge admin">Administrateur</p>
+
+            <p className="role-badge admin">
+              {t('admin_role')}
+            </p>
           </div>
+
         </div>
+
 
         <div className="profile-details">
+
           <div className="detail-item">
-            <strong>Email:</strong> {user?.email}
+            <strong>{t('email')}:</strong> {user?.email}
           </div>
+
           <div className="detail-item">
-            <strong>Téléphone:</strong> {user?.phone || 'Non renseigné'}
+            <strong>{t('phone')}:</strong> {user?.phone || t('not_provided')}
           </div>
+
           <div className="detail-item">
-            <strong>Membre depuis:</strong>{' '}
-            {new Date(user?.date_joined).toLocaleDateString('fr-FR')}
+            <strong>{t('member_since')}:</strong>{' '}
+            {new Date(user?.date_joined).toLocaleDateString(
+  language === 'fr' ? 'fr-FR' : 'en-US'
+)}
           </div>
+
         </div>
 
+
         <div className="profile-actions">
+
           <button
             className="btn btn-primary"
             onClick={() => setShowEditProfile(true)}
           >
-            <FaEdit /> Modifier le profil
+            <FaEdit /> {t('edit_profile')}
           </button>
 
           <button
             className="btn btn-outline"
             onClick={() => setShowChangePassword(true)}
           >
-            <FaLock /> Changer le mot de passe
+            <FaLock /> {t('change_password')}
           </button>
+
         </div>
+
       </div>
+
 
       {/* Modals */}
       {showEditProfile && (
@@ -1221,6 +1682,7 @@ case 'profile':
           onClose={() => setShowChangePassword(false)}
         />
       )}
+
     </div>
   );
 
@@ -1230,11 +1692,11 @@ case 'messages':
   return (
     <div className="messages-section">
       <div className="messages-header">
-        <h1><FaComments /> Support Client</h1>
-        <p>Conversations avec les utilisateurs</p>
+        <h1><FaComments /> {t('support_client')}</h1>
+        <p>{t('user_conversations')}</p>
       </div>
       
-      {/* ✅ Intégration MessagingPage avec filtre admin */}
+      {/* Intégration MessagingPage avec filtre admin */}
       <MessagingPage isAdminView={true} />
     </div>
   );
@@ -1248,68 +1710,130 @@ case 'messages':
           </div>
         );
 
-      default:
-        return <div>Section en développement</div>;
     }
   };
 
+  // return (
+  //   <div className="dashboard-layout">
+  //     <aside className="dashboard-sidebar">
+  //       <div className="sidebar-header">
+  //         <h2><FaCog /> Admin</h2>
+  //       </div>
+
+  //       <nav className="sidebar-nav">
+  //         <button 
+  //           className={activeTab === 'overview' ? 'active' : ''}
+  //           onClick={() => handleTabChange('overview')}
+  //         >
+  //           <FaChartBar /> Vue d'ensemble
+  //         </button>
+          
+  //         <button 
+  //           className={activeTab === 'users' ? 'active' : ''}
+  //           onClick={() => handleTabChange('users')}
+  //         >
+  //           <FaUsers /> Utilisateurs
+  //         </button>
+          
+  //         <button 
+  //           className={activeTab === 'housings' ? 'active' : ''}
+  //           onClick={() => handleTabChange('housings')}
+  //         >
+  //           <FaHome /> Logements
+  //         </button>
+          
+  //         <button 
+  //           className={activeTab === 'profile' ? 'active' : ''}
+  //           onClick={() => handleTabChange('profile')}
+  //         >
+  //           <FaUser /> Profil
+  //         </button>
+          
+  //         <button 
+  //           className={activeTab === 'messages' ? 'active' : ''}
+  //           onClick={() => handleTabChange('messages')}
+  //         >
+  //           <FaComments /> Support
+  //         </button>
+          
+  //         <button 
+  //           className={activeTab === 'notifications' ? 'active' : ''}
+  //           onClick={() => handleTabChange('notifications')}
+  //         >
+  //           <FaBell /> Notifications
+  //         </button>
+  //       </nav>
+  //     </aside>
+
+  //     <main className="dashboard-main">
+  //       {renderContent()}
+  //     </main>
+  //   </div>
+  // );
   return (
-    <div className="dashboard-layout">
-      <aside className="dashboard-sidebar">
-        <div className="sidebar-header">
-          <h2><FaCog /> Admin</h2>
-        </div>
+  <div className="dashboard-layout">
 
-        <nav className="sidebar-nav">
-          <button 
-            className={activeTab === 'overview' ? 'active' : ''}
-            onClick={() => handleTabChange('overview')}
-          >
-            <FaChartBar /> Vue d'ensemble
-          </button>
-          
-          <button 
-            className={activeTab === 'users' ? 'active' : ''}
-            onClick={() => handleTabChange('users')}
-          >
-            <FaUsers /> Utilisateurs
-          </button>
-          
-          <button 
-            className={activeTab === 'housings' ? 'active' : ''}
-            onClick={() => handleTabChange('housings')}
-          >
-            <FaHome /> Logements
-          </button>
-          
-          <button 
-            className={activeTab === 'profile' ? 'active' : ''}
-            onClick={() => handleTabChange('profile')}
-          >
-            <FaUser /> Profil
-          </button>
-          
-          <button 
-            className={activeTab === 'messages' ? 'active' : ''}
-            onClick={() => handleTabChange('messages')}
-          >
-            <FaComments /> Support
-          </button>
-          
-          <button 
-            className={activeTab === 'notifications' ? 'active' : ''}
-            onClick={() => handleTabChange('notifications')}
-          >
-            <FaBell /> Notifications
-          </button>
-        </nav>
-      </aside>
+    <aside className="dashboard-sidebar">
 
-      <main className="dashboard-main">
-        {renderContent()}
-      </main>
-    </div>
-  );
+      <div className="sidebar-header">
+        <h2><FaCog /> {t('admin_panel')}</h2>
+      </div>
+
+      <nav className="sidebar-nav">
+
+        <button
+          className={activeTab === 'overview' ? 'active' : ''}
+          onClick={() => handleTabChange('overview')}
+        >
+          <FaChartBar /> {t('dashboard_overview')}
+        </button>
+
+        <button
+          className={activeTab === 'users' ? 'active' : ''}
+          onClick={() => handleTabChange('users')}
+        >
+          <FaUsers /> {t('users')}
+        </button>
+
+        <button
+          className={activeTab === 'housings' ? 'active' : ''}
+          onClick={() => handleTabChange('housings')}
+        >
+          <FaHome /> {t('housings')}
+        </button>
+
+        <button
+          className={activeTab === 'profile' ? 'active' : ''}
+          onClick={() => handleTabChange('profile')}
+        >
+          <FaUser /> {t('profile')}
+        </button>
+
+        <button
+          className={activeTab === 'messages' ? 'active' : ''}
+          onClick={() => handleTabChange('messages')}
+        >
+          <FaComments /> {t('support')}
+        </button>
+
+        <button
+          className={activeTab === 'notifications' ? 'active' : ''}
+          onClick={() => handleTabChange('notifications')}
+        >
+          <FaBell /> {t('notifications')}
+        </button>
+
+      </nav>
+
+    </aside>
+
+    <main className="dashboard-main">
+      {renderContent()}
+    </main>
+
+  </div>
+);
+
 };
 
 export default AdminDashboard;

@@ -5,12 +5,13 @@ import { authService } from '../../services/authService';
 import { toast } from 'react-toastify';
 import { FaUser, FaEnvelope, FaPhone, FaCamera, FaSave, FaTimes } from 'react-icons/fa';
 import './ProfileEdit.css';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const ProfileEdit = ({ onClose, onUpdate }) => {
   const { user, updateUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [photoPreview, setPhotoPreview] = useState(user?.photo || null);
-  
+  const { t, language, theme } = useTheme();
   const [formData, setFormData] = useState({
     first_name: user?.first_name || '',
     last_name: user?.last_name || '',
@@ -81,142 +82,187 @@ const ProfileEdit = ({ onClose, onUpdate }) => {
     }
   };
 
-  return (
-    <div className="profile-edit-overlay">
-      <div className="profile-edit-modal">
-        <div className="modal-header">
-          <h2>Modifier mon profil</h2>
-          <button className="close-btn" onClick={onClose}>
-            <FaTimes />
-          </button>
+ return (
+  <div className="profile-edit-overlay">
+    <div className="profile-edit-modal">
+
+      <div className="modal-header">
+        <h2>{t('profile_edit_title')}</h2>
+
+        <button className="close-btn" onClick={onClose}>
+          <FaTimes />
+        </button>
+      </div>
+
+      <form onSubmit={handleSubmit} className="profile-edit-form">
+
+        {/* PHOTO */}
+        <div className="photo-section">
+
+          <div className="photo-preview">
+            <img 
+              src={photoPreview || '/default-avatar.png'} 
+              alt="Profile"
+            />
+
+            <label className="photo-upload-btn">
+              <FaCamera />
+
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoChange}
+                hidden
+              />
+
+            </label>
+          </div>
+
+          {photoPreview && (
+            <button
+              type="button"
+              className="remove-photo-btn"
+              onClick={handleRemovePhoto}
+            >
+              {t('profile_remove_photo')}
+            </button>
+          )}
+
         </div>
 
-        <form onSubmit={handleSubmit} className="profile-edit-form">
-          {/* Photo de profil */}
-          <div className="photo-section">
-            <div className="photo-preview">
-              <img 
-                src={photoPreview || '/default-avatar.png'} 
-                alt="Profile" 
-              />
-              <label className="photo-upload-btn">
-                <FaCamera />
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  onChange={handlePhotoChange}
-                  hidden 
-                />
-              </label>
-            </div>
-            {photoPreview && (
-              <button 
-                type="button" 
-                className="remove-photo-btn"
-                onClick={handleRemovePhoto}
-              >
-                Supprimer la photo
-              </button>
-            )}
-          </div>
 
-          {/* Informations personnelles */}
-          <div className="form-section">
-            <h3>Informations personnelles</h3>
-            
-            <div className="form-row">
-              <div className="form-group">
-                <label>
-                  <FaUser /> Prénom
-                </label>
-                <input
-                  type="text"
-                  name="first_name"
-                  value={formData.first_name}
-                  onChange={handleChange}
-                  placeholder="Votre prénom"
-                />
-              </div>
+        {/* INFOS PERSONNELLES */}
+        <div className="form-section">
 
-              <div className="form-group">
-                <label>Nom</label>
-                <input
-                  type="text"
-                  name="last_name"
-                  value={formData.last_name}
-                  onChange={handleChange}
-                  placeholder="Votre nom"
-                />
-              </div>
-            </div>
+          <h3>{t('profile_personal_info')}</h3>
+
+          <div className="form-row">
 
             <div className="form-group">
               <label>
-                <FaEnvelope /> Email
+                <FaUser /> {t('profile_first_name')}
               </label>
+
               <input
-                type="email"
-                name="email"
-                value={formData.email}
+                type="text"
+                name="first_name"
+                value={formData.first_name}
                 onChange={handleChange}
-                placeholder="votre@email.com"
-                required
+                placeholder={t('profile_first_name_placeholder')}
               />
             </div>
+
 
             <div className="form-group">
-              <label>
-                <FaPhone /> Téléphone
-              </label>
+              <label>{t('profile_last_name')}</label>
+
               <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
+                type="text"
+                name="last_name"
+                value={formData.last_name}
                 onChange={handleChange}
-                placeholder="+237 6XX XXX XXX"
+                placeholder={t('profile_last_name_placeholder')}
               />
             </div>
+
           </div>
 
-          {/* Préférences */}
-          <div className="form-section">
-            <h3>Préférences de recherche</h3>
-            
-            <div className="form-group">
-              <label>Budget maximum (FCFA)</label>
-              <input
-                type="number"
-                name="preferred_max_price"
-                value={formData.preferred_max_price}
-                onChange={handleChange}
-                placeholder="Ex: 50000"
-                min="0"
-              />
-            </div>
+
+          <div className="form-group">
+
+            <label>
+              <FaEnvelope /> {t('profile_email')}
+            </label>
+
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder={t('profile_email_placeholder')}
+              required
+            />
+
           </div>
 
-          {/* Actions */}
-          <div className="form-actions">
-            <button 
-              type="button" 
-              className="btn btn-outline"
-              onClick={onClose}
-              disabled={loading}
-            >
-              Annuler
-            </button>
-            <button 
-              type="submit" 
-              className="btn btn-primary"
-              disabled={loading}
-            >
-              <FaSave /> {loading ? 'Enregistrement...' : 'Enregistrer'}
-            </button>
+
+          <div className="form-group">
+
+            <label>
+              <FaPhone /> {t('profile_phone')}
+            </label>
+
+            <input
+              type="tel"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder={t('profile_phone_placeholder')}
+            />
+
           </div>
-        </form>
-      </div>
+
+        </div>
+
+
+        {/* PRÉFÉRENCES */}
+        <div className="form-section">
+
+          <h3>{t('profile_search_preferences')}</h3>
+
+          <div className="form-group">
+
+            <label>
+              {t('profile_max_budget')}
+            </label>
+
+            <input
+              type="number"
+              name="preferred_max_price"
+              value={formData.preferred_max_price}
+              onChange={handleChange}
+              placeholder={t('profile_budget_placeholder')}
+              min="0"
+            />
+
+          </div>
+
+        </div>
+
+
+        {/* ACTIONS */}
+        <div className="form-actions">
+
+          <button
+            type="button"
+            className="btn btn-outline"
+            onClick={onClose}
+            disabled={loading}
+          >
+            {t('cancel')}
+          </button>
+
+
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={loading}
+          >
+            <FaSave />
+
+            {loading
+              ? t('profile_saving')
+              : t('save')
+            }
+
+          </button>
+
+        </div>
+
+      </form>
     </div>
-  );
+  </div>
+);
 };
 
 export default ProfileEdit;

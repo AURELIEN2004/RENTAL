@@ -326,7 +326,7 @@ const HousingForm = ({ isEdit = false }) => {
                 onChange={handleChange}
                 className={errors.category ? 'error' : ''}
               >
-                <option value="">{t('choose_option')}</option>
+                <option value="">{t('select_option')}</option>
                 {categories?.map(cat => (
                   <option key={cat.id} value={cat.id}>{cat.name}</option>
                 ))}
@@ -342,7 +342,7 @@ const HousingForm = ({ isEdit = false }) => {
                 onChange={handleChange}
                 className={errors.housing_type ? 'error' : ''}
               >
-                <option value="">{t('choose_option')}</option>
+                <option value="">{t('select_option')}</option>
                 {housingTypes.map(type => (
                   <option key={type.id} value={type.id}>{type.name}</option>
                 ))}
@@ -444,7 +444,7 @@ const HousingForm = ({ isEdit = false }) => {
               onChange={handleRegionChange}
               className={errors.region ? 'error' : ''}
             >
-              <option value=""> {t('choose_option')} </option>
+              <option value=""> {t('select_option')} </option>
               {regions.map(region => (
                 <option key={region.id} value={region.id}>{region.name}</option>
               ))}
@@ -462,7 +462,7 @@ const HousingForm = ({ isEdit = false }) => {
                 disabled={!formData.region}
                 className={errors.city ? 'error' : ''}
               >
-                <option value="">{t('choose_option')}</option>
+                <option value="">{t('select_option')}</option>
                 {cities?.map(city => (
                   <option key={city.id} value={city.id}>{city.name}</option>
                 ))}
@@ -479,7 +479,7 @@ const HousingForm = ({ isEdit = false }) => {
                 disabled={!formData.city}
                 className={errors.district ? 'error' : ''}
               >
-                <option value=""> {t('choose_option')} </option>
+                <option value=""> {t('select_option')} </option>
                 {districts?.map(district => (
                   <option key={district.id} value={district.id}>{district.name}</option>
                 ))}

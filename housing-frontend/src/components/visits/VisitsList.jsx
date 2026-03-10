@@ -650,11 +650,11 @@ const VisitsList = ({ userRole = "locataire" }) => {
 
       <div className="visits-header">
 
-        <h2>
+        {/* <h2>
           {userRole === "proprietaire"
             ? "Demandes de Visites"
             : "Mes Visites"}
-        </h2>
+        </h2> */}
         <h2>
   {userRole === "proprietaire" ? t('visits_title_owner') : t("visits_title_tenant")}
 </h2>
@@ -667,32 +667,32 @@ const VisitsList = ({ userRole = "locataire" }) => {
 
         <div className="stat-card" onClick={() => setFilter("all")}>
           <div className="stat-number">{stats.total}</div>
-<div className="stat-label">{t("visits.stats.total")}</div>
+<div className="stat-label">{t("visits_stats_total")}</div>
         </div>
 
         <div className="stat-card orange" onClick={() => setFilter("waiting")}>
           <div className="stat-number">{stats.waiting}</div>
-<div className="stat-label">{t("visits.stats.waiting")}</div>
+<div className="stat-label">{t("visits_stats_waiting")}</div>
         </div>
 
         <div className="stat-card green" onClick={() => setFilter("confirmed")}>
           <div className="stat-number">{stats.confirmed}</div>
-<div className="stat-label">{t("visits.stats.confirmed")}</div>
+<div className="stat-label">{t("visits_stats_confirmed")}</div>
         </div>
 
         <div className="stat-card red" onClick={() => setFilter("refused")}>
           <div className="stat-number">{stats.refused}</div>
-<div className="stat-label">{t("visits.stats.refused")}</div>
+<div className="stat-label">{t("visits_stats_refused")}</div>
         </div>
 
         <div className="stat-card gray" onClick={() => setFilter("cancelled")}>
           <div className="stat-number">{stats.cancelled}</div>
-<div className="stat-label">{t("visits.stats.cancelled")}</div>
+<div className="stat-label">{t("visits_stats_cancelled")}</div>
         </div>
 
         <div className="stat-card blue" onClick={() => setFilter("upcoming")}>
           <div className="stat-number">{stats.upcoming}</div>
-<div className="stat-label">{t("visits.stats.upcoming")}</div>        </div>
+<div className="stat-label">{t("visits_stats_upcoming")}</div>        </div>
 
       </div>
 
@@ -704,49 +704,49 @@ const VisitsList = ({ userRole = "locataire" }) => {
           className={`filter-btn ${filter === "all" ? "active" : ""}`}
           onClick={() => setFilter("all")}
         >
-          Toutes
+          {t("visits_filter_all")}
         </button>
 
         <button
           className={`filter-btn ${filter === "waiting" ? "active" : ""}`}
           onClick={() => setFilter("waiting")}
         >
-          En attente
+          {t("visits_filter_waiting")} 
         </button>
 
         <button
           className={`filter-btn ${filter === "confirmed" ? "active" : ""}`}
           onClick={() => setFilter("confirmed")}
         >
-          Confirmées
+          {t("visits_filter_confirmed")}
         </button>
 
         <button
           className={`filter-btn ${filter === "refused" ? "active" : ""}`}
           onClick={() => setFilter("refused")}
         >
-          Refusées
+          {t("visits_filter_refused")}
         </button>
 
         <button
           className={`filter-btn ${filter === "cancelled" ? "active" : ""}`}
           onClick={() => setFilter("cancelled")}
         >
-          Annulées
+          {t("visits_filter_cancelled")}
         </button>
 
         <button
           className={`filter-btn ${filter === "upcoming" ? "active" : ""}`}
           onClick={() => setFilter("upcoming")}
         >
-          À venir
+        {t("visits_filter_upcoming")}
         </button>
 
         <button
           className={`filter-btn ${filter === "past" ? "active" : ""}`}
           onClick={() => setFilter("past")}
         >
-          Passées
+          {t("visits_filter_past")}
         </button>
 
       </div>
@@ -764,7 +764,7 @@ const VisitsList = ({ userRole = "locataire" }) => {
         {filteredVisits.length === 0 ? (
 
           <div className="empty-visits">
-            <p>Aucune visite</p>
+            <p>{t("visits_empty")}</p>
           </div>
 
         ) : (
@@ -794,8 +794,8 @@ const VisitsList = ({ userRole = "locataire" }) => {
 
                 <p>
                   {userRole === "locataire"
-                    ? `Propriétaire: ${visit.owner_name}`
-                    : `Locataire: ${visit.locataire_name}`}
+                    ? `${t("visits_label_owner")}: ${visit.owner_name}`
+                    : `${t("visits_label_tenant")}: ${visit.locataire_name}`}
                 </p>
 
 
@@ -823,14 +823,14 @@ const VisitsList = ({ userRole = "locataire" }) => {
                           className="btn btn-success btn-sm"
                           onClick={() => handleConfirm(visit.id)}
                         >
-                          Confirmer
+                          {t("visits_label_confirm")}
                         </button>
 
                         <button
                           className="btn btn-danger btn-sm"
                           onClick={() => handleRefuseClick(visit)}
                         >
-                          Refuser
+                          {t("visits_label_refuse")}
                         </button>
                       </>
                     )}
@@ -841,7 +841,7 @@ const VisitsList = ({ userRole = "locataire" }) => {
                         className="btn btn-outline btn-sm"
                         onClick={() => handleCancel(visit.id)}
                       >
-                        Annuler
+                        {t("visits_label_cancel")}
                       </button>
                     )}
 
@@ -849,7 +849,7 @@ const VisitsList = ({ userRole = "locataire" }) => {
                     className="btn btn-outline btn-sm"
                     onClick={() => navigate(`/housing/${visit.housing}`)}
                   >
-                    Voir logement
+                    {t("visits_label_view_housing")}
                   </button>
 
                 </div>
@@ -871,20 +871,20 @@ const VisitsList = ({ userRole = "locataire" }) => {
 
           <div className="modal-content">
 
-            <h3>Refuser la visite</h3>
+            <h3>{t("visits_modal_title")}</h3>
 
             <textarea
               value={refuseMessage}
               onChange={(e) => setRefuseMessage(e.target.value)}
-              placeholder="Message optionnel"
+              placeholder={t("visits_modal_placeholder")}
             />
 
             <button onClick={handleRefuseSubmit}>
-              Confirmer refus
+              {t("visits_modal_submit")}
             </button>
 
             <button onClick={() => setShowRefuseModal(false)}>
-              Annuler
+              {t("visits_modal_cancel")}
             </button>
 
           </div>

@@ -7,6 +7,7 @@ import React, { useState, useRef } from 'react';
 import { toast } from 'react-toastify';
 import './MessageInput.css';
 import api from '../../services/api';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const MessageInput = ({ conversationId, onSendMessage }) => {
   const [content, setContent] = useState('');
@@ -17,6 +18,7 @@ const MessageInput = ({ conversationId, onSendMessage }) => {
   const [sending, setSending] = useState(false);
   const fileInputRef = useRef(null);
   const videoInputRef = useRef(null);
+  const { t, language, theme } = useTheme();
 
   const handleImageSelect = (e) => {
     const file = e.target.files[0];
@@ -153,7 +155,7 @@ const MessageInput = ({ conversationId, onSendMessage }) => {
           <button
             className="media-btn"
             onClick={() => fileInputRef.current?.click()}
-            title="Ajouter une image"
+            title={t("messages_add_image")}
             disabled={sending}
           >
             🖼️
@@ -169,7 +171,7 @@ const MessageInput = ({ conversationId, onSendMessage }) => {
           <button
             className="media-btn"
             onClick={() => videoInputRef.current?.click()}
-            title="Ajouter une vidéo"
+            title={t("messages_add_video")}
             disabled={sending}
           >
             🎥
@@ -180,7 +182,7 @@ const MessageInput = ({ conversationId, onSendMessage }) => {
           value={content}
           onChange={(e) => setContent(e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder="Écrivez votre message..."
+          placeholder={t("messages_write_message")}
           rows="1"
           disabled={sending}
           className="message-textarea"

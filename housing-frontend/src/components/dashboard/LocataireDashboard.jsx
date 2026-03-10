@@ -142,8 +142,7 @@ const LocataireDashboard = () => {
       case 'profile':
         return (
           <div className="dashboard-section">
-            <h2>Mon Profil</h2>
-
+            <h2> {t('my_profile')}</h2>
             <div className="profile-card">
               <div className="profile-header">
                 <img
@@ -154,39 +153,39 @@ const LocataireDashboard = () => {
                 <div className="profile-info">
                   <h3>{user.first_name} {user.last_name}</h3>
                   <p>@{user.username}</p>
-                  <p className="role-badge">Locataire</p>
+                  <p className="role-badge">{t('tenant')}</p>
                 </div>
               </div>
 
               <div className="profile-details">
                 <div className="detail-item">
-                  <strong>Email:</strong> {user.email}
+                  <strong>{t('email')}:</strong> {user.email}
                 </div>
                 <div className="detail-item">
-                  <strong>Téléphone:</strong> {user.phone || 'Non renseigné'}
+                  <strong>{t('phone')}:</strong> {user.phone || t('not_provided')}
                 </div>
                 <div className="detail-item">
-                  <strong>Membre depuis:</strong>{' '}
+                  <strong>{t('member_since')}:</strong>{' '}
                   {new Date(user.date_joined).toLocaleDateString()}
                 </div>
               </div>
 
-              <div className="profile-actions">
+               <div className="profile-actions">
                 <button
                   className="btn btn-primary"
                   onClick={() => setShowEditProfile(true)}
                 >
-                  Modifier le profil
+                  {t('edit_profile')}
                 </button>
-
                 <button
                   className="btn btn-outline"
                   onClick={() => setShowChangePassword(true)}
                 >
-                  Changer le mot de passe
+                  {t('change_password')}
                 </button>
               </div>
             </div>
+
 
             {showEditProfile && (
               <ProfileEdit
@@ -211,80 +210,212 @@ const LocataireDashboard = () => {
       // ===============================
       // FAVORIS - CORRIGÉ
       // ===============================
-      case 'favorites':
-        return (
-          <div className="dashboard-section">
-            <h2>Mes Favoris ({favorites.length})</h2>
+      // case 'favorites':
+      //   return (
+      //     <div className="dashboard-section">
+      //       <h2>Mes Favoris ({favorites.length})</h2>
             
-            {loading ? (
-              <div className="loading">Chargement...</div>
-            ) : favorites.length === 0 ? (
-              <div className="empty-state">
-                <div className="empty-icon">❤️</div>
-                <p>Vous n'avez pas encore de favoris</p>
-                <button 
-                  className="btn btn-primary"
-                  onClick={() => window.location.href = '/search'}
-                >
-                  Parcourir les logements
-                </button>
-              </div>
-            ) : (
-              <div className="housing-grid">
-                {favorites.map(housing => (
-                  <div key={housing.id} className="housing-item-with-actions">
-                    <HousingCard housing={housing} />
-                    <button
-                      className="btn btn-danger btn-sm"
-                      onClick={() => handleRemoveFavorite(housing.id)}
-                    >
-                      <FaTrash /> Retirer
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        );
+      //       {loading ? (
+      //         <div className="loading">Chargement...</div>
+      //       ) : favorites.length === 0 ? (
+      //         <div className="empty-state">
+      //           <div className="empty-icon">❤️</div>
+      //           <p>Vous n'avez pas encore de favoris</p>
+      //           <button 
+      //             className="btn btn-primary"
+      //             onClick={() => window.location.href = '/search'}
+      //           >
+      //             Parcourir les logements
+      //           </button>
+      //         </div>
+      //       ) : (
+      //         <div className="housing-grid">
+      //           {favorites.map(housing => (
+      //             <div key={housing.id} className="housing-item-with-actions">
+      //               <HousingCard housing={housing} />
+      //               <button
+      //                 className="btn btn-danger btn-sm"
+      //                 onClick={() => handleRemoveFavorite(housing.id)}
+      //               >
+      //                 <FaTrash /> Retirer
+      //               </button>
+      //             </div>
+      //           ))}
+      //         </div>
+      //       )}
+      //     </div>
+      //   );
+      case 'favorites':
+  return (
+    <div className="dashboard-section">
+
+      <h2>
+        {t('favorites_title')} ({favorites.length})
+      </h2>
+
+      {loading ? (
+
+        <div className="loading">
+          {t('loading')}
+        </div>
+
+      ) : favorites.length === 0 ? (
+
+        <div className="empty-state">
+
+          <div className="empty-icon">❤️</div>
+
+          <p>{t('favorites_empty')}</p>
+
+          <button
+            className="btn btn-primary"
+            onClick={() => navigate('/search')}
+          >
+            {t('browse_housings')}
+          </button>
+
+        </div>
+
+      ) : (
+
+        <div className="housing-grid">
+
+          {favorites.map(housing => (
+
+            <div
+              key={housing.id}
+              className="housing-item-with-actions"
+            >
+
+              <HousingCard housing={housing} />
+
+              <button
+                className="btn btn-danger btn-sm"
+                onClick={() => {
+                  if (window.confirm(t('confirm_remove'))) {
+                    handleRemoveFavorite(housing.id);
+                  }
+                }}
+              >
+                <FaTrash />
+                {t('remove')}
+              </button>
+
+            </div>
+
+          ))}
+
+        </div>
+
+      )}
+
+    </div>
+  );
 
       // ===============================
       // ENREGISTRÉS - CORRIGÉ
       // ===============================
-      case 'saved':
-        return (
-          <div className="dashboard-section">
-            <h2>Logements Enregistrés ({saved.length})</h2>
+      // case 'saved':
+      //   return (
+      //     <div className="dashboard-section">
+      //       <h2>Logements Enregistrés ({saved.length})</h2>
             
-            {loading ? (
-              <div className="loading">Chargement...</div>
-            ) : saved.length === 0 ? (
-              <div className="empty-state">
-                <div className="empty-icon">💾</div>
-                <p>Vous n'avez pas encore enregistré de logements</p>
-                <button 
-                  className="btn btn-primary"
-                  onClick={() => window.location.href = '/search'}
-                >
-                  Parcourir les logements
-                </button>
-              </div>
-            ) : (
-              <div className="housing-grid">
-                {saved.map(housing => (
-                  <div key={housing.id} className="housing-item-with-actions">
-                    <HousingCard housing={housing} />
-                    <button
-                      className="btn btn-danger btn-sm"
-                      onClick={() => handleRemoveSaved(housing.id)}
-                    >
-                      <FaTrash /> Retirer
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        );
+      //       {loading ? (
+      //         <div className="loading">Chargement...</div>
+      //       ) : saved.length === 0 ? (
+      //         <div className="empty-state">
+      //           <div className="empty-icon">💾</div>
+      //           <p>Vous n'avez pas encore enregistré de logements</p>
+      //           <button 
+      //             className="btn btn-primary"
+      //             onClick={() => window.location.href = '/search'}
+      //           >
+      //             Parcourir les logements
+      //           </button>
+      //         </div>
+      //       ) : (
+      //         <div className="housing-grid">
+      //           {saved.map(housing => (
+      //             <div key={housing.id} className="housing-item-with-actions">
+      //               <HousingCard housing={housing} />
+      //               <button
+      //                 className="btn btn-danger btn-sm"
+      //                 onClick={() => handleRemoveSaved(housing.id)}
+      //               >
+      //                 <FaTrash /> Retirer
+      //               </button>
+      //             </div>
+      //           ))}
+      //         </div>
+      //       )}
+      //     </div>
+      //   );
+      case 'saved':
+  return (
+    <div className="dashboard-section">
+
+      <h2>
+        {t('saved_title')} ({saved.length})
+      </h2>
+
+      {loading ? (
+
+        <div className="loading">
+          {t('loading')}
+        </div>
+
+      ) : saved.length === 0 ? (
+
+        <div className="empty-state">
+
+          <div className="empty-icon">💾</div>
+
+          <p>{t('saved_empty')}</p>
+
+          <button
+            className="btn btn-primary"
+            onClick={() => navigate('/search')}
+          >
+            {t('browse_housings')}
+          </button>
+
+        </div>
+
+      ) : (
+
+        <div className="housing-grid">
+
+          {saved.map(housing => (
+
+            <div
+              key={housing.id}
+              className="housing-item-with-actions"
+            >
+
+              <HousingCard housing={housing} />
+
+              <button
+                className="btn btn-danger btn-sm"
+                onClick={() => {
+                  if (window.confirm(t('confirm_remove'))) {
+                    handleRemoveSaved(housing.id);
+                  }
+                }}
+              >
+                <FaTrash />
+                {t('remove')}
+              </button>
+
+            </div>
+
+          ))}
+
+        </div>
+
+      )}
+
+    </div>
+  );
 
       // ===============================
       // VISITES
@@ -319,28 +450,102 @@ const LocataireDashboard = () => {
       // ===============================
       // PARAMÈTRES
       // ===============================
-      case 'settings':
+        case 'settings':
         return (
           <div className="dashboard-section">
-            <h2>Paramètres</h2>
+      
+            <h2>{t('settings_title')}</h2>
+      
             <div className="settings-form">
+      
+              {/* EMAIL NOTIFICATIONS */}
               <div className="setting-item">
-                <label>Notifications par email</label>
-                <input type="checkbox" defaultChecked />
+      
+                <label htmlFor="emailNotif">
+                  {t('settings_email_notifications')}
+                </label>
+      
+                <input
+                  id="emailNotif"
+                  type="checkbox"
+                  defaultChecked
+                />
+      
               </div>
+      
+      
+              {/* PUSH NOTIFICATIONS */}
               <div className="setting-item">
-                <label>Notifications push</label>
-                <input type="checkbox" defaultChecked />
+      
+                <label htmlFor="pushNotif">
+                  {t('settings_push_notifications')}
+                </label>
+      
+                <input
+                  id="pushNotif"
+                  type="checkbox"
+                  defaultChecked
+                />
+      
               </div>
+      
+      
+              {/* LANGUAGE */}
+              <div className="setting-item">
+      
+                <label>{t('settings_language')}</label>
+      
+                <select
+                  value={language}
+                  onChange={(e) => changeLanguage(e.target.value)}
+                >
+                  <option value="fr">Français</option>
+                  <option value="en">English</option>
+                </select>
+      
+              </div>
+      
+      
+              {/* THEME */}
+              <div className="setting-item">
+      
+                <label>{t('settings_theme')}</label>
+      
+                <select
+                  value={theme}
+                  onChange={(e) => changeTheme(e.target.value)}
+                >
+                  <option value="light">{t('theme_light')}</option>
+                  <option value="dark">{t('theme_dark')}</option>
+                </select>
+      
+              </div>
+      
+      
+              {/* DANGER ZONE */}
               <div className="setting-item danger-zone">
-                <h3>Zone de danger</h3>
-                <button className="btn btn-danger">
-                  <FaTrash /> Supprimer mon compte
+      
+                <h3>{t('settings_danger_zone')}</h3>
+      
+                <button
+                  className="btn btn-danger"
+                  onClick={() => {
+                    if (window.confirm(t('confirm_delete_account'))) {
+                      console.log("Delete account");
+                    }
+                  }}
+                >
+                  <FaTrash />
+                  {t('settings_delete_account')}
                 </button>
+      
               </div>
+      
             </div>
+      
           </div>
         );
+      
 
       default:
         return null;
@@ -348,76 +553,92 @@ const LocataireDashboard = () => {
   };
 
   return (
-    <div className="dashboard-layout">
-      <aside className="dashboard-sidebar">
-        <div className="sidebar-header">
-          <h2>Dashboard Locataire</h2>
-        </div>
+  <div className="dashboard-layout">
 
-        <nav className="sidebar-nav">
-          <button
-            className={activeTab === 'profile' ? 'active' : ''}
-            onClick={() => handleTabChange('profile')}
-          >
-            <FaUser /> Mon Profil
-          </button>
+    {/* SIDEBAR */}
+    <aside className="dashboard-sidebar">
 
-          <button
-            className={activeTab === 'favorites' ? 'active' : ''}
-            onClick={() => handleTabChange('favorites')}
-          >
-            <FaHeart /> Favoris
-          </button>
+      <div className="sidebar-header">
+        <h2>{t('tenant_dashboard')}</h2>
+      </div>
 
-          <button
-            className={activeTab === 'saved' ? 'active' : ''}
-            onClick={() => handleTabChange('saved')}
-          >
-            <FaBookmark /> Enregistrés
-          </button>
-
-          <button
-            className={activeTab === 'visits' ? 'active' : ''}
-            onClick={() => handleTabChange('visits')}
-          >
-            <FaCalendar /> Visites
-          </button>
-
-          <button
-            className={activeTab === 'messages' ? 'active' : ''}
-            onClick={() => handleTabChange('messages')}
-          >
-            <FaEnvelope /> Messages
-          </button>
-
-          <button
-            className={activeTab === 'notifications' ? 'active' : ''}
-            onClick={() => handleTabChange('notifications')}
-          >
-            <FaBell /> Notifications
-          </button>
-
-          <button
-            className={activeTab === 'settings' ? 'active' : ''}
-            onClick={() => handleTabChange('settings')}
-          >
-            <FaCog /> Paramètres
-          </button>
-        </nav>
+      <nav className="sidebar-nav">
 
         <button
-          className="btn btn-danger btn-block mt-auto"
-          onClick={logout}
+          className={activeTab === 'profile' ? 'active' : ''}
+          onClick={() => handleTabChange('profile')}
         >
-          Déconnexion
+          <FaUser />
+          {t('menu_profile')}
         </button>
-      </aside>
 
-      <main className="dashboard-main">
-        {renderContent()}
-      </main>
-    </div>
-  );
+        <button
+          className={activeTab === 'favorites' ? 'active' : ''}
+          onClick={() => handleTabChange('favorites')}
+        >
+          <FaHeart />
+          {t('menu_favorites')}
+        </button>
+
+        <button
+          className={activeTab === 'saved' ? 'active' : ''}
+          onClick={() => handleTabChange('saved')}
+        >
+          <FaBookmark />
+          {t('menu_saved')}
+        </button>
+
+        <button
+          className={activeTab === 'visits' ? 'active' : ''}
+          onClick={() => handleTabChange('visits')}
+        >
+          <FaCalendar />
+          {t('menu_visits')}
+        </button>
+
+        <button
+          className={activeTab === 'messages' ? 'active' : ''}
+          onClick={() => handleTabChange('messages')}
+        >
+          <FaEnvelope />
+          {t('menu_messages')}
+        </button>
+
+        <button
+          className={activeTab === 'notifications' ? 'active' : ''}
+          onClick={() => handleTabChange('notifications')}
+        >
+          <FaBell />
+          {t('menu_notifications')}
+        </button>
+
+        <button
+          className={activeTab === 'settings' ? 'active' : ''}
+          onClick={() => handleTabChange('settings')}
+        >
+          <FaCog />
+          {t('menu_settings')}
+        </button>
+
+      </nav>
+
+      {/* LOGOUT */}
+      <button
+        className="btn btn-danger btn-block mt-auto"
+        onClick={logout}
+      >
+        {t('logout')}
+      </button>
+
+    </aside>
+
+    {/* MAIN CONTENT */}
+    <main className="dashboard-main">
+      {renderContent()}
+    </main>
+
+  </div>
+);
 };
 
 export default LocataireDashboard;

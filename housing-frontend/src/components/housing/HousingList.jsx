@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom';
 import HousingCard from './HousingCard';
 import Loading from '../common/Loading';
 import './HousingList.css';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const HousingList = ({ housings, loading, showActions = false, onDelete, onEdit, onStatusChange }) => {
   const [filteredHousings, setFilteredHousings] = useState([]);
   const [filter, setFilter] = useState('all');
   const [sortBy, setSortBy] = useState('recent');
+const { t, language, theme } = useTheme();
 
   useEffect(() => {
     applyFilters();
@@ -149,9 +151,9 @@ const HousingList = ({ housings, loading, showActions = false, onDelete, onEdit,
                       onChange={(e) => onStatusChange(housing.id, e.target.value)}
                       className="status-select"
                     >
-                      <option value="disponible">Disponible</option>
-                      <option value="reserve">Réservé</option>
-                      <option value="occupe">Occupé</option>
+                      <option value="disponible">{t('status_options_disponible')}</option>
+                      <option value="reserve">{t('status_options_reserve')}</option>
+                      <option value="occupe">{t('status_options_occupied')}</option>
                     </select>
                   </div>
 
