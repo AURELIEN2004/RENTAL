@@ -33,12 +33,21 @@ class VisitViewSet(viewsets.ModelViewSet):
         
         # Créer notification pour le propriétaire
         from apps.notifications.models import Notification
+        # Notification.objects.create(
+        #     user=visit.housing.owner,
+        #     type='visit',
+        #     title='Nouvelle demande de visite',
+        #     message=f'{visit.locataire.username} souhaite visiter {visit.housing.title}',
+        #     link=f'/dashboard/reservations'
+        # )
         Notification.objects.create(
             user=visit.housing.owner,
             type='visit',
-            title='Nouvelle demande de visite',
-            message=f'{visit.locataire.username} souhaite visiter {visit.housing.title}',
-            link=f'/dashboard/reservations'
+            title_fr='Nouvelle demande de visite',
+            title_en='New visit request',
+            message_fr=f'{visit.locataire.username} souhaite visiter {visit.housing.title_fr or visit.housing.title}',
+            message_en=f'{visit.locataire.username} wants to visit {visit.housing.title_en or visit.housing.title}',
+            link='/dashboard?tab=reservations'
         )
     
     @action(detail=True, methods=['post'])
@@ -50,12 +59,21 @@ class VisitViewSet(viewsets.ModelViewSet):
         
         # Notifier le locataire
         from apps.notifications.models import Notification
+        # Notification.objects.create(
+        #     user=visit.locataire,
+        #     type='visit_confirmed',
+        #     title='Visite confirmée',
+        #     message=f'Votre visite pour {visit.housing.title} a été confirmée',
+        #     link=f'/dashboard/visites'
+        # )
         Notification.objects.create(
             user=visit.locataire,
             type='visit_confirmed',
-            title='Visite confirmée',
-            message=f'Votre visite pour {visit.housing.title} a été confirmée',
-            link=f'/dashboard/visites'
+            title_fr='Visite confirmée',
+            title_en='Visit confirmed',
+            message_fr=f'Votre visite pour {visit.housing.title_fr or visit.housing.title} a été confirmée',
+            message_en=f'Your visit for {visit.housing.title_en or visit.housing.title} has been confirmed',
+            link='/dashboard?tab=visits'
         )
         
         return Response({'status': 'confirmed'})
@@ -70,12 +88,21 @@ class VisitViewSet(viewsets.ModelViewSet):
         
         # Notifier le locataire
         from apps.notifications.models import Notification
+        # Notification.objects.create(
+        #     user=visit.locataire,
+        #     type='visit_refused',
+        #     title='Visite refusée',
+        #     message=f'Votre demande de visite pour {visit.housing.title} a été refusée',
+        #     link=f'/dashboard/visites'
+        # )
         Notification.objects.create(
             user=visit.locataire,
             type='visit_refused',
-            title='Visite refusée',
-            message=f'Votre demande de visite pour {visit.housing.title} a été refusée',
-            link=f'/dashboard/visites'
+            title_fr='Visite refusée',
+            title_en='Visit refused',
+            message_fr=f'Votre demande de visite pour {visit.housing.title_fr or visit.housing.title} a été refusée',
+            message_en=f'Your visit request for {visit.housing.title_en or visit.housing.title} has been refused',
+            link='/dashboard?tab=visits'
         )
         
         return Response({'status': 'refused'})

@@ -78,12 +78,21 @@ class ConversationViewSet(viewsets.ModelViewSet):
         conversation.participants.add(request.user, housing.owner)
         
         # Créer notification pour le propriétaire
+        # Notification.objects.create(
+        #     user=housing.owner,
+        #     type='message',
+        #     title='Nouvelle conversation',
+        #     message=f'{request.user.username} souhaite discuter de {housing.title}',
+        #     link=f'/dashboard/messages/{conversation.id}'
+        # )
         Notification.objects.create(
             user=housing.owner,
             type='message',
-            title='Nouvelle conversation',
-            message=f'{request.user.username} souhaite discuter de {housing.title}',
-            link=f'/dashboard/messages/{conversation.id}'
+            title_fr='Nouvelle conversation',
+            title_en='New conversation',
+            message_fr=f'{request.user.username} souhaite discuter de {housing.title_fr or housing.title}',
+            message_en=f'{request.user.username} wants to discuss {housing.title_en or housing.title}',
+            link=f'/dashboard?tab=messages'
         )
         
         serializer = self.get_serializer(conversation)
@@ -150,12 +159,22 @@ class MessageViewSet(viewsets.ModelViewSet):
         # Notifier les autres participants
         other_participants = conversation.participants.exclude(id=request.user.id)
         for participant in other_participants:
+            # Notification.objects.create(
+            #     user=participant,
+            #     type='message',
+            #     title='Nouveau message',
+            #     message=f'{request.user.username}: {message.content[:50]}...',
+            #     link=f'/dashboard/messages/{conversation.id}'
+            # )
+            content_preview = message.content_fr or message.content_en or message.content or ''
             Notification.objects.create(
                 user=participant,
                 type='message',
-                title='Nouveau message',
-                message=f'{request.user.username}: {message.content[:50]}...',
-                link=f'/dashboard/messages/{conversation.id}'
+                title_fr='Nouveau message',
+                title_en='New message',
+                message_fr=f'{request.user.username}: {content_preview[:50]}...',
+                message_en=f'{request.user.username}: {content_preview[:50]}...',
+                link=f'/dashboard?tab=messages'
             )
         
         # Retourner le message créé avec toutes les infos

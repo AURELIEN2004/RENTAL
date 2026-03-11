@@ -203,13 +203,14 @@ import { useAuth } from '../contexts/AuthContext';
 import { FaHome, FaUsers, FaCity, FaStar, FaBrain } from 'react-icons/fa';
 import { Sparkles } from 'lucide-react';
 import './Home.css';
+import { useTheme } from '../contexts/ThemeContext';
 
 const MAX_FEATURED = 3; // ← limite stricte
 
 const Home = () => {
   const { user } = useAuth();
   const navigate  = useNavigate();
-
+const { t, language, theme } = useTheme();
   const [featuredHousings, setFeaturedHousings] = useState([]);
   const [stats,   setStats]   = useState({ totalHousings: 0, totalCities: 0, satisfiedClients: 0 });
   const [loading, setLoading] = useState(true);
@@ -291,20 +292,19 @@ const Home = () => {
           <source src="/video-hero.mp4" type="video/mp4" />
         </video>
         <div className="hero-content">
-          <h1 className="hero-title">Trouvez Votre Logement Idéal</h1>
+          <h1 className="hero-title">{t('home_hero_title')}</h1>
           <p className="hero-subtitle">
-            Plateforme intelligente de location de logements au Cameroun
-          </p>
+{t('home_hero_subtitle')}          </p>
           <div className="hero-actions">
             <Link to="/search" className="btn btn-white btn-lg">
-              Rechercher Logement
+              {t('search_housing')}
             </Link>
             {user && (
               <button
                 className="btn btn-outline-white btn-lg"
                 onClick={() => setShowQuiz(true)}
               >
-                <FaBrain /> Affiner mes recommandations
+                <FaBrain /> {t('refine_recommendations')}
               </button>
             )}
           </div>
@@ -318,22 +318,22 @@ const Home = () => {
             <div className="stat-card">
               <div className="stat-icon"><FaHome /></div>
               <h3 className="stat-number">{stats.totalHousings}+</h3>
-              <p className="stat-label">Logements disponibles</p>
+              <p className="stat-label">{t('available_housings')}</p>
             </div>
             <div className="stat-card">
               <div className="stat-icon"><FaCity /></div>
               <h3 className="stat-number">{stats.totalCities}+</h3>
-              <p className="stat-label">Villes couvertes</p>
+              <p className="stat-label">{t('covered_cities')}</p>
             </div>
             <div className="stat-card">
               <div className="stat-icon"><FaStar /></div>
               <h3 className="stat-number">{stats.satisfiedClients}+</h3>
-              <p className="stat-label">Clients satisfaits</p>
+              <p className="stat-label">{t('satisfied_clients')}</p>
             </div>
             <div className="stat-card">
               <div className="stat-icon"><FaUsers /></div>
               <h3 className="stat-number">24/7</h3>
-              <p className="stat-label">Support disponible</p>
+              <p className="stat-label">{t('support_available')}</p>
             </div>
           </div>
         </div>
@@ -343,28 +343,27 @@ const Home = () => {
       <section className="featured-section">
         <div className="container">
           <div className="section-header">
-            <h2>Logements en Vedette</h2>
+            <h2>{t('featured_housings')}</h2>
             <p>
               <Sparkles size={14} style={{ marginRight: 4, verticalAlign: 'middle' }} />
-              Sélectionnés par notre algorithme génétique intelligent
-              {user && (
+{t('selected_by_algorithm')}              {user && (
                 <button
                   className="quiz-hint-btn"
                   onClick={() => setShowQuiz(true)}
-                  title="Améliorer mes suggestions"
+                  title={t('improve_suggestions')}
                 >
-                  · Affiner mes préférences
+                  · {t('refine_preferences')}
                 </button>
               )}
             </p>
           </div>
 
           {loading ? (
-            <div className="loading">Chargement...</div>
+            <div className="loading">{t('loading')}</div>
           ) : featuredHousings.length === 0 ? (
             <div className="no-featured">
-              <p>Aucune recommandation disponible pour le moment.</p>
-              <Link to="/search" className="btn btn-primary">Parcourir les logements</Link>
+              <p>{t('no_recommendations')}</p>
+              <Link to="/search" className="btn btn-primary">{t('browse_housings')}</Link>
             </div>
           ) : (
             <div className="housing-grid housing-grid--featured">
@@ -376,7 +375,7 @@ const Home = () => {
 
           <div className="section-footer">
             <Link to="/search" className="btn btn-primary btn-lg">
-              Voir tous les logements
+              {t('view_all_housings')}
             </Link>
           </div>
         </div>
@@ -385,27 +384,27 @@ const Home = () => {
       {/* ── Comment ça marche ── */}
       <section className="how-it-works">
         <div className="container">
-          <h2>Comment Ça Marche ?</h2>
+          <h2>{t('how_it_works')}</h2>
           <div className="steps-grid">
             <div className="step-card">
               <div className="step-number">1</div>
-              <h3>Recherchez</h3>
-              <p>Utilisez notre recherche intelligente ou la voix</p>
+              <h3>{t('step_search')}</h3>
+<p>{t('step_search_desc')}</p>
             </div>
             <div className="step-card">
               <div className="step-number">2</div>
-              <h3>Comparez</h3>
-              <p>Consultez les détails, photos et localisation</p>
+              <h3>{t('step_compare')}</h3>
+<p>{t('step_compare_desc')}</p>
             </div>
             <div className="step-card">
               <div className="step-number">3</div>
-              <h3>Contactez</h3>
-              <p>Discutez directement avec le propriétaire</p>
+              <h3>{t('step_contact')}</h3>
+<p>{t('step_contact_desc')}</p>
             </div>
             <div className="step-card">
               <div className="step-number">4</div>
-              <h3>Visitez</h3>
-              <p>Planifiez une visite et trouvez votre logement</p>
+              <h3>{t('step_visit')}</h3>
+<p>{t('step_visit_desc')}</p>
             </div>
           </div>
         </div>
@@ -414,9 +413,13 @@ const Home = () => {
       {/* ── CTA ── */}
       <section className="cta-section">
         <div className="container">
-          <h2>Vous êtes propriétaire ?</h2>
-          <p>Publiez vos logements gratuitement et touchez des milliers de locataires</p>
-          <Link to="/register" className="btn btn-white btn-lg">Commencer Maintenant</Link>
+<h2>{t('cta_owner_title')}</h2>
+
+<p>{t('cta_owner_desc')}</p>
+
+<Link to="/register" className="btn btn-white btn-lg">
+  {t('start_now')}
+</Link>
         </div>
       </section>
     </div>

@@ -163,6 +163,7 @@ LANGUAGE_CODE = 'fr-fr'
 TIME_ZONE = 'Africa/Douala'
 USE_I18N = True
 USE_TZ = True
+USE_L10N = True
 
 LANGUAGES = [
     ('fr', 'Français'),
@@ -307,3 +308,10 @@ LOCALE_PATHS = [
     BASE_DIR / 'locale',
 ]
 
+# ── MODIFICATION 4 : MODELTRANSLATION config ─────────────────
+# Ajouter ce bloc n'importe où dans settings.py :
+
+MODELTRANSLATION_DEFAULT_LANGUAGE = 'fr'
+MODELTRANSLATION_LANGUAGES = ('fr', 'en')
+# Quand un champ _en est vide, Django retourne la valeur _fr
+MODELTRANSLATION_FALLBACK_LANGUAGES = {'default': ('fr', 'en')}

@@ -15,6 +15,7 @@ import {
 import { formatPrice, formatDate, getStatusColor } from '../utils/helpers';
 import { toast } from 'react-toastify';
 import './HousingDetailPage.css';
+import { useTheme } from '../contexts/ThemeContext';
 
 const HousingDetailPage = () => {
   const { id } = useParams();
@@ -30,6 +31,9 @@ const HousingDetailPage = () => {
   useEffect(() => {
     loadHousingDetail();
   }, [id]);
+
+const { t, language, theme } = useTheme();
+
 
   const loadHousingDetail = async () => {
     try {
@@ -107,11 +111,11 @@ const HousingDetailPage = () => {
   };
 
   if (loading) {
-    return <div className="loading-page">Chargement...</div>;
+    return <div className="loading-page">{t('loading')}</div>;
   }
 
   if (!housing) {
-    return <div className="error-page">Logement non trouvé</div>;
+    return <div className="error-page">{t('notFound')}</div>;
   }
 
   const mapCenter = {
@@ -137,7 +141,7 @@ const HousingDetailPage = () => {
         {/* Bouton de retour */}
         <div className="detail-back">
             <button className="btn btn-secondary back-btn" onClick={handleBack}>
-              ← Retour
+              ←{t("back")}
             </button>
           </div>
        {/* FIN BOUTTON DE RETOUR */}
@@ -145,8 +149,8 @@ const HousingDetailPage = () => {
       <div className="container">
         {/* Breadcrumb */}
         <nav className="breadcrumb">
-          <a href="/">Accueil</a> / 
-          <a href="/search">Recherche</a> / 
+          <a href="/">{t('home')}</a> / 
+          <a href="/search">{t('search')}</a> / 
           <span>{housing.title}</span>
         </nav>
 
@@ -191,38 +195,38 @@ const HousingDetailPage = () => {
 
             <div className="features-bar">
               <div className="feature">
-                <FaBed /> {housing.rooms} chambres
+                <FaBed /> {housing.rooms} {t('rooms')}
               </div>
               <div className="feature">
-                <FaBath /> {housing.bathrooms} douches
+                <FaBath /> {housing.bathrooms} {t('baths')}
               </div>
               <div className="feature">
                 <FaRuler /> {housing.area} m²
               </div>
               <div className="feature">
-                <FaEye /> {housing.views_count} vues
+                <FaEye /> {housing.views_count} {t('views')}
               </div>
             </div>
 
             <div className="action-buttons">
               <button className="btn btn-outline" onClick={handleLike}>
                 {housing.is_liked ? <FaHeart /> : <FaRegHeart />}
-                Favoris
+                {t('favorites')}
               </button>
 
               <button className="btn btn-primary" onClick={() => setShowVisitModal(true)}>
-                <FaCalendarAlt /> Planifier une visite
+                <FaCalendarAlt /> {t('planVisit')}
               </button>
             </div>
 
             {/* Description */}
             <div className="description-section">
-              <h2>Description</h2>
+              <h2>{t('description')}</h2>
               <p>{housing.description}</p>
 
               {housing.additional_features && (
                 <>
-                  <h3>Caractéristiques supplémentaires</h3>
+                  <h3>{t('additionalFeatures')}</h3>
                   <p>{housing.additional_features}</p>
                 </>
               )}
@@ -231,8 +235,7 @@ const HousingDetailPage = () => {
             {/* Vidéo / Visite 360 */}
             {(housing.video || housing.virtual_360) && (
               <div className="media-section">
-                <h2>Visite Virtuelle</h2>
-                
+              <h2>{t('virtualVisit')}</h2>                
                 {housing.video && (
                   <video controls className="housing-video">
                     <source src={housing.video} type="video/mp4" />
@@ -241,7 +244,7 @@ const HousingDetailPage = () => {
 
                 {housing.virtual_360 && (
                   <a href={housing.virtual_360} target="_blank" rel="noopener noreferrer" className="btn btn-outline">
-                    <FaVideo /> Visite 360°
+                    <FaVideo />{t('tour')}
                   </a>
                 )}
               </div>
@@ -250,7 +253,7 @@ const HousingDetailPage = () => {
             {/* Map */}
             {housing.latitude && housing.longitude && (
               <div className="map-section">
-                <h2>Localisation</h2>
+                <h2>{t('location')}</h2>
                 <LoadScript googleMapsApiKey={import.meta.env.REACT_APP_GOOGLE_MAPS_API_KEY}>
                   <GoogleMap
                     mapContainerStyle={{ width: '100%', height: '400px' }}
@@ -267,7 +270,7 @@ const HousingDetailPage = () => {
                   rel="noopener noreferrer"
                   className="btn btn-outline mt-3"
                 >
-                  Tracer l'itinéraire
+                  {t('route')}
                 </a>
               </div>
             )}
@@ -282,7 +285,7 @@ const HousingDetailPage = () => {
                 className="owner-avatar"
               />
               <h3>{housing.owner?.username}</h3>
-              <p>Propriétaire</p>
+              <p>{t('owner')}</p>
             </div>
 
             <div className="contact-methods">
@@ -291,19 +294,19 @@ const HousingDetailPage = () => {
               </button>
 
               <button className="contact-btn phone" onClick={() => window.location.href = `tel:${housing.owner?.phone}`}>
-                <FaPhone /> Appeler
+                <FaPhone /> {t('call')}
               </button>
 
               <button className="contact-btn email" onClick={handleContactOwner}>
-                <FaEnvelope /> Message
+                <FaEnvelope /> {t('message')}
               </button>
             </div>
 
             <div className="info-box">
-              <h4>Informations</h4>
-              <p><strong>Publié le:</strong> {formatDate(housing.created_at)}</p>
-              <p><strong>Type:</strong> {housing.housing_type?.name}</p>
-              <p><strong>Catégorie:</strong> {housing.category?.name}</p>
+              <h4>{t('info')}</h4>
+<p><strong>{t('published')}:</strong> {formatDate(housing.created_at)}</p>
+<p><strong>{t('type')}:</strong> {housing.housing_type?.name}</p>
+<p><strong>{t('category')}:</strong> {housing.category?.name}</p>
             </div>
           </aside>
         </div>
@@ -313,10 +316,10 @@ const HousingDetailPage = () => {
       {showVisitModal && (
         <div className="modal-overlay" onClick={() => setShowVisitModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2>Planifier une visite</h2>
+            <h2>{t('planVisit')}</h2>
             <form onSubmit={handlePlanVisit}>
               <div className="form-group">
-                <label>Date</label>
+                <label>{t('date')}</label>
                 <input
                   type="date"
                   value={visitDate}
@@ -327,7 +330,7 @@ const HousingDetailPage = () => {
               </div>
 
               <div className="form-group">
-                <label>Heure</label>
+                <label>{t('time')}</label>
                 <input
                   type="time"
                   value={visitTime}
@@ -338,10 +341,10 @@ const HousingDetailPage = () => {
 
               <div className="modal-actions">
                 <button type="button" className="btn btn-outline" onClick={() => setShowVisitModal(false)}>
-                  Annuler
+                  {t('cancel')}
                 </button>
                 <button type="submit" className="btn btn-primary">
-                  Confirmer
+                  {t('confirm')}
                 </button>
               </div>
             </form>

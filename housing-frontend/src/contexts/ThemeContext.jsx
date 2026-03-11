@@ -671,6 +671,79 @@ support_client: "Support client",
 user_conversations: "Conversations avec les utilisateurs",
 
 
+// detail page
+    loading: "Chargement...",
+    notFound: "Logement non trouvé",
+    back: "Retour",
+    home: "Accueil",
+    search: "Recherche",
+    rooms: "chambres",
+    baths: "douches",
+    views: "vues",
+    favorites: "Favoris",
+    planVisit: "Planifier une visite",
+    description: "Description",
+    additionalFeatures: "Caractéristiques supplémentaires",
+    virtualVisit: "Visite Virtuelle",
+    route: "Tracer l'itinéraire",
+    owner: "Propriétaire",
+    info: "Informations",
+    published: "Publié le",
+    type: "Type",
+    category: "Catégorie",
+    date: "Date",
+    time: "Heure",
+    cancel: "Annuler",
+    confirm: "Confirmer",
+    WhatsApp: "WhatsApp",
+    call: "Appeler",
+    message: "Message",
+    location: "Localisation",
+    tour: "Visite 360°",
+  
+ // page home
+  
+    home_hero_title: "Trouvez votre logement idéal",
+home_hero_subtitle: "Plateforme intelligente de location de logements au Cameroun",
+
+search_housing: "Rechercher logement",
+refine_recommendations: "Affiner mes recommandations",
+
+available_housings: "Logements disponibles",
+covered_cities: "Villes couvertes",
+satisfied_clients: "Clients satisfaits",
+support_available: "Support disponible",
+
+featured_housings: "Logements en vedette",
+selected_by_algorithm: "Sélectionnés par notre algorithme génétique intelligent",
+
+improve_suggestions: "Améliorer mes suggestions",
+refine_preferences: "Affiner mes préférences",
+
+loading: "Chargement...",
+no_recommendations: "Aucune recommandation disponible pour le moment",
+
+browse_housings: "Parcourir les logements",
+view_all_housings: "Voir tous les logements",
+
+how_it_works: "Comment ça marche",
+
+step_search: "Recherchez",
+step_search_desc: "Utilisez notre recherche intelligente ou la voix",
+
+step_compare: "Comparez",
+step_compare_desc: "Consultez les détails, photos et localisation",
+
+step_contact: "Contactez",
+step_contact_desc: "Discutez directement avec le propriétaire",
+
+step_visit: "Visitez",
+step_visit_desc: "Planifiez une visite et trouvez votre logement",
+
+cta_owner_title: "Vous êtes propriétaire ?",
+cta_owner_desc: "Publiez vos logements gratuitement et touchez des milliers de locataires",
+start_now: "Commencer maintenant",
+
 
     // ── Logement / Carte ─────────────────────────────────────
     available:          'Disponible',
@@ -1299,6 +1372,81 @@ support_client: "Customer Support",
 user_conversations: "Conversations with users",
 
 
+// detail page
+ 
+  
+    call: "Call",
+    message: "Message",
+    location: "Location",
+    tour: "360° Tour",
+    WhatsApp: "WhatsApp",
+    loading: "Loading...",
+    notFound: "Housing not found",
+    back: "Back",
+    home: "Home",
+    search: "Search",
+    rooms: "rooms",
+    baths: "bathrooms",
+    views: "views",
+    favorites: "Favorites",
+    planVisit: "Schedule a visit",
+    description: "Description",
+    additionalFeatures: "Additional features",
+    virtualVisit: "Virtual tour",
+    route: "Get directions",
+    owner: "Owner",
+    info: "Information",
+    published: "Published on",
+    type: "Type",
+    category: "Category",
+    date: "Date",
+    time: "Time",
+    cancel: "Cancel",
+    confirm: "Confirm"
+  ,
+
+  // page home
+ 
+home_hero_title: "Find Your Ideal Home",
+home_hero_subtitle: "Smart housing rental platform in Cameroon",
+
+search_housing: "Search housing",
+refine_recommendations: "Refine my recommendations",
+
+available_housings: "Available housings",
+covered_cities: "Covered cities",
+satisfied_clients: "Satisfied clients",
+support_available: "Support available",
+
+featured_housings: "Featured housings",
+selected_by_algorithm: "Selected by our intelligent genetic algorithm",
+
+improve_suggestions: "Improve my suggestions",
+refine_preferences: "Refine my preferences",
+
+loading: "Loading...",
+no_recommendations: "No recommendations available at the moment",
+
+browse_housings: "Browse housings",
+view_all_housings: "View all housings",
+
+how_it_works: "How it works",
+
+step_search: "Search",
+step_search_desc: "Use our intelligent search or voice",
+
+step_compare: "Compare",
+step_compare_desc: "Check details, photos and location",
+
+step_contact: "Contact",
+step_contact_desc: "Chat directly with the owner",
+
+step_visit: "Visit",
+step_visit_desc: "Schedule a visit and find your home",
+
+cta_owner_title: "Are you an owner?",
+cta_owner_desc: "Publish your housings for free and reach thousands of tenants",
+start_now: "Start now",
 
     // ── Logement / Carte ─────────────────────────────────────
     available:          'Available',
@@ -1357,7 +1505,12 @@ user_conversations: "Conversations with users",
     no:                 'No',
     error_generic:      'An error occurred. Please try again.',
   },
-};
+
+
+}
+
+
+
 
 // ─── Provider ────────────────────────────────────────────────────────────────
 export const ThemeProvider = ({ children }) => {
