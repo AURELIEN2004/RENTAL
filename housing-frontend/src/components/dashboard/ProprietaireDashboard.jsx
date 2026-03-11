@@ -72,7 +72,7 @@ const ProprietaireDashboard = () => {
 
   useEffect(() => {
     loadDashboardData();
-  }, []);
+  }, [language]);
 
   // ✅ CORRECTION : Gestion robuste du chargement
   const loadDashboardData = async () => {

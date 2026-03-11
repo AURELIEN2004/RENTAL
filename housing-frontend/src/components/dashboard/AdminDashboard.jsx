@@ -80,7 +80,7 @@ const AdminDashboard = ({ user }) => {
 
   useEffect(() => {
     loadData();
-  }, [activeTab, filterOwner, filterVisibility]);
+  }, [activeTab, filterOwner, filterVisibility,language]);
 
   // 🆕 Charger la liste des propriétaires au montage
   useEffect(() => {

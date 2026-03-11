@@ -21,7 +21,7 @@ const CommentSection = ({ housingId }) => {
 
   useEffect(() => {
     loadComments();
-  }, [housingId]);
+  }, [housingId,language]);
 
   const loadComments = async () => {
     try {

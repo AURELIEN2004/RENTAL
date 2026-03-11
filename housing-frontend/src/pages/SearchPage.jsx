@@ -11,7 +11,7 @@ import VoiceSearch  from '../components/Search/VoiceSearch';
 import HousingList  from '../components/housing/HousingList';
 import searchService from '../services/searchService';
 import './SearchPage.css';
-
+import { useTheme } from '../contexts/ThemeContext';
 // ---------------------------------------------------------------------------
 const LABELS = {
   fr: {
@@ -68,8 +68,8 @@ const SearchPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const language = (localStorage.getItem('i18nextLng') || 'fr').startsWith('en') ? 'en' : 'fr';
-  const t        = LABELS[language];
+  // const language = (localStorage.getItem('i18nextLng') || 'fr').startsWith('en') ? 'en' : 'fr';
+  // const t        = LABELS[language];
 
   const [loading,      setLoading]      = useState(false);
   const [housings,     setHousings]     = useState([]);
@@ -79,7 +79,7 @@ const SearchPage = () => {
   const [userLocation, setUserLocation] = useState(null);
   const [error,        setError]        = useState(null);
   const [nlpSummary,   setNlpSummary]   = useState('');
-
+const { t, language, theme } = useTheme();  // language déclaré après
   // ── Init depuis URL params ──
   useEffect(() => {
     const params   = new URLSearchParams(location.search);
@@ -93,7 +93,7 @@ const SearchPage = () => {
     } else {
       performSearch({}, 'classic');
     }
-  }, []); // eslint-disable-line
+  }, [location.search, language]); // eslint-disable-line
 
   // ────────────────────────────────────────────────────────────────────────
   // Recherche principale
@@ -147,14 +147,29 @@ const SearchPage = () => {
   };
 
   // ── URL ──
+  // const updateURL = (f) => {
+  //   const params = new URLSearchParams();
+  //   Object.entries(f).forEach(([k, v]) => {
+  //     if (v !== '' && v != null && v !== false && v !== undefined)
+  //       params.set(k, String(v));
+  //   });
+  //   navigate(`/search?${params.toString()}`, { replace: true });
+  // };
   const updateURL = (f) => {
-    const params = new URLSearchParams();
-    Object.entries(f).forEach(([k, v]) => {
-      if (v !== '' && v != null && v !== false && v !== undefined)
-        params.set(k, String(v));
-    });
-    navigate(`/search?${params.toString()}`, { replace: true });
-  };
+  const params = new URLSearchParams();
+
+  Object.entries(f).forEach(([k, v]) => {
+    if (v !== '' && v != null && v !== false && v !== undefined) {
+      params.set(k, String(v));
+    }
+  });
+
+  const newUrl = `?${params.toString()}`;
+
+  if (location.search !== newUrl) {
+    navigate(`/search${newUrl}`, { replace: true });
+  }
+};
 
   // ── Depuis SearchBar (mode classique ou NLP) ──
   const handleSearch = ({ query, isNLP }) => {

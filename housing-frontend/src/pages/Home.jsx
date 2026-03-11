@@ -216,9 +216,10 @@ const { t, language, theme } = useTheme();
   const [loading, setLoading] = useState(true);
   const [showQuiz, setShowQuiz] = useState(false);
 
+  
   useEffect(() => {
     loadHomeData();
-  }, []);
+  }, [language]);
 
   // Affiche le quiz automatiquement si l'utilisateur est connecté
   // et n'a pas encore renseigné ses préférences

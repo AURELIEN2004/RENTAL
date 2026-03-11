@@ -27,12 +27,12 @@ const HousingDetailPage = () => {
   const [showVisitModal, setShowVisitModal] = useState(false);
   const [visitDate, setVisitDate] = useState('');
   const [visitTime, setVisitTime] = useState('');
+const { t, language, theme } = useTheme();
 
   useEffect(() => {
     loadHousingDetail();
-  }, [id]);
+  }, [id, language]);
 
-const { t, language, theme } = useTheme();
 
 
   const loadHousingDetail = async () => {

@@ -59,7 +59,7 @@ const LocataireDashboard = () => {
 
   useEffect(() => {
     loadDashboardData();
-  }, [activeTab]);
+  }, [activeTab,language]);
 
   const loadDashboardData = async () => {
     try {
