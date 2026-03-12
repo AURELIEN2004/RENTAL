@@ -11,12 +11,14 @@ import { createConversation } from '../../services/api';
 import Loading from '../common/Loading';
 import './HousingDetail.css';
 import VisitFormModal from '../components/visits/VisitFormModal';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const HousingDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const [showVisitModal, setShowVisitModal] = useState(false);
+const { t, language, theme } = useTheme();
 
   const [housing, setHousing] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -122,7 +124,15 @@ const HousingDetail = () => {
     console.error('Erreur planification visite:', error);
   }
 };
+ const getStatusLabel = (status) => {
+  const map = {
+    disponible: t('status_available'),
+    reserve: t('status_reserved'),
+    occupe: t('status_occupied'),
+  };
 
+  return map[status] || status;
+};
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => 

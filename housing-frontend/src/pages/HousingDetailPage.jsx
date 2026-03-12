@@ -124,6 +124,15 @@ const { t, language, theme } = useTheme();
   };
 
 
+  const getStatusLabel = (status) => {
+  const map = {
+    disponible: t('status_available'),
+    reserve: t('status_reserved'),
+    occupe: t('status_occupied'),
+  };
+
+  return map[status] || status;
+};
           {/* Bouton de retour */}
   const handleBack = () => {
   if (window.history.state && window.history.state.idx > 0) {
@@ -162,10 +171,10 @@ const { t, language, theme } = useTheme();
               alt={housing.title}
             />
             
-            {/* Badge statut */}
-            <span className={`status-badge status-${housing.status}`}>
-              {housing.status}
-            </span>
+             {/* Badge statut */}
+        <span className={`status-badge status-${housing.status}`}>
+  {getStatusLabel(housing.status)}
+</span>
           </div>
 
           <div className="thumbnail-grid">

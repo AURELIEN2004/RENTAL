@@ -746,9 +746,9 @@ start_now: "Commencer maintenant",
 
 
     // ── Logement / Carte ─────────────────────────────────────
-    available:          'Disponible',
-    reserved:           'Réservé',
-    occupied:           'Occupé',
+    // available:          'Disponible',
+    // reserved:           'Réservé',
+    // occupied:           'Occupé',
     per_month:          '/mois',
     rooms:              'ch.',
     bathrooms:          'sdb.',
@@ -756,6 +756,9 @@ start_now: "Commencer maintenant",
     see_detail:         'Voir le détail',
     contact_owner:      'Contacter le propriétaire',
     schedule_visit:     'Planifier une visite',
+    status_available: "Disponible",
+status_reserved: "Réservé",
+status_occupied: "Occupé",
 
     // ── Notifications ────────────────────────────────────────
     notif_title:        'Notifications',
@@ -775,20 +778,85 @@ start_now: "Commencer maintenant",
     search_loading:     'Recherche en cours...',
 
     // ── Quiz ─────────────────────────────────────────────────
-    quiz_title:         'Personnalisez vos recommandations',
-    quiz_desc:          'Notre algorithme génétique analyse vos préférences pour vous proposer les logements les plus adaptés.',
-    quiz_time:          '⏱️ 2 minutes · 7 questions',
-    quiz_start:         'Commencer le quiz',
-    quiz_skip:          'Passer pour l\'instant',
-    quiz_next:          'Suivant →',
-    quiz_prev:          '← Précédent',
-    quiz_summary_title: 'Voir le résumé',
-    quiz_confirm:       '🚀 Affiner mes suggestions',
-    quiz_saving:        '⏳ Enregistrement…',
-    quiz_edit:          '✏️ Modifier',
-    quiz_profile_title: 'Votre profil de recherche',
-    quiz_profile_desc:  'Voici ce que nous avons retenu. Confirmez pour affiner vos recommandations.',
-    quiz_multi_hint:    'Sélectionnez une ou plusieurs réponses',
+// ── Quiz ─────────────────────────────────────────────────
+quiz_title:         'Personnalisez vos recommandations',
+quiz_desc:          'Notre algorithme génétique analyse vos préférences pour vous proposer les logements les plus adaptés.',
+quiz_time:          '⏱️ 2 minutes · 7 questions',
+quiz_start:         'Commencer le quiz',
+quiz_skip:          'Passer pour l\'instant',
+quiz_next:          'Suivant →',
+quiz_prev:          '← Précédent',
+quiz_summary_title: 'Voir le résumé',
+quiz_confirm:       '🚀 Affiner mes suggestions',
+quiz_saving:        '⏳ Enregistrement…',
+quiz_edit:          '✏️ Modifier',
+quiz_profile_title: 'Votre profil de recherche',
+quiz_profile_desc:  'Voici ce que nous avons retenu. Confirmez pour affiner vos recommandations.',
+quiz_multi_hint:    'Sélectionnez une ou plusieurs réponses',
+
+// questions
+quiz_q_city: "Dans quelle ville cherchez-vous ?",
+quiz_q_category: "Quel type de logement recherchez-vous ?",
+quiz_q_budget: "Quel est votre budget mensuel ?",
+quiz_q_furnished: "Préférez-vous un logement meublé ?",
+quiz_q_features: "Quels équipements sont importants pour vous ?",
+quiz_q_nearby: "Que souhaitez-vous avoir à proximité ?",
+quiz_q_priority: "Qu'est-ce qui compte le plus dans votre choix ?",
+
+// villes
+quiz_city_yaounde: "Yaoundé",
+quiz_city_douala: "Douala",
+quiz_city_bafoussam: "Bafoussam",
+quiz_city_other: "Autre ville",
+
+// catégories
+quiz_cat_studio: "Studio",
+quiz_cat_room: "Chambre",
+quiz_cat_apartment: "Appartement",
+quiz_cat_house: "Maison / Villa",
+
+// budget
+quiz_budget_1: "Moins de 30 000 FCFA",
+quiz_budget_2: "30 000 – 60 000 FCFA",
+quiz_budget_3: "60 000 – 100 000 FCFA",
+quiz_budget_4: "Plus de 100 000 FCFA",
+
+// meublé
+quiz_furnished_yes: "Oui, meublé",
+quiz_furnished_no: "Non, vide",
+quiz_furnished_any: "Peu importe",
+
+// équipements
+quiz_feat_parking: "Parking",
+quiz_feat_wifi: "Wi-Fi",
+quiz_feat_ac: "Climatisation",
+quiz_feat_balcony: "Balcon / Terrasse",
+quiz_feat_pool: "Piscine",
+quiz_feat_security: "Gardien / Sécurité",
+quiz_feat_water: "Eau courante",
+quiz_feat_kitchen: "Cuisine équipée",
+
+// proximité
+quiz_near_school: "École / Université",
+quiz_near_market: "Supermarché",
+quiz_near_hospital: "Hôpital / Clinique",
+quiz_near_transport: "Transport en commun",
+quiz_near_bank: "Banque / ATM",
+quiz_near_restaurant: "Restaurants",
+
+// priorité
+quiz_priority_price: "Le prix avant tout",
+quiz_priority_location: "L'emplacement",
+quiz_priority_comfort: "Le confort / équipements",
+quiz_priority_security: "La sécurité du quartier",
+quiz_city_yaounde: "Yaoundé",
+quiz_city_douala: "Douala",
+
+quiz_cat_studio: "Studio",
+quiz_cat_room: "Chambre",
+quiz_cat_apartment: "Appartement",
+quiz_cat_house: "Maison",
+
 
     // ── Messages génériques ──────────────────────────────────
     loading:            'Chargement...',
@@ -1449,16 +1517,19 @@ cta_owner_desc: "Publish your housings for free and reach thousands of tenants",
 start_now: "Start now",
 
     // ── Logement / Carte ─────────────────────────────────────
-    available:          'Available',
-    reserved:           'Reserved',
-    occupied:           'Occupied',
+    // available:          'Available',
+    // reserved:           'Reserved',
+    // occupied:           'Occupied',
     per_month:          '/month',
     rooms:              'bed.',
     bathrooms:          'bath.',
     area:               'm²',
     see_detail:         'See details',
     contact_owner:      'Contact landlord',
-    schedule_visit:     'Schedule a visit',
+    schedule_visit:     'Schedules a visit',
+    status_available: "Disponible",
+status_reserved: "Réservé",
+status_occupied: "Occupé",
 
     // ── Notifications ────────────────────────────────────────
     notif_title:        'Notifications',
@@ -1478,20 +1549,85 @@ start_now: "Start now",
     search_loading:     'Searching...',
 
     // ── Quiz ─────────────────────────────────────────────────
-    quiz_title:         'Personalize your recommendations',
-    quiz_desc:          'Our genetic algorithm analyzes your preferences to suggest the most suitable housings.',
-    quiz_time:          '⏱️ 2 minutes · 7 questions',
-    quiz_start:         'Start the quiz',
-    quiz_skip:          'Skip for now',
-    quiz_next:          'Next →',
-    quiz_prev:          '← Previous',
-    quiz_summary_title: 'View summary',
-    quiz_confirm:       '🚀 Refine my suggestions',
-    quiz_saving:        '⏳ Saving…',
-    quiz_edit:          '✏️ Edit',
-    quiz_profile_title: 'Your search profile',
-    quiz_profile_desc:  'Here is what we noted. Confirm to refine your recommendations.',
-    quiz_multi_hint:    'Select one or more answers',
+   // ── Quiz ─────────────────────────────────────────────────
+quiz_title:         'Personalize your recommendations',
+quiz_desc:          'Our genetic algorithm analyzes your preferences to suggest the most suitable housings.',
+quiz_time:          '⏱️ 2 minutes · 7 questions',
+quiz_start:         'Start the quiz',
+quiz_skip:          'Skip for now',
+quiz_next:          'Next →',
+quiz_prev:          '← Previous',
+quiz_summary_title: 'View summary',
+quiz_confirm:       '🚀 Refine my suggestions',
+quiz_saving:        '⏳ Saving…',
+quiz_edit:          '✏️ Edit',
+quiz_profile_title: 'Your search profile',
+quiz_profile_desc:  'Here is what we noted. Confirm to refine your recommendations.',
+quiz_multi_hint:    'Select one or more answers',
+
+// questions
+quiz_q_city: "Which city are you looking in?",
+quiz_q_category: "What type of housing are you looking for?",
+quiz_q_budget: "What is your monthly budget?",
+quiz_q_furnished: "Do you prefer a furnished place?",
+quiz_q_features: "Which features are important to you?",
+quiz_q_nearby: "What would you like nearby?",
+quiz_q_priority: "What matters most in your choice?",
+
+// cities
+quiz_city_yaounde: "Yaoundé",
+quiz_city_douala: "Douala",
+quiz_city_bafoussam: "Bafoussam",
+quiz_city_other: "Other city",
+
+// housing type
+quiz_cat_studio: "Studio",
+quiz_cat_room: "Room",
+quiz_cat_apartment: "Apartment",
+quiz_cat_house: "House / Villa",
+
+// budget
+quiz_budget_1: "Less than 30,000 FCFA",
+quiz_budget_2: "30,000 – 60,000 FCFA",
+quiz_budget_3: "60,000 – 100,000 FCFA",
+quiz_budget_4: "More than 100,000 FCFA",
+
+// furnished
+quiz_furnished_yes: "Yes, furnished",
+quiz_furnished_no: "No, empty",
+quiz_furnished_any: "Doesn't matter",
+
+// features
+quiz_feat_parking: "Parking",
+quiz_feat_wifi: "Wi-Fi",
+quiz_feat_ac: "Air conditioning",
+quiz_feat_balcony: "Balcony / Terrace",
+quiz_feat_pool: "Swimming pool",
+quiz_feat_security: "Security / Guard",
+quiz_feat_water: "Running water",
+quiz_feat_kitchen: "Equipped kitchen",
+
+// nearby
+quiz_near_school: "School / University",
+quiz_near_market: "Supermarket",
+quiz_near_hospital: "Hospital / Clinic",
+quiz_near_transport: "Public transport",
+quiz_near_bank: "Bank / ATM",
+quiz_near_restaurant: "Restaurants",
+
+// priority
+quiz_priority_price: "Price first",
+quiz_priority_location: "Location",
+quiz_priority_comfort: "Comfort / amenities",
+quiz_priority_security: "Neighborhood safety",
+quiz_city_yaounde: "Yaoundé",
+quiz_city_douala: "Douala",
+
+quiz_cat_studio: "Studio",
+quiz_cat_room: "Room",
+quiz_cat_apartment: "Apartment",
+quiz_cat_house: "House",
+
 
     // ── Messages génériques ──────────────────────────────────
     loading:            'Loading...',

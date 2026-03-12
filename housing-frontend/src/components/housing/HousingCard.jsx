@@ -11,6 +11,7 @@ import api from '../../services/api';
 import { toast } from 'react-toastify';
 import { useAuth } from '../../contexts/AuthContext';
 import './HousingCard.css';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const HousingCard = ({ housing, onLikeToggle, onSaveToggle, showActions = true }) => {
   const { user } = useAuth();
@@ -18,7 +19,7 @@ const HousingCard = ({ housing, onLikeToggle, onSaveToggle, showActions = true }
   const [isLiked, setIsLiked] = useState(housing.is_liked || false);
   const [isSaved, setIsSaved] = useState(housing.is_saved || false);
   const [likesCount, setLikesCount] = useState(housing.likes_count || 0);
-
+const { t, language, theme } = useTheme();
   const handleLike = async (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -62,11 +63,21 @@ const HousingCard = ({ housing, onLikeToggle, onSaveToggle, showActions = true }
         onSaveToggle(housing.id, result.data.saved);
       }
 
-      toast.success(result.data.saved ? 'Logement enregistrÃ©' : 'Logement retiré');
+      toast.success(result.data.saved ? 'Logement enregistre' : 'Logement retiré');
     } catch (error) {
       toast.error('Erreur lors de la sauvegarde');
     }
   };
+
+  const getStatusLabel = (status) => {
+  const map = {
+    disponible: t('status_available'),
+    reserve: t('status_reserved'),
+    occupe: t('status_occupied'),
+  };
+
+  return map[status] || status;
+};
 
   return (
     <Link to={`/housing/${housing.id}`} className="housing-card">
@@ -82,8 +93,8 @@ const HousingCard = ({ housing, onLikeToggle, onSaveToggle, showActions = true }
         
         {/* Badge statut */}
         <span className={`status-badge status-${housing.status}`}>
-          {housing.status}
-        </span>
+  {getStatusLabel(housing.status)}
+</span>
 
         {/* Action buttons */}
         {showActions && (
