@@ -1,226 +1,257 @@
-/* ============================================
-   📁 src/components/Search/VoiceSearch.css
-   ============================================ */
+/* src/components/Search/VoiceSearch.css */
 
-/* ── Bouton micro ─────────────────────────────────────── */
-.voice-search {
+/* ── Conteneur ──────────────────────────────────────────── */
+.vs-root {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.4rem;
+  position: relative;
 }
 
-.voice-search-unsupported {
-  opacity: 0.4;
-  cursor: not-allowed;
-  padding: 8px;
-  color: var(--gray-400, #9ca3af);
-}
-
-.voice-button {
+/* ── Bouton micro ───────────────────────────────────────── */
+.vs-btn {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 42px;
-  height: 42px;
-  border: none;
-  border-radius: 50%;
-  background: var(--primary-color, #2563eb);
-  color: #fff;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border-color);
+  background-color: var(--bg-primary);
+  color: var(--text-secondary);
   cursor: pointer;
-  transition: background 0.2s, transform 0.15s;
+  transition: border-color 0.2s, color 0.2s, background-color 0.2s;
   flex-shrink: 0;
+  overflow: hidden;
 }
 
-.voice-button:hover {
-  background: var(--primary-dark, #1d4ed8);
-  transform: scale(1.05);
+.vs-btn:hover:not(:disabled) {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
 }
 
-.voice-button.listening {
-  background: #dc2626;
-  animation: mic-pulse 1.4s ease-in-out infinite;
+/* État actif — enregistrement en cours */
+.vs-btn--listening {
+  border-color: var(--danger-color);
+  color: var(--danger-color);
+  background-color: rgba(239, 68, 68, 0.08);
 }
 
-@keyframes mic-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5); }
-  50%       { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
+/* Non supporté */
+.vs-btn--unsupported {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
-.pulse-ring {
+/* ── Animation pulse ────────────────────────────────────── */
+.vs-pulse {
   position: absolute;
-  inset: -6px;
-  border-radius: 50%;
-  border: 2px solid rgba(220, 38, 38, 0.5);
-  animation: ring-expand 1.2s ease-out infinite;
+  inset: 0;
+  border-radius: inherit;
+  background-color: rgba(239, 68, 68, 0.15);
+  animation: vsPulse 1.2s ease-out infinite;
 }
 
-@keyframes ring-expand {
-  from { transform: scale(1); opacity: 1; }
-  to   { transform: scale(1.7); opacity: 0; }
+@keyframes vsPulse {
+  0%   { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.5); }
 }
 
-.mic-icon { position: relative; z-index: 1; }
-
-.listening-label {
-  font-size: 0.82rem;
-  color: #dc2626;
-  font-weight: 500;
+/* ── Label "J'écoute" ───────────────────────────────────── */
+.vs-status {
+  font-size: 0.78rem;
+  color: var(--danger-color);
   white-space: nowrap;
-  animation: blink 1s step-start infinite;
+  animation: vsBlink 1.4s ease-in-out infinite;
 }
 
-@keyframes blink {
-  50% { opacity: 0; }
+@keyframes vsBlink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
 }
 
-/* ── Modal overlay ────────────────────────────────────── */
-.voice-modal-overlay {
+/* ── Backdrop modal ─────────────────────────────────────── */
+.vs-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(3px);
-  z-index: 9999;
+  background: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px;
-  animation: fade-in 0.15s ease;
+  z-index: 100;
+  padding: 1rem;
+  animation: vsBackdropIn 0.15s ease;
 }
 
-@keyframes fade-in {
+@keyframes vsBackdropIn {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
 
-.voice-modal {
-  background: #fff;
+/* ── Modal ──────────────────────────────────────────────── */
+.vs-modal {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
+  box-shadow: var(--shadow-lg);
   width: 100%;
-  max-width: 440px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
-  overflow: hidden;
-  animation: slide-up 0.2s ease;
-}
-
-@keyframes slide-up {
-  from { transform: translateY(20px); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
-}
-
-/* ── Modal header ─────────────────────────────────────── */
-.voice-modal-header {
+  max-width: 420px;
   display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 20px 22px 14px;
-  border-bottom: 1px solid #f1f5f9;
+  flex-direction: column;
+  animation: vsModalIn 0.2s ease;
 }
 
-.voice-modal-icon {
-  width: 46px;
-  height: 46px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  color: #fff;
+@keyframes vsModalIn {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Header */
+.vs-modal-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1.25rem 1.25rem 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.vs-modal-mic {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background-color: rgba(37, 99, 235, 0.1);
+  color: var(--primary-color);
   flex-shrink: 0;
 }
 
-.voice-modal-title {
-  margin: 0 0 2px;
-  font-size: 1rem;
-  font-weight: 700;
-  color: #1e293b;
+.vs-modal-titles {
+  flex: 1;
 }
 
-.voice-modal-subtitle {
-  margin: 0;
-  font-size: 0.82rem;
-  color: #64748b;
-}
-
-/* ── Modal body ───────────────────────────────────────── */
-.voice-modal-body {
-  padding: 16px 22px;
-}
-
-.voice-edit-wrapper {
-  position: relative;
-}
-
-.voice-edit-icon {
-  position: absolute;
-  top: 10px;
-  left: 12px;
-  color: #94a3b8;
-  pointer-events: none;
-}
-
-.voice-transcript-input {
-  width: 100%;
-  padding: 10px 12px 10px 36px;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 10px;
+.vs-modal-title {
   font-size: 0.95rem;
-  color: #1e293b;
-  resize: vertical;
-  min-height: 72px;
-  font-family: inherit;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  box-sizing: border-box;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
-.voice-transcript-input:focus {
-  outline: none;
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+.vs-modal-sub {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 0.15rem;
 }
 
-/* ── Modal actions ────────────────────────────────────── */
-.voice-modal-actions {
+.vs-modal-close {
   display: flex;
-  gap: 10px;
-  padding: 14px 22px 20px;
-  justify-content: flex-end;
+  align-items: center;
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: color 0.2s, background-color 0.2s;
+  flex-shrink: 0;
 }
 
-.voice-modal-btn {
+.vs-modal-close:hover {
+  color: var(--danger-color);
+  background-color: var(--bg-tertiary);
+}
+
+/* Body */
+.vs-modal-body {
+  padding: 1rem 1.25rem;
+}
+
+.vs-edit-row {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+}
+
+.vs-edit-icon {
+  color: var(--text-tertiary);
+  margin-top: 0.5rem;
+  flex-shrink: 0;
+}
+
+.vs-textarea {
+  flex: 1;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1.5px solid var(--border-color);
+  border-radius: 10px;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  resize: vertical;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+}
+
+.vs-textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.vs-textarea::placeholder {
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+/* Footer */
+.vs-modal-footer {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.875rem 1.25rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.vs-modal-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 9px 20px;
+  gap: 0.35rem;
   border-radius: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
+  padding: 0.55rem 1rem;
+  font-size: 0.87rem;
+  font-weight: 500;
   cursor: pointer;
   border: none;
-  transition: background 0.18s, transform 0.12s;
+  transition: opacity 0.2s, background-color 0.2s;
 }
 
-.voice-modal-btn:active { transform: scale(0.97); }
-
-.voice-modal-btn--cancel {
-  background: #f1f5f9;
-  color: #475569;
+.vs-modal-btn--cancel {
+  flex: 1;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
 }
-.voice-modal-btn--cancel:hover { background: #e2e8f0; }
 
-.voice-modal-btn--confirm {
-  background: #2563eb;
-  color: #fff;
+.vs-modal-btn--cancel:hover {
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
 }
-.voice-modal-btn--confirm:hover:not(:disabled) { background: #1d4ed8; }
-.voice-modal-btn--confirm:disabled {
-  opacity: 0.45;
+
+.vs-modal-btn--confirm {
+  flex: 2;
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.vs-modal-btn--confirm:hover:not(:disabled) { opacity: 0.88; }
+
+.vs-modal-btn--confirm:disabled {
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
-/* ── Responsive ───────────────────────────────────────── */
+/* ── Mobile ─────────────────────────────────────────────── */
 @media (max-width: 480px) {
-  .voice-modal { border-radius: 12px; }
-  .voice-modal-actions { flex-direction: column-reverse; }
-  .voice-modal-btn { justify-content: center; }
+  .vs-modal { border-radius: 12px; }
+  .vs-status { display: none; } /* économiser l'espace */
 }

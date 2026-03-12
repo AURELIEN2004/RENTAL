@@ -1,158 +1,58 @@
-// // ============================================
-// // 📁 src/components/Search/VoiceSearch.jsx
-// // ============================================
-
-// import { useEffect } from 'react';
-// import { Mic, MicOff, Loader } from 'lucide-react';
-// import useSpeechRecognition from '../../hooks/useSpeechRecognition';
-
-// /**
-//  * Composant de recherche vocale
-//  */
-// const VoiceSearch = ({ onTranscript, onError }) => {
-//   const {
-//     isListening,
-//     transcript,
-//     error,
-//     isSupported,
-//     startListening,
-//     stopListening,
-//     resetTranscript
-//   } = useSpeechRecognition();
-
-//   // Envoyer le transcript quand disponible
-//   useEffect(() => {
-//     if (transcript && !isListening) {
-//       onTranscript(transcript);
-//       // Reset après envoi
-//       setTimeout(() => resetTranscript(), 1000);
-//     }
-//   }, [transcript, isListening, onTranscript, resetTranscript]);
-
-//   // Gérer les erreurs
-//   useEffect(() => {
-//     if (error && onError) {
-//       const errorMessages = {
-//         'no-speech': 'Aucun son détecté. Parlez plus fort.',
-//         'audio-capture': 'Microphone non accessible.',
-//         'not-allowed': 'Autorisez l\'accès au microphone.',
-//         'network': 'Erreur réseau.',
-//         'aborted': 'Reconnaissance annulée.',
-//         'already-started': 'Déjà en écoute.'
-//       };
-//       onError(errorMessages[error] || 'Erreur de reconnaissance vocale');
-//     }
-//   }, [error, onError]);
-
-//   if (!isSupported) {
-//     return (
-//       <div className="voice-search-unsupported">
-//         <MicOff size={20} />
-//         <span>Non supporté</span>
-//       </div>
-//     );
-//   }
-
-//   const handleClick = () => {
-//     if (isListening) {
-//       stopListening();
-//     } else {
-//       startListening();
-//     }
-//   };
-
-//   return (
-//     <div className="voice-search">
-//       <button
-//         onClick={handleClick}
-//         className={`voice-button ${isListening ? 'listening' : ''}`}
-//         title={isListening ? 'Arrêter l\'écoute' : 'Recherche vocale'}
-//       >
-//         {isListening ? (
-//           <>
-//             <div className="pulse-ring"></div>
-//             <Mic size={20} className="mic-icon" />
-//           </>
-//         ) : (
-//           <Mic size={20} />
-//         )}
-//       </button>
-
-//       {isListening && (
-//         <div className="listening-indicator">
-//           <Loader className="spinner" size={16} />
-//           <span>J'écoute...</span>
-//         </div>
-//       )}
-
-//       {transcript && !isListening && (
-//         <div className="transcript-preview">
-//           "{transcript}"
-//         </div>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default VoiceSearch;
-
-// ============================================
-// 📁 src/components/Search/VoiceSearch.jsx  — VERSION CORRIGÉE
-//
-// Bugs corrigés :
-//  - langue passée au hook useSpeechRecognition
-//  - useEffect écoute [transcript] seulement quand !isListening
-//  - le modal de validation s'ouvre uniquement si transcript non vide
-//  - resetTranscript appelé APRÈS fermeture du modal (pas avant)
-// ============================================
+// // // ============================================
+// // // 📁 src/components/Search/VoiceSearch.jsx
+// // // ============================================
 
 import { useState, useEffect, useRef } from 'react';
 import { Mic, MicOff, Check, X, Edit3 } from 'lucide-react';
 import useSpeechRecognition from '../../hooks/useSpeechRecognition';
-
+import { useTheme } from '../../contexts/ThemeContext';
 import './VoiceSearch.css';
 
-const LABELS = {
+const T = {
   fr: {
-    title:       'Vérifiez la transcription',
-    subtitle:    'Modifiez si besoin puis lancez la recherche',
-    placeholder: 'Ce que vous avez dit…',
-    confirm:     'Rechercher',
-    cancel:      'Annuler',
-    listening:   "J'écoute…",
-    tip:         'Recherche vocale',
-    noSupport:   'Non supporté',
+    tip:       'Recherche vocale',
+    listening: "J'écoute…",
+    no_sup:    'Reconnaissance vocale non supportée',
+    m_title:   'Vérifiez la transcription',
+    m_sub:     'Corrigez si besoin, puis confirmez',
+    m_ph:      'Ce que vous avez dit…',
+    confirm:   'Rechercher',
+    cancel:    'Annuler',
     errors: {
-      'no-speech':     'Aucun son détecté. Parlez plus fort.',
-      'audio-capture': 'Microphone inaccessible.',
-      'not-allowed':   "Autorisez l'accès au microphone.",
-      'network':       'Erreur réseau.',
-      'aborted':       'Reconnaissance annulée.',
-      'already-started': 'Déjà en cours.',
+      'no-speech':       'Aucun son détecté. Parlez plus fort.',
+      'audio-capture':   'Microphone inaccessible.',
+      'not-allowed':     "Autorisez l'accès au microphone.",
+      'network':         'Erreur réseau.',
+      'aborted':         'Écoute annulée.',
+      'already-started': 'Reconnaissance déjà active.',
+      'default':         'Erreur de reconnaissance vocale.',
     },
   },
   en: {
-    title:       'Review your transcript',
-    subtitle:    'Edit if needed then search',
-    placeholder: 'What you said…',
-    confirm:     'Search',
-    cancel:      'Cancel',
-    listening:   'Listening…',
-    tip:         'Voice search',
-    noSupport:   'Not supported',
+    tip:       'Voice search',
+    listening: 'Listening…',
+    no_sup:    'Voice recognition not supported',
+    m_title:   'Review your transcript',
+    m_sub:     'Edit if needed, then confirm',
+    m_ph:      'What you said…',
+    confirm:   'Search',
+    cancel:    'Cancel',
     errors: {
-      'no-speech':     'No sound detected. Speak louder.',
-      'audio-capture': 'Microphone not accessible.',
-      'not-allowed':   'Allow microphone access.',
-      'network':       'Network error.',
-      'aborted':       'Recognition cancelled.',
+      'no-speech':       'No sound detected. Speak louder.',
+      'audio-capture':   'Microphone not accessible.',
+      'not-allowed':     'Allow microphone access.',
+      'network':         'Network error.',
+      'aborted':         'Recognition cancelled.',
       'already-started': 'Already running.',
+      'default':         'Voice recognition error.',
     },
   },
 };
 
-const VoiceSearch = ({ onTranscript, onError, language = 'fr' }) => {
-  const lbl = LABELS[language] || LABELS.fr;
+const VoiceSearch = ({ onTranscript, onError, language: langProp }) => {
+  const { language: langCtx } = useTheme();
+  const lang = langProp || langCtx || 'fr';
+  const t    = T[lang] || T.fr;
 
   const {
     isListening,
@@ -162,31 +62,30 @@ const VoiceSearch = ({ onTranscript, onError, language = 'fr' }) => {
     startListening,
     stopListening,
     resetTranscript,
-  } = useSpeechRecognition(language);   // ← langue passée au hook
+  } = useSpeechRecognition(lang);
 
-  const [showModal, setShowModal]   = useState(false);
+  const [showModal,  setShowModal]  = useState(false);
   const [editedText, setEditedText] = useState('');
-  const inputRef                    = useRef(null);
+  const textareaRef                 = useRef(null);
 
-  // ── Quand la reconnaissance s'arrête avec un résultat → modal ──
+  // ── Ouvrir modal quand transcription prête ───────────────
   useEffect(() => {
-    // On ouvre le modal seulement si on a un transcript ET qu'on a arrêté
     if (transcript && !isListening) {
       setEditedText(transcript.trim());
       setShowModal(true);
-      setTimeout(() => inputRef.current?.focus(), 120);
+      setTimeout(() => textareaRef.current?.focus(), 150);
     }
   }, [transcript, isListening]);
 
-  // ── Erreurs ──────────────────────────────────────────────────────
+  // ── Propager les erreurs ─────────────────────────────────
   useEffect(() => {
     if (error && onError) {
-      const msg = lbl.errors[error] || 'Erreur de reconnaissance vocale';
-      onError(msg);
+      onError(t.errors[error] || t.errors.default);
     }
-  }, [error]); // eslint-disable-line
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [error]);
 
-  // ── Bouton micro ─────────────────────────────────────────────────
+  // ── Handlers ─────────────────────────────────────────────
   const handleToggle = () => {
     if (isListening) {
       stopListening();
@@ -196,7 +95,6 @@ const VoiceSearch = ({ onTranscript, onError, language = 'fr' }) => {
     }
   };
 
-  // ── Validation du modal ──────────────────────────────────────────
   const handleConfirm = () => {
     const text = editedText.trim();
     if (text) onTranscript(text);
@@ -206,7 +104,7 @@ const VoiceSearch = ({ onTranscript, onError, language = 'fr' }) => {
   const closeModal = () => {
     setShowModal(false);
     setEditedText('');
-    resetTranscript();         // nettoyage APRÈS fermeture
+    resetTranscript();
   };
 
   const handleKeyDown = (e) => {
@@ -214,84 +112,108 @@ const VoiceSearch = ({ onTranscript, onError, language = 'fr' }) => {
     if (e.key === 'Escape') closeModal();
   };
 
-  // ────────────────────────────────────────────────────────────────
+  // ── Non supporté ─────────────────────────────────────────
   if (!isSupported) {
     return (
-      <div className="voice-search-unsupported" title={lbl.noSupport}>
-        <MicOff size={20} />
-      </div>
+      <button
+        type="button"
+        className="vs-btn vs-btn--unsupported"
+        title={t.no_sup}
+        disabled
+        aria-label={t.no_sup}
+      >
+        <MicOff size={20} aria-hidden="true" />
+      </button>
     );
   }
 
   return (
     <>
       {/* ── Bouton micro ── */}
-      <div className="voice-search">
+      <div className="vs-root">
         <button
           type="button"
+          className={`vs-btn ${isListening ? 'vs-btn--listening' : ''}`}
           onClick={handleToggle}
-          className={`voice-button ${isListening ? 'listening' : ''}`}
-          title={lbl.tip}
-          aria-label={lbl.tip}
+          title={t.tip}
+          aria-label={isListening ? t.listening : t.tip}
+          aria-pressed={isListening}
         >
-          {isListening && <span className="pulse-ring" />}
-          <Mic size={20} className="mic-icon" />
+          {isListening && <span className="vs-pulse" aria-hidden="true" />}
+          <Mic size={20} aria-hidden="true" />
         </button>
+
         {isListening && (
-          <span className="listening-label">{lbl.listening}</span>
+          <span className="vs-status" aria-live="polite">
+            {t.listening}
+          </span>
         )}
       </div>
 
       {/* ── Modal de validation ── */}
       {showModal && (
         <div
-          className="voice-modal-overlay"
+          className="vs-modal-backdrop"
           role="dialog"
           aria-modal="true"
+          aria-labelledby="vs-modal-title"
           onClick={(e) => { if (e.target === e.currentTarget) closeModal(); }}
         >
-          <div className="voice-modal">
+          <div className="vs-modal">
+
             {/* Header */}
-            <div className="voice-modal-header">
-              <div className="voice-modal-icon"><Mic size={22} /></div>
-              <div>
-                <h3 className="voice-modal-title">{lbl.title}</h3>
-                <p className="voice-modal-subtitle">{lbl.subtitle}</p>
+            <div className="vs-modal-header">
+              <span className="vs-modal-mic" aria-hidden="true">
+                <Mic size={20} />
+              </span>
+              <div className="vs-modal-titles">
+                <h3 id="vs-modal-title" className="vs-modal-title">
+                  {t.m_title}
+                </h3>
+                <p className="vs-modal-sub">{t.m_sub}</p>
               </div>
+              <button
+                type="button"
+                className="vs-modal-close"
+                onClick={closeModal}
+                aria-label={t.cancel}
+              >
+                <X size={16} />
+              </button>
             </div>
 
-            {/* Champ éditable */}
-            <div className="voice-modal-body">
-              <div className="voice-edit-wrapper">
-                <Edit3 size={15} className="voice-edit-icon" />
+            {/* Corps — textarea éditable */}
+            <div className="vs-modal-body">
+              <div className="vs-edit-row">
+                <Edit3 size={14} className="vs-edit-icon" aria-hidden="true" />
                 <textarea
-                  ref={inputRef}
-                  className="voice-transcript-input"
+                  ref={textareaRef}
+                  className="vs-textarea"
                   value={editedText}
                   onChange={(e) => setEditedText(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder={lbl.placeholder}
+                  placeholder={t.m_ph}
                   rows={3}
                 />
               </div>
             </div>
 
             {/* Actions */}
-            <div className="voice-modal-actions">
+            <div className="vs-modal-footer">
               <button
                 type="button"
-                className="voice-modal-btn voice-modal-btn--cancel"
+                className="vs-modal-btn vs-modal-btn--cancel"
                 onClick={closeModal}
               >
-                <X size={15} /> {lbl.cancel}
+                <X size={14} aria-hidden="true" /> {t.cancel}
               </button>
               <button
                 type="button"
-                className="voice-modal-btn voice-modal-btn--confirm"
+                className="vs-modal-btn vs-modal-btn--confirm"
                 onClick={handleConfirm}
                 disabled={!editedText.trim()}
               >
-                <Check size={15} /> {lbl.confirm}
+                <Check size={14} aria-hidden="true" /> {t.confirm}
               </button>
             </div>
           </div>

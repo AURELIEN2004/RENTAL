@@ -1,0 +1,44 @@
+/* src/components/Search/NearMeButton.css */
+
+.nmb-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0 1rem;
+  height: 44px;
+  border: 1.5px solid var(--border-color);
+  border-radius: 10px;
+  background-color: var(--bg-primary);
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.2s, color 0.2s, background-color 0.2s;
+  flex-shrink: 0;
+}
+
+.nmb-btn:hover:not(:disabled) {
+  border-color: #10b981;
+  color: #059669;
+  background-color: rgba(16, 185, 129, 0.06);
+}
+
+.nmb-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Spinner */
+.nmb-spin {
+  animation: nmbSpin 0.9s linear infinite;
+  color: #059669;
+}
+
+@keyframes nmbSpin { to { transform: rotate(360deg); } }
+
+/* ── Mobile : icône seule ───────────────────────────────── */
+@media (max-width: 480px) {
+  .nmb-btn span { display: none; }
+  .nmb-btn { padding: 0; width: 44px; justify-content: center; }
+}

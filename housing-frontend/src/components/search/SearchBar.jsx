@@ -1,159 +1,143 @@
-// ============================================
-// 📁 src/components/Search/SearchBar.jsx  — VERSION AMÉLIORÉE
-//
-// Mode NLP intégré :
-//   - L'utilisateur tape une requête libre
-//   - Après soumission, le backend NLP analyse et retourne les critères compris
-//   - Un badge résumé est affiché ("Recherche : Studio meublé à Yaoundé…")
-//   - Ce badge est cliquable pour effacer/réinitialiser
-// ============================================
+// // ============================================
+// // 📁 src/components/Search/SearchBar.jsx  — VERSION AMÉLIORÉE
+// //
+
 
 import { useState, useRef } from 'react';
 import { Search, Loader, X, Sparkles } from 'lucide-react';
+import { useTheme } from '../../contexts/ThemeContext';
 import './SearchBar.css';
 
-/**
- * Barre de recherche principale.
- *
- * Props:
- *   onSearch        {function}  appelé avec { query, isNLP: bool }
- *   loading         {boolean}
- *   placeholder     {string}
- *   criteriaSummary {string}    résumé des critères NLP (venant du parent)
- *   onClearNLP      {function}  appelé quand l'utilisateur efface le résumé NLP
- *   language        {string}    'fr' | 'en'
- *
- * Usage dans SearchPage :
- *   <SearchBar
- *     onSearch={handleSearch}
- *     loading={loading}
- *     placeholder="Rechercher par titre, ville, quartier..."
- *     criteriaSummary={nlpSummary}
- *     onClearNLP={handleClearNLP}
- *   />
- */
+const T = {
+  fr: {
+    classic:       'Classique',
+    nlp:           'Langage naturel',
+    ph_classic:    'Rechercher par titre, ville, quartier…',
+    ph_nlp:        'Ex : Studio meublé à Yaoundé pour 50 000 FCFA',
+    btn:           'Rechercher',
+    clear:         'Effacer',
+    aria:          'Champ de recherche',
+  },
+  en: {
+    classic:       'Classic',
+    nlp:           'Natural language',
+    ph_classic:    'Search by title, city, neighborhood…',
+    ph_nlp:        'Ex: Furnished studio in Yaoundé for 50,000 FCFA',
+    btn:           'Search',
+    clear:         'Clear',
+    aria:          'Search field',
+  },
+};
+
 const SearchBar = ({
   onSearch,
-  loading          = false,
-  placeholder      = 'Rechercher par titre, ville, quartier…',
-  criteriaSummary  = '',
-  onClearNLP       = null,
-  language         = 'fr',
+  loading         = false,
+  criteriaSummary = '',
+  onClearNLP      = null,
+  language: langProp,
 }) => {
-  const [query, setQuery]     = useState('');
-  const [mode, setMode]       = useState('classic'); // 'classic' | 'nlp'
-  const inputRef              = useRef(null);
+  const { language: langCtx } = useTheme();
+  const lang = langProp || langCtx || 'fr';
+  const t    = T[lang] || T.fr;
 
-  const labels = {
-    fr: {
-      classic:  'Classique',
-      nlp:      'Langage naturel',
-      search:   'Rechercher',
-      nlp_tip:  'Ex : Studio meublé à Yaoundé pour 50 000 FCFA',
-      clear:    'Effacer',
-    },
-    en: {
-      classic:  'Classic',
-      nlp:      'Natural language',
-      search:   'Search',
-      nlp_tip:  'Ex: Furnished studio in Yaoundé for 50,000 FCFA',
-      clear:    'Clear',
-    },
-  }[language] || {};
+  const [query, setQuery] = useState('');
+  const [mode,  setMode]  = useState('classic'); // 'classic' | 'nlp'
+  const inputRef          = useRef(null);
+
+  const placeholder = mode === 'nlp' ? t.ph_nlp : t.ph_classic;
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const trimmed = query.trim();
-    if (!trimmed) return;
+    if (!trimmed || loading) return;
     onSearch({ query: trimmed, isNLP: mode === 'nlp' });
   };
 
   const handleClear = () => {
     setQuery('');
-    if (onClearNLP) onClearNLP();
+    onClearNLP?.();
     inputRef.current?.focus();
   };
 
-  // Quand VoiceSearch pousse une transcription validée → remplir le champ + lancer
-  // (géré depuis le parent via handleVoiceTranscript, pas besoin ici)
-
   return (
-    <div className="search-bar-wrapper">
+    <div className="sb-wrapper">
+
       {/* ── Sélecteur de mode ── */}
-      <div className="search-mode-toggle">
+      <div className="sb-mode-toggle" role="group">
         <button
           type="button"
-          className={`mode-btn ${mode === 'classic' ? 'active' : ''}`}
+          className={`sb-mode-btn ${mode === 'classic' ? 'sb-mode-btn--active' : ''}`}
           onClick={() => setMode('classic')}
         >
-          <Search size={13} />
-          {labels.classic}
+          <Search size={13} aria-hidden="true" />
+          {t.classic}
         </button>
         <button
           type="button"
-          className={`mode-btn ${mode === 'nlp' ? 'active' : ''}`}
+          className={`sb-mode-btn ${mode === 'nlp' ? 'sb-mode-btn--active' : ''}`}
           onClick={() => setMode('nlp')}
         >
-          <Sparkles size={13} />
-          {labels.nlp}
+          <Sparkles size={13} aria-hidden="true" />
+          {t.nlp}
         </button>
       </div>
 
       {/* ── Formulaire ── */}
-      <form onSubmit={handleSubmit} className="search-bar">
-        <div className="search-input-wrapper">
-          {loading
-            ? <Loader className="search-icon spinning" size={20} />
-            : <Search className="search-icon" size={20} />
-          }
+      <form onSubmit={handleSubmit} className="sb-form" role="search">
+        <div className="sb-input-row">
+
+          <span className="sb-icon-left" aria-hidden="true">
+            {loading
+              ? <Loader className="sb-spin" size={18} />
+              : <Search size={18} />
+            }
+          </span>
 
           <input
             ref={inputRef}
-            type="text"
+            type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={mode === 'nlp' ? labels.nlp_tip : placeholder}
-            className="search-input"
+            placeholder={placeholder}
+            className="sb-input"
             disabled={loading}
-            aria-label="Champ de recherche"
+            aria-label={t.aria}
+            autoComplete="off"
           />
 
-          {/* Effacer */}
           {(query || criteriaSummary) && (
             <button
               type="button"
-              className="search-clear-btn"
+              className="sb-clear"
               onClick={handleClear}
-              title={labels.clear}
-              aria-label={labels.clear}
+              aria-label={t.clear}
             >
-              <X size={16} />
+              <X size={15} />
             </button>
           )}
 
           <button
             type="submit"
-            className="search-button"
+            className="sb-submit"
             disabled={loading || !query.trim()}
           >
-            {labels.search}
+            {t.btn}
           </button>
         </div>
 
         {/* ── Badge résumé NLP ── */}
         {criteriaSummary && (
-          <div className="search-nlp-summary">
-            <Sparkles size={14} className="summary-icon" />
-            <span className="summary-text">{criteriaSummary}</span>
+          <div className="sb-nlp-badge">
+            <Sparkles size={12} aria-hidden="true" />
+            <span>{criteriaSummary}</span>
             {onClearNLP && (
               <button
                 type="button"
-                className="summary-clear"
+                className="sb-nlp-clear"
                 onClick={onClearNLP}
-                title={labels.clear}
-                aria-label={labels.clear}
+                aria-label={t.clear}
               >
-                <X size={13} />
+                <X size={12} />
               </button>
             )}
           </div>

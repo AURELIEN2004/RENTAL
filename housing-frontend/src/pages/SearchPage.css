@@ -1,153 +1,312 @@
-/* ============================================
-   📁 src/pages/SearchPage.css
-   Styles pour SearchPage
-   ============================================ */
+/* src/pages/SearchPage.css */
+/* ============================================================
+   Utilise les variables globales :
+   --bg-primary, --bg-secondary, --bg-tertiary
+   --text-primary, --text-secondary, --border-color
+   --primary-color, --shadow, --shadow-lg
+   ============================================================ */
 
+/* ── Page ─────────────────────────────────────────────────── */
 .search-page {
-  font-family: 'Inter', sans-serif;
-  background-color: #f9f9f9;
   min-height: 100vh;
-  padding-bottom: 80px; /* Pour le bouton flottant chatbot */
+  background-color: var(--bg-secondary);
 }
 
-.search-header {
-  background-color: #fff;
-  padding: 2rem 1rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  margin-bottom: 2rem;
+/* ── En-tête ─────────────────────────────────────────────── */
+.sp-header {
+  background-color: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+  padding: 2rem 0 1.5rem;
+  position: sticky;
+  top: 64px; /* hauteur de la navbar */
+  z-index: 40;
+  box-shadow: var(--shadow);
 }
 
-.search-header h1 {
-  font-size: 1.8rem;
-  margin-bottom: 1rem;
+.sp-header-text {
+  margin-bottom: 1.25rem;
 }
 
-.search-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  align-items: center;
+.sp-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.25rem;
 }
 
-.search-actions {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.location-indicator {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.8rem;
+.sp-subtitle {
+  color: var(--text-secondary);
   font-size: 0.9rem;
-  color: #555;
 }
 
-.search-content {
-  padding: 0 1rem;
-}
-
-.search-stats {
+/* ── Contrôles ──────────────────────────────────────────── */
+.sp-controls {
   display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
   flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
 }
 
-.stat-item {
-  background-color: #fff;
-  padding: 0.8rem 1rem;
+.sp-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* ── Badges ─────────────────────────────────────────────── */
+.sp-badges {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.sp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.sp-badge--nearby {
+  background-color: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.sp-badge--nlp {
+  background-color: rgba(124, 58, 237, 0.12);
+  color: var(--secondary-color);
+  border: 1px solid rgba(124, 58, 237, 0.3);
+}
+
+.sp-badge--filters {
+  background-color: rgba(37, 99, 235, 0.12);
+  color: var(--primary-color);
+  border: 1px solid rgba(37, 99, 235, 0.3);
+}
+
+/* ── Contenu ────────────────────────────────────────────── */
+.sp-content {
+  padding: 1.5rem 0 3rem;
+}
+
+/* ── Toolbar résultats ──────────────────────────────────── */
+.sp-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.sp-count {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.sp-count strong {
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+/* ── Tri ────────────────────────────────────────────────── */
+.sp-sort {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sp-sort label {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.sp-sort select {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  padding: 0.35rem 2rem 0.35rem 0.75rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.6rem center;
+  transition: border-color 0.2s;
+}
+
+.sp-sort select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+/* ── Chargement ─────────────────────────────────────────── */
+.sp-loading {
   display: flex;
   flex-direction: column;
-  min-width: 120px;
-}
-
-.stat-label {
-  font-size: 0.75rem;
-  color: #777;
-  margin-bottom: 0.2rem;
-}
-
-.stat-value {
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.sort-controls {
-  margin-bottom: 1.5rem;
-  display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 1rem;
+  padding: 4rem 0;
+  color: var(--text-secondary);
 }
 
-.sort-controls select {
-  padding: 0.4rem 0.6rem;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-.loading-state, .error-state, .empty-state {
-  text-align: center;
-  padding: 2rem 1rem;
-  color: #555;
-}
-
-.loading-state .spinner {
+.sp-spinner {
   animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
+  color: var(--primary-color);
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg);}
-  100% { transform: rotate(360deg);}
+  to { transform: rotate(360deg); }
 }
 
-.empty-state h3 {
-  margin: 0.5rem 0;
-  font-size: 1.2rem;
+/* ── Erreur ─────────────────────────────────────────────── */
+.sp-error {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: var(--danger-color);
 }
 
-.empty-state p {
+.sp-error p {
   margin-bottom: 1rem;
+  font-size: 0.95rem;
 }
 
-.empty-state button,
-.error-state button {
-  background-color: #007bff;
-  color: #fff;
+.sp-retry {
+  background-color: var(--danger-color);
+  color: white;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
+  border-radius: 8px;
+  padding: 0.6rem 1.5rem;
+  font-size: 0.9rem;
   cursor: pointer;
+  transition: opacity 0.2s;
 }
 
-.empty-state button:hover,
-.error-state button:hover {
-  background-color: #0056b3;
-}
+.sp-retry:hover { opacity: 0.85; }
 
-/* Bouton flottant Chatbot */
-.chatbot-button {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 999;
-  background-color: #007bff;
-  color: #fff;
-  border-radius: 50%;
-  width: 56px;
-  height: 56px;
+/* ── État vide ──────────────────────────────────────────── */
+.sp-empty {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  cursor: pointer;
-  transition: transform 0.2s;
+  gap: 0.75rem;
+  padding: 4rem 1rem;
+  text-align: center;
 }
 
-.chatbot-button:hover {
-  transform: scale(1.1);
+.sp-empty-icon {
+  color: var(--text-tertiary);
+  margin-bottom: 0.5rem;
+}
+
+.sp-empty h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.sp-empty p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+/* ── Suggestions ─────────────────────────────────────────── */
+.sp-suggestions {
+  margin-top: 0.75rem;
+}
+
+.sp-suggestions p {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.sp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  justify-content: center;
+}
+
+.sp-chip {
+  background-color: var(--bg-tertiary);
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+  border-radius: 999px;
+  padding: 0.3rem 0.9rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.sp-chip:hover {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+/* ── Reset ──────────────────────────────────────────────── */
+.sp-reset {
+  margin-top: 0.75rem;
+  background-color: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.6rem 1.5rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.sp-reset:hover {
+  background-color: var(--border-color);
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .sp-header { position: static; }
+  .sp-title  { font-size: 1.3rem; }
+  .sp-controls { flex-direction: column; }
+  .sp-actions  { width: 100%; justify-content: flex-end; }
+  .sp-toolbar  { flex-direction: column; align-items: flex-start; }
+}
+
+
+
+
+/* ================================
+   SEARCH HEADER
+================================ */
+
+.sp-header {
+  position: relative;
+  padding: 40px 0 20px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* container interne */
+.sp-header .container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 0 20px;
+}
+
+/* titre */
+.sp-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.sp-subtitle {
+  opacity: 0.7;
+  margin-bottom: 25px;
 }

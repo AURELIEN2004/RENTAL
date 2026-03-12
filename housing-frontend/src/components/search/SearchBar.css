@@ -1,413 +1,179 @@
-/* =========================================
-   SearchBar – Container
-========================================= */
+/* src/components/Search/SearchBar.css */
 
-.search-bar-container {
-  width: 100%;
-  margin-bottom: 1.5rem;
+/* ── Wrapper global ─────────────────────────────────────── */
+.sb-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  flex: 1;
+  min-width: 0;
 }
 
-/* =========================================
-   Form
-========================================= */
-
-.search-bar-form {
-  width: 100%;
+/* ── Sélecteur de mode ──────────────────────────────────── */
+.sb-mode-toggle {
+  display: flex;
+  gap: 0.25rem;
 }
 
-/* =========================================
-   Input Wrapper
-========================================= */
+.sb-mode-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
 
-.search-input-wrapper {
+.sb-mode-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.sb-mode-btn--active {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+/* ── Formulaire ─────────────────────────────────────────── */
+.sb-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.sb-input-row {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  background: #ffffff;
+  background-color: var(--bg-primary);
+  border: 1.5px solid var(--border-color);
   border-radius: 12px;
-  padding: 0.4rem 0.6rem;
-  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-/* =========================================
-   Search Icon
-========================================= */
+.sb-input-row:focus-within {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
 
-.search-icon {
-  color: #6b7280;
+/* Icône gauche */
+.sb-icon-left {
+  display: flex;
+  align-items: center;
+  padding: 0 0.75rem;
+  color: var(--text-tertiary);
   flex-shrink: 0;
 }
 
-/* =========================================
-   Input
-========================================= */
-
-.search-input {
+/* Champ texte */
+.sb-input {
   flex: 1;
+  background: transparent;
   border: none;
   outline: none;
+  color: var(--text-primary);
   font-size: 0.95rem;
-  padding: 0.6rem;
-  color: #111827;
+  padding: 0.75rem 0;
+  min-width: 0;
 }
 
-.search-input::placeholder {
-  color: #9ca3af;
+.sb-input::placeholder {
+  color: var(--text-tertiary);
 }
 
-.search-input:disabled {
-  background: transparent;
-  color: #9ca3af;
+.sb-input::-webkit-search-cancel-button {
+  display: none; /* on gère nous-mêmes le bouton clear */
 }
 
-/* =========================================
-   Voice Button
-========================================= */
-
-.voice-button {
+/* Bouton effacer */
+.sb-clear {
   display: flex;
   align-items: center;
-  justify-content: center;
+  padding: 0 0.5rem;
+  background: none;
   border: none;
-  background: #e5e7eb;
-  border-radius: 999px;
-  width: 38px;
-  height: 38px;
+  color: var(--text-tertiary);
   cursor: pointer;
-  transition: all 0.2s ease;
+  border-radius: 4px;
+  transition: color 0.2s;
 }
 
-.voice-button:hover {
-  background: #d1d5db;
-}
+.sb-clear:hover { color: var(--danger-color); }
 
-.voice-button.recording {
-  background: #ef4444;
-  color: #fff;
-}
-
-/* Pulse animation when recording */
-.pulse {
-  animation: pulse 1.3s infinite;
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.2);
-    opacity: 0.7;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-/* =========================================
-   Search Button
-========================================= */
-
-.search-button {
-  background: #2563eb;
-  color: #ffffff;
+/* Bouton rechercher */
+.sb-submit {
+  background-color: var(--primary-color);
+  color: white;
   border: none;
-  border-radius: 10px;
-  padding: 0.55rem 1.1rem;
-  font-weight: 600;
+  padding: 0 1.25rem;
+  height: 100%;
+  min-height: 44px;
+  font-size: 0.88rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: opacity 0.2s;
+  white-space: nowrap;
 }
 
-.search-button:hover {
-  background: #1d4ed8;
-}
-
-.search-button:disabled {
-  background: #93c5fd;
+.sb-submit:hover:not(:disabled) { opacity: 0.88; }
+.sb-submit:disabled {
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
 /* Spinner */
-.spinner {
-  animation: spin 1s linear infinite;
+.sb-spin {
+  animation: sbSpin 0.9s linear infinite;
+  color: var(--primary-color);
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
+@keyframes sbSpin { to { transform: rotate(360deg); } }
 
-/* =========================================
-   Recording Indicator
-========================================= */
-
-.recording-indicator {
-  margin-top: 0.6rem;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  padding: 0.5rem 0.8rem;
-  border-radius: 10px;
-}
-
-.recording-dot {
-  width: 8px;
-  height: 8px;
-  background: #ef4444;
-  border-radius: 50%;
-  animation: pulse 1.2s infinite;
-}
-
-.recording-text {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #b91c1c;
-}
-
-.cancel-recording {
-  margin-left: auto;
-  background: transparent;
-  border: none;
-  color: #991b1b;
-  font-size: 0.8rem;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.cancel-recording:hover {
-  text-decoration: underline;
-}
-
-/* =========================================
-   Processing Indicator
-========================================= */
-
-.processing-indicator {
-  margin-top: 0.6rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.85rem;
-  color: #374151;
-}
-
-/* =========================================
-   Responsive
-========================================= */
-
-@media (max-width: 640px) {
-  .search-input-wrapper {
-    flex-wrap: wrap;
-  }
-
-  .search-button {
-    width: 100%;
-  }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* ============================================
-   📁 src/components/Search/SearchBar.css
-   ============================================ */
-
-.search-bar-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  flex: 1;
-  min-width: 0;
-}
-
-/* ── Mode toggle ──────────────────────────────────────── */
-.search-mode-toggle {
-  display: flex;
-  gap: 4px;
-  align-self: flex-start;
-}
-
-.mode-btn {
+/* ── Badge résumé NLP ───────────────────────────────────── */
+.sb-nlp-badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 12px;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 20px;
-  font-size: 0.78rem;
-  font-weight: 500;
-  cursor: pointer;
-  background: #fff;
-  color: #64748b;
-  transition: all 0.15s;
-  white-space: nowrap;
-}
-
-.mode-btn:hover { border-color: #94a3b8; color: #1e293b; }
-
-.mode-btn.active {
-  background: #2563eb;
-  border-color: #2563eb;
-  color: #fff;
-}
-
-/* ── Barre de recherche ───────────────────────────────── */
-.search-bar { width: 100%; }
-
-.search-input-wrapper {
-  display: flex;
-  align-items: center;
-  background: #fff;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 0 6px 0 14px;
-  gap: 8px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  height: 52px;
-}
-
-.search-input-wrapper:focus-within {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.search-icon {
-  color: #94a3b8;
-  flex-shrink: 0;
-}
-
-.search-icon.spinning {
-  animation: spin 1s linear infinite;
-  color: #2563eb;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.search-input {
-  flex: 1;
-  border: none;
-  outline: none;
-  font-size: 0.97rem;
-  color: #1e293b;
-  background: transparent;
-  min-width: 0;
-}
-
-.search-input::placeholder { color: #94a3b8; }
-.search-input:disabled { opacity: 0.6; }
-
-.search-clear-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border: none;
-  border-radius: 50%;
-  background: #f1f5f9;
-  color: #64748b;
-  cursor: pointer;
-  transition: background 0.15s;
-  flex-shrink: 0;
-  padding: 0;
-}
-
-.search-clear-btn:hover { background: #e2e8f0; color: #1e293b; }
-
-.search-button {
-  padding: 0 18px;
-  height: 38px;
-  background: #2563eb;
-  color: #fff;
-  border: none;
+  gap: 0.4rem;
+  background-color: rgba(124, 58, 237, 0.1);
+  color: var(--secondary-color);
+  border: 1px solid rgba(124, 58, 237, 0.25);
   border-radius: 8px;
-  font-size: 0.88rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.search-button:hover:not(:disabled) { background: #1d4ed8; }
-.search-button:disabled { opacity: 0.45; cursor: not-allowed; }
-
-/* ── Badge résumé NLP ─────────────────────────────────── */
-.search-nlp-summary {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: #eff6ff;
-  border: 1px solid #bfdbfe;
-  border-radius: 8px;
+  padding: 0.35rem 0.75rem;
   font-size: 0.82rem;
-  color: #1d4ed8;
-  flex-wrap: wrap;
+  max-width: 100%;
 }
 
-.summary-icon {
-  color: #2563eb;
-  flex-shrink: 0;
-}
-
-.summary-text {
+.sb-nlp-badge span {
   flex: 1;
-  min-width: 0;
-  word-break: break-word;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.summary-clear {
+.sb-nlp-clear {
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
+  background: none;
   border: none;
-  border-radius: 50%;
-  background: #bfdbfe;
-  color: #1d4ed8;
+  color: var(--secondary-color);
   cursor: pointer;
   padding: 0;
-  transition: background 0.15s;
-  flex-shrink: 0;
+  opacity: 0.7;
+  transition: opacity 0.2s;
 }
 
-.summary-clear:hover { background: #93c5fd; }
+.sb-nlp-clear:hover { opacity: 1; }
 
-/* ── Responsive ───────────────────────────────────────── */
-@media (max-width: 600px) {
-  .search-button { padding: 0 12px; font-size: 0.82rem; }
-  .search-input  { font-size: 0.9rem; }
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .sb-submit {
+    padding: 0 0.75rem;
+    font-size: 0.82rem;
+  }
 }
