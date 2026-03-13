@@ -264,6 +264,81 @@ class NLPSearchAPIView(APIView):
             print(f"⚠️ Historique non sauvegardé : {e}")
 
 
+# class HousingSearchAPIView(APIView):
+#     def get(self, request):
+#         return Response({"message": "Search API works"})
+
+
+
+
 class HousingSearchAPIView(APIView):
+    permission_classes = [AllowAny]
+
     def get(self, request):
-        return Response({"message": "Search API works"})
+
+        query = request.GET.get("query", "")
+        category = request.GET.get("category")
+        housing_type = request.GET.get("housing_type")
+
+        region = request.GET.get("region")
+        city = request.GET.get("city")
+        district = request.GET.get("district")
+
+        min_price = request.GET.get("min_price")
+        max_price = request.GET.get("max_price")
+
+        min_rooms = request.GET.get("min_rooms")
+        max_rooms = request.GET.get("max_rooms")
+
+        page = int(request.GET.get("page", 1))
+        page_size = 10
+
+        filters = {}
+
+        if category:
+            filters["category"] = category
+
+        if housing_type:
+            filters["housing_type"] = housing_type
+
+        if region:
+            filters["region"] = region
+
+        if city:
+            filters["city"] = city
+
+        if district:
+            filters["district"] = district
+
+        if min_price:
+            filters["min_price"] = min_price
+
+        if max_price:
+            filters["max_price"] = max_price
+
+        if min_rooms:
+            filters["min_rooms"] = min_rooms
+
+        if max_rooms:
+            filters["max_rooms"] = max_rooms
+
+        engine = SearchEngine()
+
+        results = engine.search(
+            query=query,
+            filters=filters
+        )
+
+        paginator = Paginator(results, page_size)
+
+        page_obj = paginator.get_page(page)
+
+        serializer = HousingSerializer(page_obj.object_list, many=True)
+
+        return Response({
+            "count": paginator.count,
+            "total_pages": paginator.num_pages,
+            "page": page,
+            "results": serializer.data
+        })
+

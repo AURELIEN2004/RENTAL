@@ -108,6 +108,12 @@
 // export default searchService;
 
 
+
+
+
+
+
+
 // src/services/searchService.js
 // ============================================================
 // ENDPOINTS ACTIFS (vérifiés dans apps/recherche/urls.py) :
@@ -173,3 +179,10 @@ const searchService = {
 };
 
 export default searchService;
+
+
+
+
+
+
+

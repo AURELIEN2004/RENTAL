@@ -348,6 +348,22 @@
 // export default FilterPanel;
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // src/components/Search/FilterPanel.jsx
 // ============================================================
 // Props :
@@ -703,3 +719,5 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, language: langProp }
 };
 
 export default FilterPanel;
+
+

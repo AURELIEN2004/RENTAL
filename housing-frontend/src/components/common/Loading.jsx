@@ -1,3 +1,5 @@
+// src/components/common/loading.jsx — VERSION BILINGUE
+
 import React from 'react';
 import './Loading.css';
 

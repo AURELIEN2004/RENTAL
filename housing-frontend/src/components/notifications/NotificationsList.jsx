@@ -673,6 +673,9 @@
 
 // export default NotificationsList;
 
+
+// // src/components/notifications/NotificationsList.jsx
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './NotificationsList.css';
