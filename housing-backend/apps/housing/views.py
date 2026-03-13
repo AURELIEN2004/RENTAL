@@ -36,19 +36,31 @@ class HousingTypeViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 # --- HOUSING VIEWSET FUSIONNÉ ---
+# class HousingViewSet(viewsets.ModelViewSet):
+#     """
+#     ViewSet principal pour les logements
+#     Avec filtrage avancé, recherche, tri, recommandations, interactions et statistiques propriétaires
+#     """
+#     queryset = Housing.objects.filter(is_visible=True).select_related(
+#         'owner', 'category', 'housing_type', 'region', 'city', 'district'
+#     ).prefetch_related('images')
+
+#     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+
+#     search_fields = ['title', 'description', 'city__name', 'district__name']
+#     ordering_fields = ['price', 'created_at', 'views_count', 'likes_count', 'area', 'rooms']
+#     permission_classes = [IsOwnerOrReadOnly]
+
+# APRÈS — ajouter filterset_class :
 class HousingViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet principal pour les logements
-    Avec filtrage avancé, recherche, tri, recommandations, interactions et statistiques propriétaires
-    """
     queryset = Housing.objects.filter(is_visible=True).select_related(
         'owner', 'category', 'housing_type', 'region', 'city', 'district'
     ).prefetch_related('images')
 
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-
-    search_fields = ['title', 'description', 'city__name', 'district__name']
-    ordering_fields = ['price', 'created_at', 'views_count', 'likes_count', 'area', 'rooms']
+    filter_backends  = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_class  = HousingFilter   # ← AJOUTER CETTE SEULE LIGNE
+    search_fields    = ['title', 'description', 'city__name', 'district__name']
+    ordering_fields  = ['price', 'created_at', 'views_count', 'likes_count', 'area', 'rooms']
     permission_classes = [IsOwnerOrReadOnly]
 
     # ----------------------------
