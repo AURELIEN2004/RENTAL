@@ -812,6 +812,7 @@ const T = {
   },
 };
 
+
 // Valeurs vides — noms EXACTEMENT ceux du HousingFilter Django
 const EMPTY = {
   category:     '',   // NumberFilter → category__id
