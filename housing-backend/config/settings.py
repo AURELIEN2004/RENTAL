@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     # 'corsheaders',
     'django_filters',
-    'modeltranslation',
+    # 'modeltranslation',
     'django_extensions',
 
     
@@ -228,20 +228,33 @@ SIMPLE_JWT = {
     'BLACKLIST_AFTER_ROTATION': False,  # ✅ Désactiver si pas de blacklist
     'UPDATE_LAST_LOGIN': True,
 }
+    
+CORS_ALLOW_ALL_ORIGINS = True   # ← décommenter pendant le dev
 
 # CORS (pour React et Flutter)
 CORS_ALLOWED_ORIGINS = [
+    # CORS_ALLOW_ALL_ORIGINS = True   # ← décommenter pendant le dev
+
     "http://localhost:3000",  # React dev
     "http://localhost:8000",
     "http://127.0.0.1:3000",
     "http://localhost:5174",
     "http://localhost:5173",
     "http://127.0.0.1:5173",  # Vite dev
+      # Flutter Web — ajouter ces lignes
+    "http://localhost:5500",   # flutter run -d chrome (port par défaut)
+    "http://localhost:8080",   # autre port possible
+    "http://localhost:56866",  # port aléatoire Flutter
+    "http://127.0.0.1:5500",
+    "http://127.0.0.1:8080",
+    "http://localhost:55xxx",   # Flutter génère un port aléatoire
+
 ]
 
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:5173",
+    "http://127.0.0.1:56420",
 ]
 # Optionnel : si tu ajoutes des headers personnalisés
 CORS_ALLOW_HEADERS = [
@@ -252,7 +265,9 @@ CORS_ALLOW_HEADERS = [
     "x-csrftoken",
     "x-requested-with",
 ]
+ 
 
+ 
 from corsheaders.defaults import default_headers
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
