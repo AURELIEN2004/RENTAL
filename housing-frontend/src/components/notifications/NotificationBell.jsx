@@ -1,155 +1,341 @@
-// // src/components/notifications/NotificationBell.jsx
+// // // src/components/notifications/NotificationBell.jsx
+
+// // import React, { useState, useEffect, useRef } from 'react';
+// // import { useNavigate } from 'react-router-dom';
+// // import './NotificationBell.css';
+
+// // const fetchNotifications = async () => {
+// //   const token = localStorage.getItem('access_token');
+// //   const response = await fetch('http://localhost:8000/api/notifications/', {
+// //     headers: {
+// //       'Authorization': `Bearer ${token}`
+// //     }
+// //   });
+  
+// //   if (!response.ok) throw new Error('Erreur chargement notifications');
+// //   return response.json();
+// // };
+
+// // const markAsRead = async (id) => {
+// //   const token = localStorage.getItem('access_token');
+// //   await fetch(`http://localhost:8000/api/notifications/${id}/mark_read/`, {
+// //     method: 'POST',
+// //     headers: {
+// //       'Authorization': `Bearer ${token}`
+// //     }
+// //   });
+// // };
+
+// // const NotificationBell = () => {
+// //   const [notifications, setNotifications] = useState([]);
+// //   const [unreadCount, setUnreadCount] = useState(0);
+// //   const [showDropdown, setShowDropdown] = useState(false);
+// //   const dropdownRef = useRef(null);
+// //   const navigate = useNavigate();
+
+// //   useEffect(() => {
+// //     loadNotifications();
+// //     const interval = setInterval(loadNotifications, 30000); // Refresh every 30s
+// //     return () => clearInterval(interval);
+// //   }, []);
+
+// //   useEffect(() => {
+// //     const handleClickOutside = (event) => {
+// //       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+// //         setShowDropdown(false);
+// //       }
+// //     };
+
+// //     document.addEventListener('mousedown', handleClickOutside);
+// //     return () => document.removeEventListener('mousedown', handleClickOutside);
+// //   }, []);
+
+// //   const loadNotifications = async () => {
+// //     try {
+// //       const data = await fetchNotifications();
+// //       const notifs = Array.isArray(data) ? data : data.results || [];
+// //       setNotifications(notifs.slice(0, 5)); // Only latest 5
+// //       setUnreadCount(notifs.filter(n => !n.is_read).length);
+// //     } catch (err) {
+// //       console.error('Erreur notifications:', err);
+// //     }
+// //   };
+
+// //   const handleNotificationClick = async (notification) => {
+// //     if (!notification.is_read) {
+// //       await markAsRead(notification.id);
+// //       setUnreadCount(prev => Math.max(0, prev - 1));
+// //     }
+    
+// //     if (notification.link) {
+// //       navigate(notification.link);
+// //     }
+    
+// //     setShowDropdown(false);
+// //   };
+
+// //   const formatTime = (timestamp) => {
+// //     const date = new Date(timestamp);
+// //     const now = new Date();
+// //     const diffMs = now - date;
+// //     const diffMins = Math.floor(diffMs / 60000);
+// //     const diffHours = Math.floor(diffMs / 3600000);
+
+// //     if (diffMins < 1) return 'À l\'instant';
+// //     if (diffMins < 60) return `${diffMins}min`;
+// //     if (diffHours < 24) return `${diffHours}h`;
+// //     return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+// //   };
+
+// //   return (
+// //     <div className="notification-bell-container" ref={dropdownRef}>
+// //       <button 
+// //         className="notification-bell-btn"
+// //         onClick={() => setShowDropdown(!showDropdown)}
+// //         aria-label="Notifications"
+// //       >
+// //         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+// //           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+// //           <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+// //         </svg>
+// //         {unreadCount > 0 && (
+// //           <span className="notification-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
+// //         )}
+// //       </button>
+
+// //       {showDropdown && (
+// //         <div className="notification-dropdown">
+// //           <div className="dropdown-header">
+// //             <h3>Notifications</h3>
+// //             {unreadCount > 0 && (
+// //               <span className="unread-count">{unreadCount} non lue{unreadCount > 1 ? 's' : ''}</span>
+// //             )}
+// //           </div>
+
+// //           <div className="dropdown-list">
+// //             {notifications.length === 0 ? (
+// //               <div className="empty-dropdown">
+// //                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+// //                   <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+// //                   <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+// //                 </svg>
+// //                 <p>Aucune notification</p>
+// //               </div>
+// //             ) : (
+// //               notifications.map(notif => (
+// //                 <div
+// //                   key={notif.id}
+// //                   className={`dropdown-item ${!notif.is_read ? 'unread' : ''}`}
+// //                   onClick={() => handleNotificationClick(notif)}
+// //                 >
+// //                   <div className="item-content">
+// //                     <h4>{notif.title}</h4>
+// //                     <p>{notif.message}</p>
+// //                     <span className="item-time">{formatTime(notif.created_at)}</span>
+// //                   </div>
+// //                   {!notif.is_read && <div className="unread-dot"></div>}
+// //                 </div>
+// //               ))
+// //             )}
+// //           </div>
+
+// //           <div className="dropdown-footer">
+// //             <button 
+// //               className="view-all-btn"
+// //               onClick={() => {
+// //                 navigate('/dashboard/notifications');
+// //                 setShowDropdown(false);
+// //               }}
+// //         //  onClick={() => window.location.href = '/dashboard/notifications'}
+
+// //             >
+// //               Voir toutes les notifications
+// //             </button>
+// //           </div>
+// //         </div>
+// //       )}
+// //     </div>
+// //   );
+// // };
+
+// // export default NotificationBell;
+
+// // src/components/notifications/NotificationBell.jsx — VERSION CORRIGÉE
+// //
+// // Bugs corrigés :
+// //  - "Voir toutes" → navigate('/dashboard?tab=notifications') au lieu de window.location.href
+// //  - Chaque item dropdown → navigate() au lieu de reload
+// //  - markAsRead appelé + badge mis à jour immédiatement
 
 // import React, { useState, useEffect, useRef } from 'react';
 // import { useNavigate } from 'react-router-dom';
 // import './NotificationBell.css';
+// import { useTheme } from '../../contexts/ThemeContext';
+
+// const API_BASE = 'http://localhost:8000/api';
+
+// const getHeaders = () => ({
+//   Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+// });
 
 // const fetchNotifications = async () => {
-//   const token = localStorage.getItem('access_token');
-//   const response = await fetch('http://localhost:8000/api/notifications/', {
-//     headers: {
-//       'Authorization': `Bearer ${token}`
-//     }
-//   });
-  
+//   const response = await fetch(`${API_BASE}/notifications/`, { headers: getHeaders() });
 //   if (!response.ok) throw new Error('Erreur chargement notifications');
 //   return response.json();
 // };
 
-// const markAsRead = async (id) => {
-//   const token = localStorage.getItem('access_token');
-//   await fetch(`http://localhost:8000/api/notifications/${id}/mark_read/`, {
+// const markAsReadAPI = async (id) => {
+//   await fetch(`${API_BASE}/notifications/${id}/mark_read/`, {
 //     method: 'POST',
-//     headers: {
-//       'Authorization': `Bearer ${token}`
-//     }
+//     headers: getHeaders(),
 //   });
 // };
 
+// // ─────────────────────────────────────────────────────────────────
 // const NotificationBell = () => {
-//   const [notifications, setNotifications] = useState([]);
-//   const [unreadCount, setUnreadCount] = useState(0);
-//   const [showDropdown, setShowDropdown] = useState(false);
+//   const [notifications, setNotifications]   = useState([]);
+//   const [unreadCount,   setUnreadCount]     = useState(0);
+//   const [showDropdown,  setShowDropdown]    = useState(false);
 //   const dropdownRef = useRef(null);
-//   const navigate = useNavigate();
+//   const navigate    = useNavigate();
 
+//   const { t, language, theme } = useTheme();
+//   // Chargement initial + polling 30s
 //   useEffect(() => {
 //     loadNotifications();
-//     const interval = setInterval(loadNotifications, 30000); // Refresh every 30s
+//     const interval = setInterval(loadNotifications, 30000);
 //     return () => clearInterval(interval);
 //   }, []);
 
+//   // Fermeture au clic extérieur
 //   useEffect(() => {
-//     const handleClickOutside = (event) => {
-//       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+//     const handleClickOutside = (e) => {
+//       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
 //         setShowDropdown(false);
 //       }
 //     };
-
 //     document.addEventListener('mousedown', handleClickOutside);
 //     return () => document.removeEventListener('mousedown', handleClickOutside);
 //   }, []);
 
 //   const loadNotifications = async () => {
 //     try {
-//       const data = await fetchNotifications();
-//       const notifs = Array.isArray(data) ? data : data.results || [];
-//       setNotifications(notifs.slice(0, 5)); // Only latest 5
+//       const data   = await fetchNotifications();
+//       const notifs = Array.isArray(data) ? data : (data.results || []);
+//       setNotifications(notifs.slice(0, 5));
 //       setUnreadCount(notifs.filter(n => !n.is_read).length);
 //     } catch (err) {
 //       console.error('Erreur notifications:', err);
 //     }
 //   };
 
+//   // Clic sur une notification du dropdown
 //   const handleNotificationClick = async (notification) => {
 //     if (!notification.is_read) {
-//       await markAsRead(notification.id);
-//       setUnreadCount(prev => Math.max(0, prev - 1));
+//       try {
+//         await markAsReadAPI(notification.id);
+//         setNotifications(prev =>
+//           prev.map(n => n.id === notification.id ? { ...n, is_read: true } : n)
+//         );
+//         setUnreadCount(prev => Math.max(0, prev - 1));
+//       } catch (err) {
+//         console.error('Erreur markAsRead:', err);
+//       }
 //     }
-    
+//     setShowDropdown(false);
+
+//     // Navigation vers le lien de la notification ou vers le dashboard notifications
 //     if (notification.link) {
 //       navigate(notification.link);
+//     } else {
+//       navigate('/dashboard?tab=notifications');
 //     }
-    
+//   };
+
+//   // ★ CORRIGÉ : "Voir toutes" → navigate React (pas window.location.href)
+//   const handleViewAll = () => {
 //     setShowDropdown(false);
+//     navigate('/dashboard?tab=notifications');
 //   };
 
 //   const formatTime = (timestamp) => {
-//     const date = new Date(timestamp);
-//     const now = new Date();
-//     const diffMs = now - date;
-//     const diffMins = Math.floor(diffMs / 60000);
-//     const diffHours = Math.floor(diffMs / 3600000);
-
-//     if (diffMins < 1) return 'À l\'instant';
-//     if (diffMins < 60) return `${diffMins}min`;
-//     if (diffHours < 24) return `${diffHours}h`;
+//     const date    = new Date(timestamp);
+//     const now     = new Date();
+//     const diffMs  = now - date;
+//     const diffMin = Math.floor(diffMs / 60000);
+//     const diffH   = Math.floor(diffMs / 3600000);
+//     if (diffMin < 1)  return "À l'instant";
+//     if (diffMin < 60) return `${diffMin}min`;
+//     if (diffH < 24)   return `${diffH}h`;
 //     return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
 //   };
 
 //   return (
 //     <div className="notification-bell-container" ref={dropdownRef}>
-//       <button 
+//       {/* Bouton cloche */}
+//       <button
 //         className="notification-bell-btn"
-//         onClick={() => setShowDropdown(!showDropdown)}
-//         aria-label="Notifications"
-//       >
-//         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-//           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-//           <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+//         onClick={() => setShowDropdown(prev => !prev)}
+//              aria-label={t('notif_title')}      >
+//         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+//              stroke="currentColor" strokeWidth="2">
+//           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+//           <path d="M13.73 21a2 2 0 0 1-3.46 0" />
 //         </svg>
 //         {unreadCount > 0 && (
-//           <span className="notification-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
+//           <span className="notification-badge">
+//             {unreadCount > 9 ? '9+' : unreadCount}
+//           </span>
 //         )}
 //       </button>
 
+//       {/* Dropdown */}
 //       {showDropdown && (
 //         <div className="notification-dropdown">
 //           <div className="dropdown-header">
-//             <h3>Notifications</h3>
+//           <h3>{t('notif_title')}</h3>
+//             {notifications.length > 0 && ` (${notifications.length})`}
+
 //             {unreadCount > 0 && (
-//               <span className="unread-count">{unreadCount} non lue{unreadCount > 1 ? 's' : ''}</span>
+//               <span className="unread-count">
+// {unreadCount} {t('notif_unread_label')}{unreadCount > 1 ? 's' : ''}              </span>
 //             )}
 //           </div>
 
 //           <div className="dropdown-list">
 //             {notifications.length === 0 ? (
 //               <div className="empty-dropdown">
-//                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
-//                   <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-//                   <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+//                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none"
+//                      stroke="currentColor" strokeWidth="1">
+//                   <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+//                   <path d="M13.73 21a2 2 0 0 1-3.46 0" />
 //                 </svg>
-//                 <p>Aucune notification</p>
+// <p>{t('notif_empty')}</p>
 //               </div>
 //             ) : (
 //               notifications.map(notif => (
 //                 <div
 //                   key={notif.id}
 //                   className={`dropdown-item ${!notif.is_read ? 'unread' : ''}`}
-//                   onClick={() => handleNotificationClick(notif)}
+//                   // onClick={() => handleNotificationClick(notif)}
+//                   onClick={handleViewAll}
+//                   style={{ cursor: 'pointer' }}
 //                 >
-//                   <div className="item-content">
+//                   <div className="item-content" >
 //                     <h4>{notif.title}</h4>
 //                     <p>{notif.message}</p>
 //                     <span className="item-time">{formatTime(notif.created_at)}</span>
 //                   </div>
-//                   {!notif.is_read && <div className="unread-dot"></div>}
+//                   {!notif.is_read && <div className="unread-dot" />}
 //                 </div>
 //               ))
 //             )}
 //           </div>
 
+//           {/* ★ CORRIGÉ : bouton utilise navigate() */}
 //           <div className="dropdown-footer">
-//             <button 
-//               className="view-all-btn"
-//               onClick={() => {
-//                 navigate('/dashboard/notifications');
-//                 setShowDropdown(false);
-//               }}
-//         //  onClick={() => window.location.href = '/dashboard/notifications'}
-
-//             >
-//               Voir toutes les notifications
+//             <button className="view-all-btn" onClick={handleViewAll}>
+// {t('notif_view_all')}
 //             </button>
 //           </div>
 //         </div>
@@ -160,12 +346,16 @@
 
 // export default NotificationBell;
 
-// src/components/notifications/NotificationBell.jsx — VERSION CORRIGÉE
+
+
+
+// src/components/notifications/NotificationBell.jsx
 //
-// Bugs corrigés :
-//  - "Voir toutes" → navigate('/dashboard?tab=notifications') au lieu de window.location.href
-//  - Chaque item dropdown → navigate() au lieu de reload
-//  - markAsRead appelé + badge mis à jour immédiatement
+// CORRECTIONS BILINGUE :
+//  ✅ getHeaders() inclut maintenant X-Language
+//  ✅ useEffect recharge les notifications quand language change
+//  ✅ Affichage : getLocalizedTitle/Message() selon la langue active
+//     (title_fr/title_en au lieu de title générique)
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -174,8 +364,11 @@ import { useTheme } from '../../contexts/ThemeContext';
 
 const API_BASE = 'http://localhost:8000/api';
 
+// ✅ FIX 1 : getHeaders() inclut X-Language
 const getHeaders = () => ({
   Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+  'X-Language':  localStorage.getItem('language') || 'fr',
+  'Accept-Language': localStorage.getItem('language') || 'fr',
 });
 
 const fetchNotifications = async () => {
@@ -191,21 +384,22 @@ const markAsReadAPI = async (id) => {
   });
 };
 
-// ─────────────────────────────────────────────────────────────────
+// ── Composant ────────────────────────────────────────────────
 const NotificationBell = () => {
-  const [notifications, setNotifications]   = useState([]);
-  const [unreadCount,   setUnreadCount]     = useState(0);
-  const [showDropdown,  setShowDropdown]    = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount,   setUnreadCount]   = useState(0);
+  const [showDropdown,  setShowDropdown]  = useState(false);
   const dropdownRef = useRef(null);
   const navigate    = useNavigate();
 
   const { t, language, theme } = useTheme();
-  // Chargement initial + polling 30s
+
+  // ✅ FIX 2 : recharger quand la langue change
   useEffect(() => {
     loadNotifications();
     const interval = setInterval(loadNotifications, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [language]); // ← dépendance sur language
 
   // Fermeture au clic extérieur
   useEffect(() => {
@@ -229,7 +423,19 @@ const NotificationBell = () => {
     }
   };
 
-  // Clic sur une notification du dropdown
+  // ✅ FIX 3 : afficher title/message dans la bonne langue
+  const getLocalizedTitle = (notif) => {
+    if (language === 'en' && notif.title_en) return notif.title_en;
+    if (language === 'fr' && notif.title_fr) return notif.title_fr;
+    return notif.title || ''; // fallback
+  };
+
+  const getLocalizedMessage = (notif) => {
+    if (language === 'en' && notif.message_en) return notif.message_en;
+    if (language === 'fr' && notif.message_fr) return notif.message_fr;
+    return notif.message || ''; // fallback
+  };
+
   const handleNotificationClick = async (notification) => {
     if (!notification.is_read) {
       try {
@@ -243,8 +449,6 @@ const NotificationBell = () => {
       }
     }
     setShowDropdown(false);
-
-    // Navigation vers le lien de la notification ou vers le dashboard notifications
     if (notification.link) {
       navigate(notification.link);
     } else {
@@ -252,22 +456,24 @@ const NotificationBell = () => {
     }
   };
 
-  // ★ CORRIGÉ : "Voir toutes" → navigate React (pas window.location.href)
   const handleViewAll = () => {
     setShowDropdown(false);
     navigate('/dashboard?tab=notifications');
   };
 
   const formatTime = (timestamp) => {
-    const date    = new Date(timestamp);
-    const now     = new Date();
-    const diffMs  = now - date;
+    const date   = new Date(timestamp);
+    const now    = new Date();
+    const diffMs = now - date;
     const diffMin = Math.floor(diffMs / 60000);
     const diffH   = Math.floor(diffMs / 3600000);
-    if (diffMin < 1)  return "À l'instant";
-    if (diffMin < 60) return `${diffMin}min`;
-    if (diffH < 24)   return `${diffH}h`;
-    return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    if (diffMin < 1)  return language === 'fr' ? "À l'instant" : "Just now";
+    if (diffMin < 60) return language === 'fr' ? `${diffMin}min` : `${diffMin}min ago`;
+    if (diffH < 24)   return language === 'fr' ? `${diffH}h` : `${diffH}h ago`;
+    return date.toLocaleDateString(
+      language === 'fr' ? 'fr-FR' : 'en-US',
+      { day: 'numeric', month: 'short' }
+    );
   };
 
   return (
@@ -276,7 +482,8 @@ const NotificationBell = () => {
       <button
         className="notification-bell-btn"
         onClick={() => setShowDropdown(prev => !prev)}
-             aria-label={t('notif_title')}      >
+        aria-label={t('notif_title')}
+      >
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" strokeWidth="2">
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -293,12 +500,12 @@ const NotificationBell = () => {
       {showDropdown && (
         <div className="notification-dropdown">
           <div className="dropdown-header">
-          <h3>{t('notif_title')}</h3>
+            <h3>{t('notif_title')}</h3>
             {notifications.length > 0 && ` (${notifications.length})`}
-
             {unreadCount > 0 && (
               <span className="unread-count">
-{unreadCount} {t('notif_unread_label')}{unreadCount > 1 ? 's' : ''}              </span>
+                {unreadCount} {t('notif_unread_label')}{unreadCount > 1 ? 's' : ''}
+              </span>
             )}
           </div>
 
@@ -310,20 +517,21 @@ const NotificationBell = () => {
                   <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
                   <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                 </svg>
-<p>{t('notif_empty')}</p>
+                <p>{t('notif_empty')}</p>
               </div>
             ) : (
               notifications.map(notif => (
                 <div
                   key={notif.id}
                   className={`dropdown-item ${!notif.is_read ? 'unread' : ''}`}
-                  // onClick={() => handleNotificationClick(notif)}
                   onClick={handleViewAll}
                   style={{ cursor: 'pointer' }}
                 >
-                  <div className="item-content" >
-                    <h4>{notif.title}</h4>
-                    <p>{notif.message}</p>
+                  <div className="item-content">
+                    {/* ✅ Titre dans la bonne langue */}
+                    <h4>{getLocalizedTitle(notif)}</h4>
+                    {/* ✅ Message dans la bonne langue */}
+                    <p>{getLocalizedMessage(notif)}</p>
                     <span className="item-time">{formatTime(notif.created_at)}</span>
                   </div>
                   {!notif.is_read && <div className="unread-dot" />}
@@ -332,10 +540,9 @@ const NotificationBell = () => {
             )}
           </div>
 
-          {/* ★ CORRIGÉ : bouton utilise navigate() */}
           <div className="dropdown-footer">
             <button className="view-all-btn" onClick={handleViewAll}>
-{t('notif_view_all')}
+              {t('notif_view_all')}
             </button>
           </div>
         </div>
