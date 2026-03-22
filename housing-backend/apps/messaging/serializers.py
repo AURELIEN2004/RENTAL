@@ -31,19 +31,41 @@ class MessageSerializer(serializers.ModelSerializer):
         return None
 
 
+# class ConversationSerializer(serializers.ModelSerializer):
+#     housing = HousingListSerializer(read_only=True)
+#     participants = UserSerializer(many=True, read_only=True)
+#     last_message = serializers.SerializerMethodField()
+#     unread_count = serializers.SerializerMethodField()
+    
+#     class Meta:
+#         model = Conversation
+#         fields = [
+#             'id', 'housing', 'participants', 'last_message', 
+#             'unread_count', 'created_at', 'updated_at'
+#         ]
+    # apps/messaging/serializers.py
 class ConversationSerializer(serializers.ModelSerializer):
-    housing = HousingListSerializer(read_only=True)
+    housing = serializers.SerializerMethodField()  # ✅ Remplacer HousingListSerializer
     participants = UserSerializer(many=True, read_only=True)
     last_message = serializers.SerializerMethodField()
     unread_count = serializers.SerializerMethodField()
+    is_support = serializers.BooleanField(read_only=True)  # ✅ AJOUTÉ
     
     class Meta:
         model = Conversation
         fields = [
-            'id', 'housing', 'participants', 'last_message', 
+            'id', 'housing', 'is_support', 'participants', 'last_message', 
             'unread_count', 'created_at', 'updated_at'
         ]
     
+    def get_housing(self, obj):
+        """Retourne None si conversation support, sinon les infos du logement"""
+        if not obj.housing:
+            return None
+        from apps.housing.serializers import HousingListSerializer
+        return HousingListSerializer(obj.housing, context=self.context).data
+    
+    # ... reste inchangé
     def get_last_message(self, obj):
         last_msg = obj.messages.order_by('-created_at').first()
         if last_msg:

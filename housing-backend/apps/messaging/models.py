@@ -9,10 +9,41 @@ from django.db import models
 from django.conf import settings
 
 
+# class Conversation(models.Model):
+#     """Conversation entre locataire et propriétaire"""
+#     housing = models.ForeignKey('housing.Housing', on_delete=models.CASCADE, related_name='conversations')
+#     participants = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='conversations')
+    
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+    
+#     class Meta:
+#         verbose_name = "Conversation"
+#         verbose_name_plural = "Conversations"
+#         ordering = ['-updated_at']
+    
+#     def __str__(self):
+#         return f"Conversation sur {self.housing.title}"
+    
+#     @property
+#     def last_message(self):
+#         return self.messages.first()
+# apps/messaging/models.py
 class Conversation(models.Model):
-    """Conversation entre locataire et propriétaire"""
-    housing = models.ForeignKey('housing.Housing', on_delete=models.CASCADE, related_name='conversations')
-    participants = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='conversations')
+    """Conversation entre locataire et propriétaire, ou avec le support"""
+    housing = models.ForeignKey(
+        'housing.Housing', 
+        on_delete=models.CASCADE, 
+        related_name='conversations',
+        null=True,      # ✅ AJOUTÉ
+        blank=True,     # ✅ AJOUTÉ
+    )
+    is_support = models.BooleanField(default=False)  # ✅ AJOUTÉ pour distinguer les types
+    
+    participants = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, 
+        related_name='conversations'
+    )
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -23,7 +54,9 @@ class Conversation(models.Model):
         ordering = ['-updated_at']
     
     def __str__(self):
-        return f"Conversation sur {self.housing.title}"
+        if self.housing:
+            return f"Conversation sur {self.housing.title}"
+        return f"Conversation support #{self.id}"
     
     @property
     def last_message(self):

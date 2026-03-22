@@ -969,6 +969,54 @@ def admin_delete_housing(request, housing_id):
 
 
 
+        # apps/users/views.py
+# PATCH : admin_users_list_enhanced
+# Remplacer la fonction existante par cette version
+# qui accepte le paramètre ?role=proprietaire|locataire|all
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def admin_users_list_enhanced(request):
+    """Liste améliorée des utilisateurs avec filtre rôle"""
+    from apps.housing.models import Housing
+    from django.db.models import Count
+
+    users = User.objects.annotate(
+        housings_count=Count('housings')
+    ).order_by('-date_joined')
+
+    # ✅ FIX : filtre par rôle
+    role = request.query_params.get('role', 'all')
+    if role == 'proprietaire':
+        users = users.filter(is_proprietaire=True)
+    elif role == 'locataire':
+        users = users.filter(is_locataire=True)
+    # 'all' → pas de filtre
+
+    # Filtre par recherche texte (optionnel)
+    search = request.query_params.get('search', '').strip()
+    if search:
+        from django.db.models import Q
+        users = users.filter(
+            Q(username__icontains=search) |
+            Q(email__icontains=search)    |
+            Q(first_name__icontains=search) |
+            Q(last_name__icontains=search)
+        )
+
+    users_data = []
+    for user in users:
+        user_data = UserSerializer(user).data
+        user_data['housings_count'] = user.housings_count
+        if user.photo:
+            user_data['photo'] = request.build_absolute_uri(user.photo.url)
+        users_data.append(user_data)
+
+    return Response(users_data)
+
+
+
+
 # ========================================
 # 🆕 ADMIN: SUPPORT CHAT - CRÉER CONVERSATION
 # ========================================
@@ -976,11 +1024,10 @@ def admin_delete_housing(request, housing_id):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def create_support_conversation(request):
-    """Créer une conversation avec le support (admin)"""
+    """Créer une conversation avec le support (admin) — pour TOUS les utilisateurs"""
     from apps.messaging.models import Conversation, Message
     
     try:
-        # Récupérer tous les admins
         admins = User.objects.filter(is_staff=True, is_superuser=True)
         
         if not admins.exists():
@@ -989,12 +1036,12 @@ def create_support_conversation(request):
                 status=status.HTTP_404_NOT_FOUND
             )
         
-        # Prendre le premier admin disponible
         admin = admins.first()
         
-        # Vérifier si une conversation existe déjà entre l'utilisateur et cet admin
+        # Vérifier si une conversation support existe déjà
         existing_conversation = Conversation.objects.filter(
-            participants=request.user
+            participants=request.user,
+            is_support=True,      # ✅ Filtrer uniquement les conversations support
         ).filter(
             participants=admin
         ).first()
@@ -1009,15 +1056,18 @@ def create_support_conversation(request):
                 }
             })
         
-        # Créer une nouvelle conversation
-        conversation = Conversation.objects.create()
+        # ✅ CORRECTION BUG 2 : housing=None + is_support=True
+        conversation = Conversation.objects.create(
+            housing=None,
+            is_support=True,
+        )
         conversation.participants.add(request.user, admin)
         
         # Message initial automatique
         Message.objects.create(
             conversation=conversation,
             sender=admin,
-            content=f"Bonjour {request.user.username}! Je suis l'équipe support. Comment puis-je vous aider?"
+            content=f"Bonjour {request.user.username} ! Je suis l'équipe support. Comment puis-je vous aider ?"
         )
         
         return Response({
@@ -1028,15 +1078,13 @@ def create_support_conversation(request):
                 'photo': request.build_absolute_uri(admin.photo.url) if admin.photo else None
             }
         }, status=status.HTTP_201_CREATED)
-        
     except Exception as e:
         import traceback
-        traceback.print_exc()  # ✅ Debug dans console
+        traceback.print_exc()
         return Response(
             {'error': str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-
 
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
