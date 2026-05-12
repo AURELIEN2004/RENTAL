@@ -401,3 +401,50 @@ font-size:15px;
 
 
 
+
+
+
+/* --- Ajustements Home Page --- */
+
+@media (max-width: 768px) {
+  .hero-section {
+    height: 60vh; /* Réduit pour voir le début du contenu sans scroller */
+    min-height: 400px;
+  }
+
+  .hero-title {
+    font-size: 28px;
+    padding: 0 10px;
+  }
+
+  .hero-actions {
+    flex-direction: column; /* Boutons l'un sur l'autre pour plus de clicabilité */
+    width: 100%;
+    padding: 0 20px;
+  }
+
+  .hero-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Stats Grid : 2x2 est plus élégant que 1x4 sur mobile */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+  }
+
+  .stat-card {
+    padding: 15px;
+  }
+
+  .stat-number {
+    font-size: 20px;
+  }
+
+  /* Les étapes "Comment ça marche" */
+  .steps-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
