@@ -60,26 +60,27 @@ const Navbar = () => {
           </button>
 
           {/* Language Toggle */}
-          <button onClick={toggleLanguage} className="icon-btn" title="Changer la langue">
-            <FaGlobe /> <span className="lang-text">{language.toUpperCase()}</span>
-          </button>
+<button onClick={toggleLanguage} className="icon-btn" title="Changer la langue">
+  <FaGlobe /> 
+  <span className="lang-text hide-mobile">{language.toUpperCase()}</span> {/* Ajout de hide-mobile */}
+</button>
 
-         {user && <NotificationBell />}
+{user && <NotificationBell />}
 
-          {/* User Menu */}
-          {user ? (
-            <div className="user-menu">
-              <button 
-                className="user-menu-btn" 
-                onClick={() => setUserMenuOpen(!userMenuOpen)}
-              >
-                {user.photo ? (
-                  <img src={user.photo} alt={user.username} className="user-avatar" />
-                ) : (
-                  <FaUser className="user-icon" />
-                )}
-                <span className="user-name">{user.username}</span>
-              </button>
+{/* User Menu */}
+{user ? (
+  <div className="user-menu">
+    <button 
+      className="user-menu-btn" 
+      onClick={() => setUserMenuOpen(!userMenuOpen)}
+    >
+      {user.photo ? (
+        <img src={user.photo} alt={user.username} className="user-avatar" />
+      ) : (
+        <FaUser className="user-icon" />
+      )}
+      <span className="user-name hide-mobile">{user.username}</span> {/* Ajout de hide-mobile */}
+    </button>
 
               {userMenuOpen && (
                 <div className="user-dropdown">

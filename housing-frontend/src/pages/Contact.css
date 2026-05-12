@@ -123,12 +123,92 @@
   color: var(--primary-color);
 }
 
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
   .contact-content {
     grid-template-columns: 1fr;
   }
   
   .faq-grid {
     grid-template-columns: 1fr;
+  }
+} */
+
+
+
+/* --- Optimisation Contact Mobile --- */
+
+@media (max-width: 768px) {
+  .contact-page {
+    padding: 10px 0;
+  }
+
+  .contact-hero {
+    padding: 30px 15px;
+    margin-bottom: 30px;
+  }
+
+  .contact-hero h1 {
+    font-size: 1.8em;
+  }
+
+  /* Inversion de l'ordre : on affiche les infos de contact RAPIDES avant le long formulaire */
+  .contact-content {
+    display: flex;
+    flex-direction: column-reverse; /* Les cartes d'info montent en haut */
+    gap: 30px;
+  }
+
+  .contact-form-section h2, 
+  .contact-info-section h2 {
+    font-size: 1.5em;
+    text-align: center;
+  }
+
+  /* Cartes de contact compactes */
+  .contact-info-card {
+    padding: 15px;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .info-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2em;
+  }
+
+  .info-content h3 {
+    font-size: 1.1em;
+    margin-bottom: 4px;
+  }
+
+  .info-content p {
+    font-size: 0.9em;
+    margin-bottom: 8px;
+  }
+
+  /* Formulaire plus compact */
+  .contact-form input, 
+  .contact-form textarea {
+    padding: 10px;
+    font-size: 14px; /* Évite le zoom automatique iOS sur les inputs */
+  }
+
+  /* FAQ en accordéon visuel ou liste simple */
+  .contact-faq h2 {
+    font-size: 1.6em;
+    margin-bottom: 20px;
+  }
+
+  .faq-item {
+    padding: 15px;
+  }
+
+  .faq-item h3 {
+    font-size: 1em;
+  }
+
+  .faq-item p {
+    font-size: 0.9em;
   }
 }

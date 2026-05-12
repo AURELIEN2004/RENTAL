@@ -116,7 +116,7 @@
   justify-content: center;
   flex-wrap: wrap;
 }
-
+/* 
 @media (max-width: 768px) {
   .about-hero h1 {
     font-size: 2em;
@@ -127,4 +127,109 @@
   .stats-grid {
     grid-template-columns: 1fr;
   }
-} 
+}  */
+
+/* --- Gardez votre code existant au début --- */
+
+.about-page {
+  padding: 20px 0; /* Réduit de 40px */
+}
+
+/* --- Ajustements Responsives Compacts --- */
+
+@media (max-width: 768px) {
+  /* 1. Hero plus petit */
+  .about-hero {
+    padding: 30px 15px; /* Réduit de 60px */
+    margin-bottom: 30px; /* Moins d'espace sous le hero */
+  }
+
+  .about-hero h1 {
+    font-size: 1.6em; /* Plus compact */
+  }
+
+  .about-hero .subtitle {
+    font-size: 1em;
+  }
+
+  /* 2. Sections moins espacées */
+  .about-section {
+    margin-bottom: 35px; /* Réduit de 60px */
+  }
+
+  .about-section h2 {
+    font-size: 1.4em; /* Titres de section plus petits */
+    margin-bottom: 15px;
+  }
+
+  /* 3. Grilles compactes (2 colonnes au lieu de 1 seule) */
+  .innovation-grid,
+  .values-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 colonnes pour éviter le scroll infini */
+    gap: 12px; /* Espace réduit entre les cartes */
+    margin-top: 20px;
+  }
+
+  .innovation-card,
+  .value-item {
+    padding: 15px 10px; /* Cartes beaucoup plus petites */
+  }
+
+  .innovation-card .icon {
+    font-size: 2em; /* Icônes moins imposantes */
+    margin-bottom: 8px;
+  }
+
+  .innovation-card h3,
+  .value-item h3 {
+    font-size: 0.95em; /* Texte plus petit */
+  }
+
+  .innovation-card p,
+  .value-item p {
+    font-size: 0.85em;
+    line-height: 1.3;
+  }
+
+  /* 4. Stats compactes */
+  .stats-section {
+    padding: 25px 15px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 colonnes aussi ici */
+    gap: 15px;
+  }
+
+  .stat-number {
+    font-size: 1.8em; /* Chiffres moins gros */
+  }
+
+  .stat-label {
+    font-size: 0.85em;
+  }
+
+  /* 5. CTA final */
+  .about-cta {
+    padding: 30px 15px;
+  }
+
+  .about-cta h2 {
+    font-size: 1.5em;
+  }
+  
+  .btn-lg {
+    padding: 10px 15px;
+    font-size: 0.9em;
+  }
+}
+
+/* Pour les écrans très étroits (iPhone SE) */
+@media (max-width: 380px) {
+    .innovation-grid, .values-grid, .stats-grid {
+        gap: 8px;
+    }
+    .innovation-card h3 {
+        font-size: 0.85em;
+    }
+}

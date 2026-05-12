@@ -131,12 +131,127 @@
   margin-bottom: 16px;
 }
 
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
   .services-grid {
     grid-template-columns: 1fr;
   }
   
   .step-arrow {
     display: none;
+  }
+} */
+
+
+/* --- Ajustements Responsives Compacts pour Services --- */
+
+@media (max-width: 768px) {
+  .services-page {
+    padding: 15px 0;
+  }
+
+  /* 1. Hero compact */
+  .services-hero {
+    padding: 30px 15px;
+    margin-bottom: 30px;
+    border-radius: 12px;
+  }
+
+  .services-hero h1 {
+    font-size: 1.8em;
+  }
+
+  /* 2. En-têtes de section réduits */
+  .services-section {
+    margin-bottom: 40px; /* Réduit de 80px */
+  }
+
+  .section-header {
+    margin-bottom: 20px;
+  }
+
+  .section-header h2 {
+    font-size: 1.5em;
+  }
+
+  .section-header p {
+    font-size: 1em;
+  }
+
+  /* 3. Grille de Services à 2 COLONNES (Indispensable) */
+  .services-grid {
+    grid-template-columns: repeat(2, 1fr); /* Évite l'empilement vertical infini */
+    gap: 10px;
+  }
+
+  .service-card {
+    padding: 15px 10px;
+    border-radius: 10px;
+  }
+
+  .service-icon {
+    font-size: 1.8em; /* Réduit de 3em */
+    margin-bottom: 10px;
+  }
+
+  .service-card h3 {
+    font-size: 1em;
+    margin-bottom: 8px;
+  }
+
+  .service-card p {
+    font-size: 0.8em;
+    line-height: 1.2;
+    color: var(--text-secondary);
+  }
+
+  /* 4. Processus (Étapes) compacté */
+  .process-section {
+    padding: 30px 15px;
+    border-radius: 12px;
+  }
+
+  .process-steps {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 2x2 au lieu de 1x4 */
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .step {
+    padding: 15px 10px;
+    min-width: unset; /* Permet aux cartes de rétrécir */
+  }
+
+  .step-number {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2em;
+    margin-bottom: 10px;
+  }
+
+  .step h3 {
+    font-size: 0.95em;
+  }
+
+  .step p {
+    font-size: 0.8em;
+  }
+
+  .step-arrow {
+    display: none; /* Toujours caché sur mobile */
+  }
+
+  /* 5. CTA compact */
+  .services-cta {
+    padding: 35px 15px;
+  }
+
+  .services-cta h2 {
+    font-size: 1.6em;
+  }
+
+  .btn-lg {
+    width: 100%; /* Les boutons occupent toute la largeur sur mobile pour être plus cliquables */
+    margin-bottom: 10px;
   }
 }
