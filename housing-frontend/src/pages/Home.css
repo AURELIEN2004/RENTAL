@@ -163,8 +163,205 @@
 /* ================================= */
 /* STATS */
 /* ================================= */
+/* ============================================
+   STATS SECTION
+   ============================================ */
 
-.stats-section{
+.stats-section {
+  padding: 80px 0;
+  background: var(--bg-secondary);
+  overflow: hidden;
+}
+
+.stats-section .container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+/* GRID */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  width: 100%;
+}
+
+/* CARD */
+
+.stat-card {
+  background: var(--bg-primary);
+  border-radius: 20px;
+  padding: 32px 24px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+
+  box-shadow: var(--shadow);
+  transition: all 0.3s ease;
+
+  min-width: 0;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+}
+
+/* ICON */
+
+.stat-icon {
+  width: 70px;
+  height: 70px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.1);
+
+  color: #3b82f6;
+  font-size: 28px;
+
+  margin-bottom: 20px;
+
+  flex-shrink: 0;
+}
+
+/* NUMBER */
+
+.stat-number {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800;
+  line-height: 1.1;
+
+  color: var(--text-primary);
+
+  margin-bottom: 10px;
+
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* LABEL */
+
+.stat-label {
+  font-size: 1rem;
+  line-height: 1.5;
+
+  color: var(--text-secondary);
+
+  max-width: 100%;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+
+/* ============================================
+   TABLETTE
+   ============================================ */
+
+@media (max-width: 992px) {
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .stat-card {
+    padding: 28px 20px;
+  }
+
+  .stat-icon {
+    width: 64px;
+    height: 64px;
+    font-size: 24px;
+  }
+}
+
+
+/* ============================================
+   MOBILE
+   ============================================ */
+
+@media (max-width: 768px) {
+
+  .stats-section {
+    padding: 60px 0;
+  }
+
+  .stats-section .container {
+    padding: 0 16px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .stat-card {
+    width: 100%;
+    padding: 24px 18px;
+
+    border-radius: 16px;
+  }
+
+  .stat-icon {
+    width: 58px;
+    height: 58px;
+    font-size: 22px;
+
+    margin-bottom: 16px;
+  }
+
+  .stat-number {
+    font-size: 2rem;
+  }
+
+  .stat-label {
+    font-size: 0.95rem;
+  }
+}
+
+
+/* ============================================
+   PETITS ÉCRANS
+   ============================================ */
+
+@media (max-width: 480px) {
+
+  .stats-section .container {
+    padding: 0 12px;
+  }
+
+  .stat-card {
+    padding: 20px 16px;
+  }
+
+  .stat-number {
+    font-size: 1.8rem;
+  }
+
+  .stat-label {
+    font-size: 0.9rem;
+  }
+
+  .stat-icon {
+    width: 52px;
+    height: 52px;
+    font-size: 20px;
+  }
+}
+
+
+/* .stats-section{
   padding:60px 0;
 }
 
@@ -201,7 +398,7 @@
 
 .stat-label{
   color:var(--text-light);
-}
+} 
 
 /* ================================= */
 /* FEATURED HOUSINGS */

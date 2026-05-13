@@ -12,6 +12,7 @@ import MessagingPage from '../messaging/MessagingPage';
 import VisibilityManagement from '../../pages/VisibilityManagement';
 import HousingForm from '../housing/HousingForm';
 import HousingEditModal from '../housing/HousingEditModal'; // ✅ IMPORT MANQUANT
+// import './ProprietaireDashboard.css';
 
 import {
   FaHome, FaPlus, FaEye, FaCalendar, FaEnvelope,
