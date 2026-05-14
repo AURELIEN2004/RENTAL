@@ -1,0 +1,383 @@
+/* ============================================================
+   DashboardLayout.css
+   Sidebar toujours à GAUCHE — drawer overlay sur mobile
+   Style ChatGPT : sidebar glisse, contenu reste à droite
+   ============================================================ */
+
+/* ── Variables ─────────────────────────────────────────────── */
+:root {
+  --sidebar-width: 260px;
+  --topbar-height: 70px;
+  --sidebar-bg: var(--bg-primary, #1a1d23);
+  --sidebar-border: var(--border-color, #2a2d35);
+  --sidebar-text: var(--text-secondary, #9ca3af);
+  --sidebar-text-active: #ffffff;
+  --sidebar-active-bg: var(--primary-color, #6366f1);
+  --sidebar-hover-bg: rgba(255, 255, 255, 0.06);
+  --overlay-bg: rgba(0, 0, 0, 0.45);
+  --transition: 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  --content-bg: var(--bg-secondary, #f3f4f6);
+}
+
+/* ── Layout principal ───────────────────────────────────────── */
+.dashboard-layout {
+  display: flex;
+  height: calc(100vh - var(--topbar-height));
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Overlay (mobile uniquement) ────────────────────────────── */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  top: var(--topbar-height);
+  background: var(--overlay-bg);
+  z-index: 99;
+  opacity: 0;
+  transition: opacity var(--transition);
+  pointer-events: none;
+}
+
+/* ── Sidebar ────────────────────────────────────────────────── */
+.dashboard-sidebar {
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  background-color: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: transform var(--transition);
+  position: relative;
+  z-index: 100;
+  flex-shrink: 0;
+
+  /* Scrollbar fine style ChatGPT */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.1) transparent;
+}
+
+.dashboard-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+.dashboard-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.12);
+  border-radius: 4px;
+}
+
+/* ── Sidebar Header ─────────────────────────────────────────── */
+.sidebar-header {
+  padding: 20px 18px 16px;
+  border-bottom: 1px solid var(--sidebar-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.sidebar-header h2 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--sidebar-text-active);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.01em;
+}
+
+/* Bouton fermeture — visible seulement sur mobile */
+.sidebar-close-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--sidebar-text);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: background var(--transition), color var(--transition);
+}
+.sidebar-close-btn:hover {
+  background: var(--sidebar-hover-bg);
+  color: var(--sidebar-text-active);
+}
+
+/* ── Navigation ─────────────────────────────────────────────── */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 8px;
+  flex: 1;
+}
+
+.sidebar-nav button {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: 100%;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--sidebar-text);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-nav button svg,
+.sidebar-nav button .nav-icon {
+  flex-shrink: 0;
+  font-size: 16px;
+  opacity: 0.8;
+}
+
+.sidebar-nav button:hover {
+  background: var(--sidebar-hover-bg);
+  color: var(--sidebar-text-active);
+}
+
+.sidebar-nav button.active {
+  background: var(--sidebar-active-bg);
+  color: var(--sidebar-text-active);
+  font-weight: 600;
+}
+
+.sidebar-nav button.active svg {
+  opacity: 1;
+}
+
+/* ── Logout en bas ──────────────────────────────────────────── */
+.sidebar-footer {
+  padding: 12px 8px;
+  border-top: 1px solid var(--sidebar-border);
+  flex-shrink: 0;
+}
+
+/* Support ancien .btn-block dans sidebar */
+.dashboard-sidebar > .btn-danger,
+.dashboard-sidebar .btn-block {
+  margin: 12px 8px;
+  width: calc(100% - 16px);
+}
+
+/* ── Topbar mobile (bouton hamburger) ───────────────────────── */
+.mobile-topbar {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 90;
+  background: var(--bg-primary, #1a1d23);
+  border-bottom: 1px solid var(--sidebar-border);
+  padding: 12px 16px;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.hamburger-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  color: var(--text-primary, #fff);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  transition: background var(--transition);
+}
+.hamburger-btn:hover {
+  background: var(--sidebar-hover-bg);
+}
+
+.hamburger-btn span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 2px;
+  transition: transform var(--transition), opacity var(--transition);
+}
+
+/* Animation hamburger → X */
+.hamburger-btn.open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.hamburger-btn.open span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+.hamburger-btn.open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+.mobile-topbar-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-primary, #fff);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Contenu principal ──────────────────────────────────────── */
+.dashboard-main {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: var(--content-bg);
+  padding: 32px;
+  min-width: 0; /* empêche le débordement flex */
+}
+
+/* ── Section contenu ────────────────────────────────────────── */
+.dashboard-section {
+  max-width: 1200px;
+}
+
+.dashboard-section h2 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 24px 0;
+}
+
+/* ── RESPONSIVE — Mobile (<= 768px) ─────────────────────────── */
+@media (max-width: 768px) {
+
+  /* Layout : colonne MAIS sidebar reste fixed sur le côté */
+  .dashboard-layout {
+    flex-direction: column;
+    overflow: visible;
+  }
+
+  /* Topbar mobile visible */
+  .mobile-topbar {
+    display: flex;
+  }
+
+  /* Sidebar : fixed à gauche, hors écran par défaut */
+  .dashboard-sidebar {
+    position: fixed;
+    top: var(--topbar-height);
+    left: 0;
+    height: calc(100vh - var(--topbar-height));
+    width: var(--sidebar-width);
+    transform: translateX(calc(-1 * var(--sidebar-width)));
+    z-index: 200;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Sidebar ouverte */
+  .dashboard-sidebar.sidebar-open {
+    transform: translateX(0);
+  }
+
+  /* Bouton fermeture visible sur mobile */
+  .sidebar-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Overlay actif */
+  .sidebar-overlay {
+    display: block;
+  }
+
+  .sidebar-overlay.overlay-visible {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* Contenu occupe tout l'espace */
+  .dashboard-main {
+    padding: 20px 16px;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  /* Stats grid 2 colonnes sur mobile */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  /* Stats bar scroll horizontal */
+  .stats-bar {
+    overflow-x: auto;
+    padding-bottom: 8px;
+    gap: 10px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .stat-item {
+    min-width: 90px;
+    flex-shrink: 0;
+  }
+
+  /* Housing grid 1 colonne */
+  .housing-grid,
+  .housing-list {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  /* Profile header vertical */
+  .profile-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  /* Profile actions vertical */
+  .profile-actions {
+    flex-direction: column;
+  }
+
+  .profile-actions .btn {
+    width: 100%;
+  }
+
+  /* Section header */
+  .section-header-flex {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+
+/* ── Tablette (769px – 1024px) ──────────────────────────────── */
+@media (min-width: 769px) and (max-width: 1024px) {
+  :root {
+    --sidebar-width: 220px;
+  }
+
+  .dashboard-main {
+    padding: 24px 20px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ── Utilitaires ────────────────────────────────────────────── */
+.mt-auto { margin-top: auto; }
+.btn-block { width: 100%; }
