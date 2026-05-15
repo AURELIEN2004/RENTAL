@@ -153,3 +153,38 @@
     align-items: flex-start;
   }
 }
+
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width: 768px) {
+  .footer-container {
+    grid-template-columns: repeat(2, 1fr); /* 2 colonnes sur tablette */
+  }
+}
+
+@media (max-width: 580px) {
+  .footer-container {
+    grid-template-columns: 1fr; /* 1 colonne sur mobile */
+    text-align: center;
+  }
+
+  .footer-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .contact-info p {
+    justify-content: center;
+  }
+
+  .social-links, .app-downloads {
+    justify-content: center;
+  }
+
+  .footer-container-bottom {
+    flex-direction: column-reverse; /* Droits d'auteur en bas sur mobile */
+    text-align: center;
+  }
+}
