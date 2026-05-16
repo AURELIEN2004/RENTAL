@@ -6,6 +6,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { FaSearch, FaCircle } from 'react-icons/fa';
 import './ConversationList.css';
 import { useTheme } from '../../contexts/ThemeContext';
+import { FaHome, FaTimes } from 'react-icons/fa';
+
 
 const ConversationList = ({ 
   conversations = [], 
@@ -56,25 +58,72 @@ const ConversationList = ({
   });
 
   return (
-    <div className="conversation-list">
+   <div className="conversation-list">
       <div className="conversations-header">
-        {/* <h2>💬 Messages</h2> */}
         <h2>💬 {t("messages_header_title")}</h2>
         {unreadCount > 0 && (
-          <span className="unread-badge">{unreadCount}</span>
+          <span className="unread-badge-header">{unreadCount}</span>
         )}
       </div>
 
-      <div className="search-conversations">
-        <FaSearch className="search-icon" />
-        <input
-          type="text"
-          // placeholder="🔍 Rechercher une conversation..."
-          placeholder={t("messages_search_placeholder")}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
+      {/* <div className="search-container-wrapper">
+        <div className="search-conversations">
+          <FaSearch className="search-icon" />
+          <input
+            type="text"
+            placeholder={t("messages_search_placeholder")}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div> */}
+
+<div className="search-container-wrapper">
+  <div className="search-conversations">
+    
+    {/* Icône de recherche avec style fusionné */}
+    <FaSearch style={{ 
+      position: 'absolute', 
+      left: '14px', 
+      color: 'blue', 
+      fontSize: '14px',
+      pointerEvents: 'none',
+      transition: 'color 0.2s ease'
+    }} className="search-main-icon" />
+    
+    <input
+      type="text"
+      placeholder={t("messages_search_placeholder")}
+      value={searchTerm}
+      onChange={(e) => setSearchTerm(e.target.value)}
+      className="search-input-field"
+    />
+
+    {/* Bouton pour effacer la recherche (Style Pro type Slack/WhatsApp) */}
+    {searchTerm && (
+      <button 
+        onClick={() => setSearchTerm('')}
+        style={{
+          position: 'absolute',
+          right: '14px',
+          background: 'none',
+          border: 'none',
+          color: 'var(--text-muted)',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          padding: '4px',
+          fontSize: '12px'
+        }}
+        className="clear-search-btn"
+        title="Effacer la recherche"
+      >
+        <FaTimes />
+      </button>
+    )}
+
+  </div>
+</div>
 
       <div className="conversations-scroll">
         {filteredConversations.length === 0 ? (
@@ -128,7 +177,7 @@ const ConversationList = ({
                   {/* Référence au logement */}
                   {conversation.housing && (
                     <div className="conv-housing">
-                      <span className="housing-tag">🏠</span>
+                      <span className="housing-tag"><FaHome style={{ color: 'var(--primary-color)', fontSize: '16px' }} /></span>
                       <span className="housing-title">
                         {truncateMessage(conversation.housing.title, 30)}
                       </span>

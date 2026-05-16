@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import './MessageInput.css';
 import api from '../../services/api';
 import { useTheme } from '../../contexts/ThemeContext';
+import { FaImage, FaVideo, FaPaperPlane, FaTimes } from 'react-icons/fa';
 
 const MessageInput = ({ conversationId, onSendMessage }) => {
   const [content, setContent] = useState('');
@@ -19,6 +20,14 @@ const MessageInput = ({ conversationId, onSendMessage }) => {
   const fileInputRef = useRef(null);
   const videoInputRef = useRef(null);
   const { t, language, theme } = useTheme();
+
+  // Fonction pour ajuster la hauteur du textarea automatiquement
+  const handleInput = (e) => {
+    const target = e.target;
+    target.style.height = 'inherit';
+    target.style.height = `${target.scrollHeight}px`;
+    setContent(target.value);
+  };
 
   const handleImageSelect = (e) => {
     const file = e.target.files[0];
@@ -121,7 +130,7 @@ const MessageInput = ({ conversationId, onSendMessage }) => {
                   if (fileInputRef.current) fileInputRef.current.value = '';
                 }}
               >
-                ✕
+                <FaTimes />
               </button>
             </div>
           )}
@@ -136,14 +145,14 @@ const MessageInput = ({ conversationId, onSendMessage }) => {
                   if (videoInputRef.current) videoInputRef.current.value = '';
                 }}
               >
-                ✕
+                <FaTimes />
               </button>
             </div>
           )}
         </div>
       )}
 
-      <div className="input-wrapper">
+      {/* <div className="input-wrapper">
         <div className="media-buttons">
           <input
             type="file"
@@ -193,7 +202,7 @@ const MessageInput = ({ conversationId, onSendMessage }) => {
           onClick={handleSend}
           disabled={(!content.trim() && !image && !video) || sending}
         >
-          {sending ? '⏳' : '➤'}
+          {sending ? '⏳' : <FaPaperPlane />}
         </button>
       </div>
 
@@ -202,6 +211,53 @@ const MessageInput = ({ conversationId, onSendMessage }) => {
           {content.length} / 2000
         </div>
       )}
+    </div>
+  );
+}; */}
+
+{/* AJOUT */}
+<div className="input-wrapper">
+        <div className="media-buttons">
+          {/* Bouton Image */}
+          <button
+            className="media-btn"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={sending}
+          >
+            <FaImage  style={{ color: 'var(--primary-color)', fontSize: '16px' }}/>
+          </button>
+          
+          {/* Bouton Vidéo */}
+          <button
+            className="media-btn"
+            onClick={() => videoInputRef.current?.click()}
+            disabled={sending}
+          >
+            <FaVideo style={{ color: 'var(--primary-color)', fontSize: '16px' }} />
+          </button>
+
+          <input type="file" ref={fileInputRef} accept="image/*" onChange={handleImageSelect} style={{ display: 'none' }} />
+          <input type="file" ref={videoInputRef} accept="video/*" onChange={handleVideoSelect} style={{ display: 'none' }} />
+        </div>
+
+        <textarea
+          value={content}
+          onChange={handleInput} /* On utilise la nouvelle fonction */
+          onKeyPress={handleKeyPress}
+          placeholder={t("messages_write_message")}
+          rows="1"
+          disabled={sending}
+          className="message-textarea"
+        />
+
+        <button
+          className={`send-button ${(!content.trim() && !image && !video) || sending ? 'disabled' : ''}`}
+          onClick={handleSend}
+          disabled={(!content.trim() && !image && !video) || sending}
+        >
+          {sending ? '⏳' : <FaPaperPlane />}
+        </button>
+      </div>
     </div>
   );
 };

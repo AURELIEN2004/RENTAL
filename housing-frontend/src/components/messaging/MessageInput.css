@@ -221,3 +221,103 @@
     gap: 8px;
   }
 }
+
+
+
+
+
+/* AJOUT */
+
+.message-input-container {
+  background: var(--bg-primary);
+  border-top: 1px solid var(--border-color);
+  padding: 12px 15px;
+  position: relative;
+}
+
+.input-wrapper {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end; /* Garde les boutons en bas si le texte grandit */
+}
+
+.media-btn {
+  width: 38px;
+  height: 38px;
+  background: var(--bg-tertiary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  border: none;
+  cursor: pointer;
+}
+
+.message-textarea {
+  flex: 1;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  border-radius: 20px;
+  padding: 10px 15px;
+  font-size: 15px;
+  max-height: 150px; /* Limite la croissance pour ne pas cacher tout le thread */
+  min-height: 40px;
+  overflow-y: auto;
+}
+
+.send-button {
+  background: var(--primary-color);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  font-size: 18px;
+}
+
+/* --- RESPONSIVE MOBILE --- */
+@media (max-width: 768px) {
+  .message-input-container {
+    padding: 8px 10px;
+  }
+
+  .media-buttons {
+    gap: 5px;
+  }
+
+  .media-btn {
+    width: 35px;
+    height: 35px;
+  }
+
+  .message-textarea {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+
+  .send-button {
+    width: 38px;
+    height: 38px;
+  }
+}
+
+
+
+.send-button svg {
+  transform: translateX(-1px) translateY(1px); /* Petit ajustement optique */
+}
+
+/* Spinner pour le chargement pendant l'envoi */
+.spinner-small {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}

@@ -8,6 +8,7 @@ import MessageThread from './MessageThread';
 import { toast } from 'react-toastify';
 import './MessagingPage.css';
 import { useTheme } from '../../contexts/ThemeContext';
+import { FaArrowLeft } from 'react-icons/fa'; // Importez une icône de retour
 
 const MessagingPage = () => {
   const { user } = useAuth();
@@ -53,6 +54,12 @@ const MessagingPage = () => {
     loadConversations();
   };
 
+  // AJOUT
+  // Nouvelle fonction pour revenir à la liste sur mobile
+  const handleBackToList = () => {
+    setSelectedConversation(null);
+  };
+
   if (loading) {
     return (
       <div className="messaging-loading">
@@ -62,10 +69,44 @@ const MessagingPage = () => {
     );
   }
 
-  return (
+//   return (
+//     <div className="messaging-page">
+//       <div className="messaging-container">
+//         {/* Sidebar gauche - Liste conversations */}
+//         <aside className="conversations-sidebar">
+//           <ConversationList
+//             conversations={conversations}
+//             onSelectConversation={handleSelectConversation}
+//             selectedConversationId={selectedConversation?.id}
+//             unreadCount={unreadCount}
+//           />
+//         </aside>
+
+//         {/* Panel droit - Thread messages */}
+//         <main className="messages-panel">
+//           {selectedConversation ? (
+//             <MessageThread
+//               conversation={selectedConversation}
+//               onNewMessage={handleNewMessage}
+//             />
+//           ) : (
+//             <div className="no-conversation-selected">
+//               <div className="empty-icon">💬</div>
+//               <h3>{t("messages_select_conversation")}</h3>
+//               <p>{t("messages_choose_conversation")}</p>
+//             </div>
+//           )}
+//         </main>
+//       </div>
+//     </div>
+//   );
+// };
+return (
     <div className="messaging-page">
-      <div className="messaging-container">
-        {/* Sidebar gauche - Liste conversations */}
+      {/* On ajoute des classes dynamiques pour le responsive */}
+      <div className={`messaging-container ${selectedConversation ? 'conversation-open' : ''}`}>
+        
+        {/* Sidebar gauche - Cachée sur mobile si une conversation est ouverte */}
         <aside className="conversations-sidebar">
           <ConversationList
             conversations={conversations}
@@ -75,13 +116,20 @@ const MessagingPage = () => {
           />
         </aside>
 
-        {/* Panel droit - Thread messages */}
+        {/* Panel droit - Caché sur mobile si aucune conversation n'est sélectionnée */}
         <main className="messages-panel">
           {selectedConversation ? (
-            <MessageThread
-              conversation={selectedConversation}
-              onNewMessage={handleNewMessage}
-            />
+            <>
+              {/* Bouton retour visible uniquement sur mobile */}
+              <div className="mobile-back-header" onClick={handleBackToList}>
+                <FaArrowLeft /> <span>{t("back")}</span>
+              </div>
+              <MessageThread
+                conversation={selectedConversation}
+                onNewMessage={handleNewMessage}
+                onBack={handleBackToList} // <--- Ajoutez cette ligne pour lier la fonction
+              />
+            </>
           ) : (
             <div className="no-conversation-selected">
               <div className="empty-icon">💬</div>
@@ -94,5 +142,4 @@ const MessagingPage = () => {
     </div>
   );
 };
-
 export default MessagingPage;

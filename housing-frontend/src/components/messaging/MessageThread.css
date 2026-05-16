@@ -319,3 +319,261 @@
     height: 150px;
   }
 }
+
+
+
+
+
+
+
+
+/* --- Ajustements Globaux --- */
+.message-thread {
+  background: var(--bg-primary); /* Fond plus neutre */
+}
+
+/* --- Housing Context Mobile Friendly --- */
+.housing-context {
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.context-toggle {
+  display: none; /* Caché sur PC */
+  padding: 10px 15px;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--primary-color);
+}
+
+/* --- Bulles de messages optimisées --- */
+.message-bubble {
+  max-width: 80%; /* Un peu plus large pour éviter les bulles trop hautes */
+  margin-bottom: 12px;
+}
+
+.message-avatar {
+  width: 28px; /* Avatars plus petits dans le thread */
+  height: 28px;
+}
+
+.bubble-text {
+  padding: 8px 12px;
+  font-size: 14px; /* Taille standard mobile */
+}
+
+/* --- RESPONSIVE MOBILE --- */
+@media (max-width: 768px) {
+  .thread-header {
+    padding: 10px 15px;
+  }
+
+  .header-avatar {
+    width: 35px;
+    height: 35px;
+  }
+
+  /* Transformation du contexte logement en accordéon */
+  .housing-context {
+    padding: 0;
+  }
+
+  .context-toggle {
+    display: flex;
+  }
+
+  .context-details-mobile {
+    display: flex;
+    padding: 10px 15px;
+    gap: 12px;
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-secondary);
+  }
+
+  .context-image {
+    width: 60px;
+    height: 60px;
+  }
+
+  .message-bubble {
+    max-width: 90%; /* On utilise presque toute la largeur sur mobile */
+  }
+
+  /* On cache les avatars dans les bulles sur mobile pour gagner de la place */
+  /* Optionnel : si vous voulez garder un look épuré style WhatsApp */
+  .message-bubble .message-avatar {
+    display: none;
+  }
+
+  .message-bubble.mine .bubble-content {
+    border-radius: 15px 15px 2px 15px;
+  }
+
+  .message-bubble.theirs .bubble-content {
+    border-radius: 15px 15px 15px 2px;
+  }
+}
+
+
+
+
+/* --- Bouton Retour Mobile --- */
+.mobile-back-btn {
+  display: none; /* Caché sur Web par défaut */
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 18px;
+  padding: 8px;
+  margin-right: 5px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- Ajustement du Header pour éviter les chevauchements --- */
+.header-user-info {
+  display: flex;
+  align-items: center;
+  min-width: 0; /* Important pour que le texte puisse se tronquer si trop long */
+}
+
+.user-text-details {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.user-text-details h3 {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Évite que le nom ne pousse les icônes hors écran */
+}
+
+/* --- RESPONSIVE MOBILE --- */
+@media (max-width: 768px) {
+  .mobile-back-btn {
+    display: flex; /* On l'affiche sur mobile */
+  }
+
+  .header-avatar {
+    width: 35px; /* On réduit un peu l'avatar sur mobile */
+    height: 35px;
+  }
+
+  .header-actions {
+    gap: 5px; /* On serre les icônes d'action à droite */
+  }
+
+  .action-icon-btn {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ==========================================================================
+   CONTEXTE LOGEMENT UNIVERSEL (WEB & MOBILE)
+   ========================================================================== */
+
+.housing-context {
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Le bandeau cliquable (Web & Mobile) */
+.context-header-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  background: rgba(37, 99, 235, 0.05); /* Léger fond bleu discret */
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s ease;
+}
+
+.context-header-toggle:hover {
+  background: rgba(37, 99, 235, 0.08);
+}
+
+.toggle-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.context-home-icon {
+  color: var(--primary-color);
+  font-size: 16px;
+}
+
+.toggle-icon {
+  color: var(--text-secondary);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+/* Gestion de l'affichage du contenu selon l'état (WEB) */
+.housing-context.collapsed .context-content-wrapper {
+  display: none; /* Cache le contenu quand c'est replié */
+}
+
+.housing-context.expanded .context-content-wrapper {
+  display: flex; /* Affiche le contenu quand c'est déplié */
+  gap: 16px;
+  padding: 16px 20px;
+  animation: fadeInContext 0.2s ease;
+}
+
+/* ==========================================================================
+   STYLE MOBILE (max-width: 768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  .context-header-toggle {
+    padding: 10px 15px; /* Plus serré sur mobile */
+  }
+
+  .toggle-title {
+    font-size: 13px;
+  }
+
+  /* Version empilée pour le mobile lorsque déplié */
+  .housing-context.expanded .context-content-wrapper {
+    flex-direction: column;
+    padding: 12px 15px;
+    gap: 12px;
+  }
+
+  .context-image {
+    width: 100%;
+    height: 120px; /* Bannière horizontale sur mobile au lieu d'un carré */
+  }
+}
+
+@keyframes fadeInContext {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}

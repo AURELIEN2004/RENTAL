@@ -5,18 +5,19 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { housingService } from '../../services/housingService';
 import MessageInput from './MessageInput';
-import { FaPhone, FaVideo, FaEllipsisV, FaHome } from 'react-icons/fa';
+import { FaPhone, FaVideo, FaEllipsisV, FaHome,FaArrowLeft } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 import './MessageThread.css';
 import { useTheme } from '../../contexts/ThemeContext';
+import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
 
-const MessageThread = ({ conversation, onNewMessage }) => {
+const MessageThread = ({ conversation, onNewMessage,onBack }) => {
   const { user } = useAuth();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef(null);
-
-
+//  const [showContext, setShowContext] = useState(false); // Fermé par défaut sur mobile pour gagner de la place
+const [showContext, setShowContext] = useState(window.innerWidth > 768);
   const { t, language, theme } = useTheme();
 
   useEffect(() => {
@@ -110,6 +111,10 @@ const MessageThread = ({ conversation, onNewMessage }) => {
       {/* Header */}
       <div className="thread-header">
         <div className="header-user-info">
+          {/* BOUTON RETOUR : Visible uniquement sur mobile via CSS */}
+    <button className="mobile-back-btn" onClick={onBack}>
+      <FaArrowLeft />
+    </button>
           <img 
             src={otherUser?.photo || '/default-avatar.png'} 
             // alt={otherUser?.username || 'Utilisateur'}
@@ -121,7 +126,8 @@ const MessageThread = ({ conversation, onNewMessage }) => {
             <h3>{otherUser?.username || 'Utilisateur'}</h3>
             {conversation.housing && (
               <div className="header-housing">
-                🏠 {conversation.housing.title}
+                        <FaHome className="context-home-icon" />
+ {conversation.housing.title}
               </div>
             )}
           </div>
@@ -154,7 +160,7 @@ const MessageThread = ({ conversation, onNewMessage }) => {
         </div>
       </div>
 
-      {/* Contexte logement */}
+      {/* Contexte logement
       {conversation.housing && (
         <div className="housing-context">
           <div className="context-image">
@@ -183,6 +189,76 @@ const MessageThread = ({ conversation, onNewMessage }) => {
           </div>
         </div>
       )}
+ */}
+{/* Contexte logement optimisé */}
+      {/* {conversation.housing && (
+        <div className={`housing-context ${showContext ? 'expanded' : 'collapsed'}`}>
+          <div className="context-toggle" onClick={() => setShowContext(!showContext)}>
+            <span>🏠 {conversation.housing.title}</span>
+            {showContext ? <FaChevronUp /> : <FaChevronDown />}
+          </div>
+          
+          {showContext && (
+            <div className="context-details-mobile">
+              <div className="context-image">
+                <img src={conversation.housing.main_image || '/placeholder.jpg'} alt="" />
+              </div>
+              <div className="context-info">
+                <p className="context-price">{conversation.housing.price?.toLocaleString()} FCFA/mois</p>
+                <a href={`/housing/${conversation.housing.id}`} className="view-details-btn">
+                  {t("messages_housing_details")} →
+                </a>
+              </div>
+            </div>
+          )}
+        </div>
+      )} */}
+
+      {/* Contexte logement optimisé */}
+{conversation.housing && (
+  <div className={`housing-context ${showContext ? 'expanded' : 'collapsed'}`}>
+    
+    {/* Bandeau de contrôle Universel (Web + Mobile) */}
+    <div className="context-header-toggle" onClick={() => setShowContext(!showContext)}>
+      <div className="toggle-title">
+        <FaHome className="context-home-icon" />
+        <span>{conversation.housing.title}</span>
+      </div>
+      <div className="toggle-icon">
+        {showContext ? <FaChevronUp /> : <FaChevronDown />}
+      </div>
+    </div>
+    
+    {/* Contenu qui se plie et se déplie */}
+    <div className="context-content-wrapper">
+      <div className="context-image">
+        <img 
+          src={conversation.housing.main_image || '/placeholder.jpg'} 
+          alt={conversation.housing.title}
+          onError={(e) => e.target.src = '/placeholder.jpg'}
+        />
+      </div>
+      <div className="context-info">
+        <h4>{conversation.housing.title}</h4>
+        <p className="context-category">
+          {conversation.housing.category_name} • {conversation.housing.type_name}
+        </p>
+        <p className="context-price">
+          {conversation.housing.price?.toLocaleString()} FCFA/mois
+        </p>
+        <a 
+          href={`/housing/${conversation.housing.id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="view-details-btn"
+        >
+          {t("messages_housing_details")} →
+        </a>
+      </div>
+    </div>
+  </div>
+)}
+
 
       {/* Messages */}
       <div className="messages-container">

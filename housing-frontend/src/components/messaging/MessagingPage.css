@@ -99,3 +99,69 @@
     z-index: 100;
   }
 }
+
+
+
+/* AJOUT */
+/* ... (gardez votre code existant au début) ... */
+
+/* Header de retour mobile (caché par défaut sur PC) */
+.mobile-back-header {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  padding: 15px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  color: var(--primary-color);
+  font-weight: bold;
+}
+
+/* ==================== RESPONSIVE MOBILE ==================== */
+@media (max-width: 768px) {
+  .messaging-page {
+    height: calc(100vh - 70px); /* Ajustez selon la hauteur de votre navbar */
+  }
+
+  .messaging-container {
+    display: block; /* On quitte le mode Grid pour un mode simple stack */
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* État par défaut : On affiche la liste, on cache le panel de messages */
+  .conversations-sidebar {
+    width: 100%;
+    height: 100%;
+    display: block;
+    border-right: none;
+  }
+
+  .messages-panel {
+    display: none; /* Caché tant qu'on n'a pas cliqué sur une conv */
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+  }
+
+  /* État : Conversation ouverte */
+  .messaging-container.conversation-open .conversations-sidebar {
+    display: none; /* On cache la liste */
+  }
+
+  .messaging-container.conversation-open .messages-panel {
+    display: flex; /* On affiche la discussion */
+  }
+
+  .mobile-back-header {
+    display: flex; /* On affiche le bouton retour uniquement ici */
+  }
+
+  .no-conversation-selected {
+    display: none; /* Inutile sur mobile */
+  }
+}
