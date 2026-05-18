@@ -50,4 +50,4 @@ export const useSidebar = () => {
   return { isOpen, isMobile, open, close, toggle, closeOnTabChange };
 };
 
-export default useSidebar;
+export default useSidebar;   
