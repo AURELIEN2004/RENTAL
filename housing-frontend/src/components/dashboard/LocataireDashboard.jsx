@@ -665,7 +665,7 @@ import {
   FaBell, FaCog, FaUser, FaTrash,
 } from 'react-icons/fa';
 import HousingCard from '../housing/HousingCard';
-import DashboardShell from './DashboardShell';
+import DashboardShell from './DashboardShell.jsx';
 import './Dashboard.css';
 import { toast } from 'react-toastify';
 

@@ -1601,7 +1601,7 @@ import {
   FaEnvelope, FaTrophy, FaSearch, FaArrowLeft, FaLock,
   FaCheckCircle, FaComments,
 } from "react-icons/fa";
-import DashboardShell from "./DashboardShell";
+import DashboardShell from './DashboardShell.jsx';
 import "./AdminDashboard.css";
 import { useAuth } from "../../contexts/AuthContext";
 import { useTheme } from "../../contexts/ThemeContext";

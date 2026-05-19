@@ -725,7 +725,7 @@ import MessagingPage from '../messaging/MessagingPage';
 import VisibilityManagement from '../../pages/VisibilityManagement';
 import HousingForm from '../housing/HousingForm';
 import HousingEditModal from '../housing/HousingEditModal';
-import DashboardShell from './DashboardShell';
+import DashboardShell from './DashboardShell.jsx';
 import {
   FaHome, FaPlus, FaEye, FaCalendar, FaEnvelope,
   FaBell, FaCog, FaUser, FaTrash, FaChartLine, FaEdit,
