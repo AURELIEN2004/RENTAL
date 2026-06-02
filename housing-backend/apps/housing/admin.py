@@ -30,7 +30,7 @@ class CategoryAdmin(admin.ModelAdmin):
 @admin.register(HousingType)
 class HousingTypeAdmin(admin.ModelAdmin):
     list_display  = ['name', 'created_at']
-    search_fields = ['name', 'name_fr', 'name_en']
+    search_fields = ['name', 'name_fr', 'name_en','latitude', 'longitude']
 
     fieldsets = (
         ('🇫🇷 Français', {

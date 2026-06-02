@@ -230,3 +230,33 @@ class UserPreferenceSerializer(serializers.ModelSerializer):
 #         fields = ['id', 'title', 'title_fr', 'title_en',
 #                   'description', 'description_fr', 'description_en', ...]
 # """
+
+# pour le mapping
+class HousingMapSerializer(serializers.ModelSerializer):
+    """
+    Sérialiseur léger pour l'affichage sur carte.
+    Retourne uniquement les champs nécessaires aux markers
+    et aux cartes de résultats (pas les détails complets).
+    """
+    city_name     = serializers.CharField(source='city.name',     read_only=True)
+    district_name = serializers.CharField(source='district.name', read_only=True)
+    owner_name    = serializers.CharField(source='owner.get_full_name', read_only=True)
+    owner_phone   = serializers.CharField(source='owner.phone',   read_only=True)
+    images        = HousingImageSerializer(many=True, read_only=True)
+    category      = serializers.CharField(source='category.name', read_only=True)
+ 
+    class Meta:
+        model  = Housing
+        fields = [
+            'id', 'title', 'description',
+            'category', 'price', 'rooms', 'bathrooms', 'area',
+            'status', 'is_visible',
+            'city', 'city_name',
+            'district', 'district_name',
+            'latitude', 'longitude',
+            'features',
+            'images',
+            'owner_name', 'owner_phone',
+            'views_count', 'likes_count',
+            'created_at',
+        ]

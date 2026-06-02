@@ -339,3 +339,132 @@
         display: none; /* On ne garde que l'image du logo si l'écran est minuscule */
     }
 }
+
+
+
+/* POUR MODE S/C MOBILE */
+/* ==========================================================================
+   STYLE COMPLÉMENTAIRE ET CORRECTIONS POUR RÉGLAGES (WEB & MOBILE)
+   ========================================================================== */
+
+.settings-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Par défaut sur le Web : l'engrenage est caché, les boutons sont affichés normalement en ligne */
+.settings-toggle-btn {
+  display: none !important;
+}
+
+.settings-actions-box {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Cache le texte "Mode Sombre/Clair" sur Web car l'icône suffit */
+.settings-menu-text {
+  display: none;
+}
+
+.lang-tag {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   RESPONSIVE : TABLETTES ET MOBILES (max-width: 768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  
+  /* 1. On affiche l'engrenage de contrôle */
+  .settings-toggle-btn {
+    display: flex !important;
+    background-color: var(--bg-tertiary);
+  }
+
+  /* 2. La boîte se transforme en menu déroulant discret suspendu */
+  .settings-actions-box {
+    display: none; /* Caché par défaut */
+    flex-direction: column;
+    position: absolute;
+    top: 120%;
+    right: 0;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    padding: 8px;
+    min-width: 160px;
+    gap: 4px;
+    z-index: 1010;
+  }
+
+  /* Quand on clique sur l'engrenage, on applique cette classe */
+  .settings-actions-box.open {
+    display: flex;
+    animation: slideDownNavbar 0.2s ease-out;
+  }
+
+  /* On transforme les boutons internes pour occuper toute la largeur du menu déroulant */
+  .settings-actions-box .icon-btn {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 15px;
+  }
+
+  /* On affiche le texte explicatif sur mobile à côté de l'icône pour faire plus pro */
+  .settings-menu-text {
+    display: inline-block;
+    font-size: 14px;
+    margin-left: 8px;
+  }
+
+  .lang-tag {
+    margin-left: 8px;
+  }
+
+  /* --- Ajustements généraux Navbar Mobile --- */
+  .hide-mobile {
+    display: none !important;
+  }
+
+  .navbar-container {
+    padding: 0 12px;
+  }
+
+  .logo-text {
+    font-size: 1.3rem;
+  }
+
+  .logo-img {
+    width: 32px;
+    height: 32px;
+  }
+
+  .navbar-actions {
+    gap: 8px;
+  }
+
+  .user-menu-btn {
+    padding: 4px;
+    background: transparent;
+  }
+}
+
+/* Très petits écrans */
+@media (max-width: 400px) {
+  .logo-text {
+    display: none; /* Ne garde que l'image sur les écrans type iPhone SE */
+  }
+}
+
+/* Petite animation d'ouverture */
+@keyframes slideDownNavbar {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

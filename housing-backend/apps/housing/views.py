@@ -22,6 +22,9 @@ from .permissions import IsOwnerOrReadOnly
 from .filters import HousingFilter
 import traceback
 
+import math as math_module  # uniquement si math n'est pas déjà importé en haut
+
+
 
 class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Category.objects.all()
@@ -78,7 +81,7 @@ class HousingViewSet(viewsets.ModelViewSet):
     # ----------------------------
     def get_permissions(self):
         # Actions publiques (lecture seule)
-        if self.action in ['list', 'retrieve', 'search_advanced', 'recommended']:
+        if self.action in ['list', 'retrieve', 'search_advanced', 'recommended', 'nearby', 'stats_map']:
             return [AllowAny()]
         
         # Actions publiques mais qui peuvent enregistrer des stats
@@ -314,6 +317,92 @@ class HousingViewSet(viewsets.ModelViewSet):
             'total_conversations': Conversation.objects.filter(housing__owner=request.user).count(),
             'pending_visits': Visit.objects.filter(housing__owner=request.user, status='attente').count(),
         })
+
+
+# AJOUT pour le mapping
+
+    @action(detail=False, methods=['get'])
+    def nearby(self, request):
+        """
+        GET /api/housings/nearby/?lat=3.848&lng=11.502&radius=5
+ 
+        Retourne les logements dans un rayon `radius` km autour du point (lat, lng).
+        Utilisé par la carte pour la fonctionnalité "Autour de moi".
+        """
+        try:
+            lat    = float(request.query_params.get('lat',    3.848))
+            lng    = float(request.query_params.get('lng',    11.502))
+            radius = float(request.query_params.get('radius', 5))
+        except (ValueError, TypeError):
+            return Response(
+                {'error': 'lat, lng et radius doivent être des nombres valides'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+ 
+        # Bounding box approchée pour pré-filtrer rapidement en BDD
+        lat_delta = radius / 111.0
+        lng_delta = radius / (111.0 * math_module.cos(math_module.radians(lat)))
+ 
+        qs = Housing.objects.filter(
+            is_visible=True,
+            latitude__range  = (lat - lat_delta, lat + lat_delta),
+            longitude__range = (lng - lng_delta, lng + lng_delta),
+        ).exclude(
+            latitude__isnull=True
+        ).exclude(
+            longitude__isnull=True
+        ).select_related(
+            'owner', 'category', 'housing_type', 'region', 'city', 'district'
+        ).prefetch_related('images')
+ 
+        # Filtre Haversine précis
+        def _haversine(la1, lo1, la2, lo2):
+            R = 6371
+            d2r = math_module.pi / 180
+            dLa = (la2 - la1) * d2r
+            dLo = (lo2 - lo1) * d2r
+            a = (math_module.sin(dLa / 2) ** 2 +
+                 math_module.cos(la1 * d2r) * math_module.cos(la2 * d2r) *
+                 math_module.sin(dLo / 2) ** 2)
+            return R * 2 * math_module.atan2(math_module.sqrt(a), math_module.sqrt(1 - a))
+ 
+        results = []
+        for h in qs:
+            d = _haversine(lat, lng, float(h.latitude), float(h.longitude))
+            if d <= radius:
+                results.append((d, h))
+ 
+        # Trier par distance croissante
+        results.sort(key=lambda x: x[0])
+        housings_list = [h for _, h in results]
+ 
+        serializer = HousingListSerializer(
+            housings_list, many=True, context={'request': request}
+        )
+        return Response({
+            'count'  : len(housings_list),
+            'results': serializer.data,
+        })
+ 
+    @action(detail=False, methods=['get'])
+    def stats_map(self, request):
+        """
+        GET /api/housings/stats_map/
+ 
+        Statistiques pour la barre d'info de la carte :
+        total, prix moyen, prix minimum.
+        Accepte les mêmes filtres que la liste principale.
+        """
+        qs = self.filter_queryset(self.get_queryset())
+        data = qs.aggregate(
+            total     = Count('id'),
+            avg_price = Avg('price'),
+            min_price = Min('price'),
+            max_price = Max('price'),
+        )
+        return Response(data)
+ 
+
 
 
 # ----------------------------

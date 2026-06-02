@@ -29,6 +29,8 @@ import Footer from './components/common/Footer';
 import SupportContactButton from './components/common/SupportContactButton';
 // Styles
 import './styles/global.css';
+// src/App.jsx ou src/router.jsx
+import SearchMapPage from './pages/SearchMapPage';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -61,7 +63,9 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password/:token" element={<ResetPassword />} />
-                <Route path="/search" element={<SearchPage />} />
+                <Route path="/search" element={<SearchMapPage />} />
+                <Route path="/recherche" element={<SearchMapPage />} />
+
                 
 
 
