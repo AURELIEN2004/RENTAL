@@ -63,7 +63,7 @@ function App() {
                 <Route path="/register" element={<Register />} />
                 <Route path="/forgot-password" element={<ForgotPassword />} />
                 <Route path="/reset-password/:token" element={<ResetPassword />} />
-                <Route path="/search" element={<SearchMapPage />} />
+                <Route path="/search" element={<SearchPage />} />
                 <Route path="/recherche" element={<SearchMapPage />} />
 
                 

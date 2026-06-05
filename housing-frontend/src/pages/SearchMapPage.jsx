@@ -1,272 +1,1163 @@
+// // ============================================================
+// // 📁 src/pages/SearchMapPage.jsx
+// // Dépendances npm :
+// //   npm install leaflet react-leaflet leaflet.markercluster
+// //   npm install @react-leaflet/core
+// // CSS global (index.css / App.css) :
+// //   import 'leaflet/dist/leaflet.css';
+// //   import 'leaflet.markercluster/dist/MarkerCluster.css';
+// //   import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
+// // ============================================================
+// import React, { useState, useEffect, useRef, useCallback } from 'react';
+// import { MapContainer, TileLayer, useMap } from 'react-leaflet';
+// import L from 'leaflet';
+// import 'leaflet.markercluster';
+// import './SearchMapPage.css';
+
+// // ─── API BASE ────────────────────────────────────────────────
+// const API = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+// const LANG = localStorage.getItem('lang') || 'fr';
+
+// async function apiFetch(path, opts = {}) {
+//   const token = localStorage.getItem('access_token');
+//   const res = await fetch(`${API}${path}`, {
+//     ...opts,
+//     headers: {
+//       'Content-Type': 'application/json',
+//       'X-Language': LANG,
+//       ...(token ? { Authorization: `Bearer ${token}` } : {}),
+//       ...opts.headers,
+//     },
+//   });
+//   if (!res.ok) throw new Error(await res.text());
+//   return res.json();
+// }
+
+// // ─── FEATURE META ──────────────────────────────────────────
+// const FEAT = {
+//   wifi: { icon: 'fa-wifi', label: 'WiFi' },
+//   parking: { icon: 'fa-car', label: 'Parking' },
+//   gardien: { icon: 'fa-shield-halved', label: 'Gardien' },
+//   climatisation: { icon: 'fa-snowflake', label: 'Climatisation' },
+//   eau: { icon: 'fa-droplet', label: 'Eau 24h' },
+//   electricite: { icon: 'fa-bolt', label: 'Électricité' },
+//   piscine: { icon: 'fa-person-swimming', label: 'Piscine' },
+//   jardin: { icon: 'fa-leaf', label: 'Jardin' },
+//   balcon: { icon: 'fa-door-open', label: 'Balcon/Terrasse' },
+//   cuisine: { icon: 'fa-utensils', label: 'Cuisine équipée' },
+//   ascenseur: { icon: 'fa-elevator', label: 'Ascenseur' },
+//   vue: { icon: 'fa-binoculars', label: 'Vue panoramique' },
+// };
+
+// // ─── HAVERSINE ─────────────────────────────────────────────
+// function haversine(la1, lo1, la2, lo2) {
+//   const R = 6371, d2r = Math.PI / 180;
+//   const dLa = (la2 - la1) * d2r, dLo = (lo2 - lo1) * d2r;
+//   const a = Math.sin(dLa / 2) ** 2 + Math.cos(la1 * d2r) * Math.cos(la2 * d2r) * Math.sin(dLo / 2) ** 2;
+//   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+// }
+
+// // ─── FORMAT PRICE ──────────────────────────────────────────
+// function fmtPrice(p) {
+//   return p >= 1_000_000
+//     ? (p / 1_000_000).toFixed(1) + 'M'
+//     : Math.round(p / 1000) + 'k';
+// }
+
+// // ════════════════════════════════════════════════════════════
+// //  MapController — gère markers, clusters, routes
+// // ════════════════════════════════════════════════════════════
+// function MapController({ housings, selectedId, onSelectHousing, userLoc, route }) {
+//   const map = useMap();
+//   const clusterRef = useRef(null);
+//   const routeRef = useRef(null);
+//   const userMarkerRef = useRef(null);
+
+//   // Init cluster group once
+//   useEffect(() => {
+//     const cluster = L.markerClusterGroup({
+//       maxClusterRadius: 60,
+//       iconCreateFunction: (c) =>
+//         L.divIcon({
+//           html: `<div class="smp-cluster">${c.getChildCount()}</div>`,
+//           className: '',
+//           iconSize: [36, 36],
+//         }),
+//     });
+//     map.addLayer(cluster);
+//     clusterRef.current = cluster;
+//     return () => map.removeLayer(cluster);
+//   }, [map]);
+
+//   // Render markers when housings or selectedId change
+//   useEffect(() => {
+//     if (!clusterRef.current) return;
+//     clusterRef.current.clearLayers();
+
+//     housings.forEach((h) => {
+//       if (!h.latitude || !h.longitude) return;
+//       const isSelected = h.id === selectedId;
+//       const icon = L.divIcon({
+//         html: `<div class="smp-marker${isSelected ? ' selected' : ''}" id="mk${h.id}">${fmtPrice(h.price)} FCFA</div>`,
+//         className: '',
+//         iconSize: null,
+//         iconAnchor: [44, 14],
+//       });
+//       const marker = L.marker([h.latitude, h.longitude], { icon });
+//       marker.on('click', () => onSelectHousing(h));
+//       clusterRef.current.addLayer(marker);
+//     });
+//   }, [housings, selectedId, onSelectHousing]);
+
+//   // Draw route
+//   useEffect(() => {
+//     if (routeRef.current) { map.removeLayer(routeRef.current); routeRef.current = null; }
+//     if (!route?.length) return;
+//     const poly = L.polyline(route, { color: '#F59E0B', weight: 5, opacity: 0.85, dashArray: '10,5' });
+//     poly.addTo(map);
+//     routeRef.current = poly;
+//     map.fitBounds(poly.getBounds(), { padding: [60, 60] });
+//   }, [route, map]);
+
+//   // User location marker
+//   useEffect(() => {
+//     if (userMarkerRef.current) { map.removeLayer(userMarkerRef.current); userMarkerRef.current = null; }
+//     if (!userLoc) return;
+//     const m = L.marker([userLoc.lat, userLoc.lng], {
+//       icon: L.divIcon({ html: '<div class="smp-user-dot"></div>', className: '', iconSize: [14, 14] }),
+//     }).addTo(map).bindTooltip('📍 Vous êtes ici');
+//     userMarkerRef.current = m;
+//   }, [userLoc, map]);
+
+//   return null;
+// }
+
+// // ════════════════════════════════════════════════════════════
+// //  HousingCard
+// // ════════════════════════════════════════════════════════════
+// function HousingCard({ h, selected, onSelect, onToggleFav, isFav, onToggleCompare, inCompare, userLoc }) {
+//   const STATUS = { disponible: ['s-dispo', 'Disponible'], reserve: ['s-res', 'Réservé'], occupe: ['s-occ', 'Occupé'] };
+//   const [scls, slabel] = STATUS[h.status] || STATUS.disponible;
+//   const dist = userLoc ? haversine(userLoc.lat, userLoc.lng, h.latitude, h.longitude).toFixed(1) : null;
+
+//   const mainImg = h.images?.find(i => i.is_main) || h.images?.[0];
+
+//   return (
+//     <div className={`smp-card${selected ? ' selected' : ''}`} onClick={() => onSelect(h)}>
+//       <div className="smp-card-img">
+//         {mainImg
+//           ? <img src={mainImg.image} alt={h.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+//           : <span className="smp-card-emoji">{h.category === 'Villa' ? '🏡' : h.category === 'Studio' ? '🏠' : h.category === 'Chambre' ? '🛏️' : '🏢'}</span>
+//         }
+//         <div className="smp-card-ov" />
+//         <span className={`smp-status ${scls}`}>{slabel}</span>
+//         <button className={`smp-fav${isFav ? ' liked' : ''}`} onClick={e => { e.stopPropagation(); onToggleFav(h.id); }} title="Favoris">
+//           <i className="fas fa-heart" />
+//         </button>
+//         <button className={`smp-cmp${inCompare ? ' active' : ''}`} onClick={e => { e.stopPropagation(); onToggleCompare(h); }} title="Comparer">
+//           <i className="fas fa-scale-balanced" />
+//         </button>
+//       </div>
+//       <div className="smp-card-body">
+//         <div className="smp-price">{h.price.toLocaleString('fr-FR')} <span>FCFA/mois</span></div>
+//         <div className="smp-title">{h.title}</div>
+//         <div className="smp-loc">
+//           <i className="fas fa-location-dot" />
+//           {h.district_name || h.district}, {h.city_name || h.city}
+//           {dist && <span className="smp-dist"> · {dist} km</span>}
+//         </div>
+//         <div className="smp-meta">
+//           <span><i className="fas fa-bed" /> {h.rooms}ch</span>
+//           <span><i className="fas fa-bath" /> {h.bathrooms}sdb</span>
+//           <span><i className="fas fa-ruler-combined" /> {h.area}m²</span>
+//           <span style={{ marginLeft: 'auto' }}><i className="fas fa-eye" /> {h.views_count || 0}</span>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+// // ════════════════════════════════════════════════════════════
+// //  DetailPanel
+// // ════════════════════════════════════════════════════════════
+// function DetailPanel({ housing, onClose, onStartItin, isFav, onToggleFav, inCompare, onToggleCompare }) {
+//   if (!housing) return null;
+//   const STATUS = { disponible: ['s-dispo', 'Disponible'], reserve: ['s-res', 'Réservé'], occupe: ['s-occ', 'Occupé'] };
+//   const [scls, slabel] = STATUS[housing.status] || STATUS.disponible;
+//   const mainImg = housing.images?.find(i => i.is_main) || housing.images?.[0];
+//   const initials = housing.owner_name?.split(' ').map(n => n[0]).join('').slice(0, 2) || '?';
+
+//   return (
+//     <div className="smp-detail-panel open">
+//       <div className="smp-dp-head">
+//         <span className="smp-dp-title"><i className="fas fa-house-chimney" /> Détails</span>
+//         <button className="smp-close-btn" onClick={onClose}><i className="fas fa-xmark" /></button>
+//       </div>
+//       <div className="smp-dp-body">
+//         {/* Image */}
+//         <div className="smp-dp-img">
+//           {mainImg
+//             ? <img src={mainImg.image} alt={housing.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+//             : <span style={{ fontSize: 65 }}>{housing.category === 'Villa' ? '🏡' : '🏢'}</span>
+//           }
+//           <div className="smp-dp-img-ov" />
+//           <div className="smp-dp-price-badge">
+//             {housing.price.toLocaleString('fr-FR')} FCFA<span>/mois</span>
+//           </div>
+//           <span className={`smp-status ${scls}`} style={{ position: 'absolute', top: 12, right: 12 }}>{slabel}</span>
+//         </div>
+
+//         {/* Info */}
+//         <div className="smp-dp-info">
+//           <h2 className="smp-dp-h1">{housing.title}</h2>
+//           <p className="smp-dp-loc"><i className="fas fa-location-dot" /> {housing.district_name}, {housing.city_name}</p>
+
+//           <div className="smp-dp-stats">
+//             {[
+//               { v: housing.rooms, l: 'Chambre(s)' },
+//               { v: housing.bathrooms, l: 'Salle(s) de bain' },
+//               { v: `${housing.area}m²`, l: 'Superficie' },
+//             ].map(({ v, l }) => (
+//               <div className="smp-dp-stat" key={l}>
+//                 <div className="smp-dp-stat-v">{v}</div>
+//                 <div className="smp-dp-stat-l">{l}</div>
+//               </div>
+//             ))}
+//           </div>
+
+//           <span className="smp-sect-lbl">Équipements</span>
+//           <div className="smp-feats">
+//             {(housing.features || []).map(f => (
+//               <span className="smp-feat-tag" key={f}>
+//                 <i className={`fas ${FEAT[f]?.icon || 'fa-check'}`} />
+//                 {FEAT[f]?.label || f}
+//               </span>
+//             ))}
+//           </div>
+
+//           <span className="smp-sect-lbl">Description</span>
+//           <p className="smp-desc">{housing.description}</p>
+
+//           <div className="smp-dp-meta-row">
+//             <span><i className="fas fa-eye" /> {housing.views_count || 0} vues</span>
+//             <span><i className="fas fa-heart" style={{ color: 'var(--red)' }} /> {housing.likes_count || 0} likes</span>
+//             <span style={{ marginLeft: 'auto' }}><i className="fas fa-calendar" /> {housing.created_at?.slice(0, 10)}</span>
+//           </div>
+//         </div>
+
+//         {/* Owner */}
+//         <div className="smp-owner-card">
+//           <div className="smp-owner-av">{initials}</div>
+//           <div>
+//             <div className="smp-owner-n">{housing.owner_name}</div>
+//             <div className="smp-owner-r"><i className="fas fa-phone" /> {housing.owner_phone}</div>
+//           </div>
+//         </div>
+
+//         {/* Actions */}
+//         <div className="smp-actions">
+//           <button className={`smp-act-btn${isFav ? ' active' : ''}`} onClick={() => onToggleFav(housing.id)}>
+//             <i className="fas fa-heart" style={{ color: 'var(--red)' }} /> {isFav ? 'Retiré' : 'Favoris'}
+//           </button>
+//           <button className={`smp-act-btn${inCompare ? ' active' : ''}`} onClick={() => onToggleCompare(housing)}>
+//             <i className="fas fa-scale-balanced" style={{ color: 'var(--blue)' }} /> Comparer
+//           </button>
+//           <button className="smp-act-btn smp-itin-btn" onClick={() => onStartItin(housing)}>
+//             <i className="fas fa-route" /> Calculer l'itinéraire
+//           </button>
+//           <button className="smp-act-btn smp-primary-btn" onClick={() => alert(`Demande de visite pour : ${housing.title}`)}>
+//             <i className="fas fa-calendar-plus" /> Planifier une visite
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+// // ════════════════════════════════════════════════════════════
+// //  ItineraryPanel
+// // ════════════════════════════════════════════════════════════
+// function ItineraryPanel({ open, status, distance, duration, destination, onClose, transportMode, onSetTransport, progress }) {
+//   if (!open) return null;
+//   return (
+//     <div className="smp-itin-panel">
+//       <div className="smp-itin-inner">
+//         <div className="smp-itin-hd">
+//           <span className="smp-itin-title"><i className="fas fa-route" /> Itinéraire</span>
+//           <button className="smp-close-btn" onClick={onClose}><i className="fas fa-xmark" /></button>
+//         </div>
+//         <div className="smp-trans-modes">
+//           {[
+//             { mode: 'driving', icon: 'fa-car', label: 'Voiture' },
+//             { mode: 'foot', icon: 'fa-person-walking', label: 'Pied' },
+//             { mode: 'bike', icon: 'fa-bicycle', label: 'Vélo' },
+//           ].map(({ mode, icon, label }) => (
+//             <button
+//               key={mode}
+//               className={`smp-trans-btn${transportMode === mode ? ' active' : ''}`}
+//               onClick={() => onSetTransport(mode)}
+//             >
+//               <i className={`fas ${icon}`} /> {label}
+//             </button>
+//           ))}
+//         </div>
+//         <div className="smp-itin-prog"><div className="smp-itin-prog-fill" style={{ width: `${progress}%` }} /></div>
+//         {distance && (
+//           <div className="smp-itin-stats">
+//             {[
+//               { ico: 'fa-road', v: distance, l: 'Distance' },
+//               { ico: 'fa-clock', v: duration, l: 'Durée estimée' },
+//               { ico: 'fa-location-dot', v: destination, l: 'Destination' },
+//             ].map(({ ico, v, l }) => (
+//               <div className="smp-itin-s" key={l}>
+//                 <div className="smp-itin-ico"><i className={`fas ${ico}`} /></div>
+//                 <div><div className="smp-itin-sv">{v}</div><div className="smp-itin-sl">{l}</div></div>
+//               </div>
+//             ))}
+//           </div>
+//         )}
+//         <p className="smp-itin-status" dangerouslySetInnerHTML={{ __html: status }} />
+//       </div>
+//     </div>
+//   );
+// }
+
+// // ════════════════════════════════════════════════════════════
+// //  CompareModal
+// // ════════════════════════════════════════════════════════════
+// function CompareModal({ list, onClose, onRemove }) {
+//   if (!list.length) return null;
+//   const rows = [
+//     { label: 'Prix/mois', fmt: h => h.price.toLocaleString('fr-FR') + ' FCFA', valFn: h => h.price, lowBest: true },
+//     { label: 'Catégorie', fmt: h => h.category },
+//     { label: 'Ville · Quartier', fmt: h => `${h.city_name} · ${h.district_name}` },
+//     { label: 'Chambres', fmt: h => h.rooms + '', valFn: h => h.rooms },
+//     { label: 'Salles de bain', fmt: h => h.bathrooms + '', valFn: h => h.bathrooms },
+//     { label: 'Superficie', fmt: h => h.area + 'm²', valFn: h => h.area },
+//     { label: 'Statut', fmt: h => h.status === 'disponible' ? '✅ Dispo' : h.status === 'reserve' ? '⏳ Réservé' : '❌ Occupé' },
+//     { label: 'Vues', fmt: h => (h.views_count || 0).toLocaleString(), valFn: h => h.views_count || 0 },
+//   ];
+
+//   return (
+//     <div className="smp-modal-bg" onClick={e => e.target === e.currentTarget && onClose()}>
+//       <div className="smp-modal-box">
+//         <div className="smp-modal-head">
+//           <h2><i className="fas fa-scale-balanced" style={{ color: 'var(--blue)', marginRight: 8 }} />Comparaison</h2>
+//           <button className="smp-close-btn" onClick={onClose}><i className="fas fa-xmark" /></button>
+//         </div>
+//         <div className="smp-cmp-table">
+//           {/* Header */}
+//           <div className="smp-cmp-row" style={{ borderBottom: '2px solid var(--sb3)' }}>
+//             <div className="smp-cmp-lbl" />
+//             {list.map(h => (
+//               <div key={h.id} className="smp-cmp-th">
+//                 <div>{h.title}</div>
+//                 <button onClick={() => onRemove(h.id)} style={{ background: 'none', border: 'none', color: 'var(--t2)', cursor: 'pointer', fontSize: 12 }}>
+//                   <i className="fas fa-xmark" /> Retirer
+//                 </button>
+//               </div>
+//             ))}
+//           </div>
+//           {/* Rows */}
+//           {rows.map(({ label, fmt, valFn, lowBest }) => {
+//             let bestIdx = -1;
+//             if (valFn) {
+//               const vals = list.map(valFn);
+//               const best = lowBest ? Math.min(...vals) : Math.max(...vals);
+//               bestIdx = vals.indexOf(best);
+//             }
+//             return (
+//               <div className="smp-cmp-row" key={label}>
+//                 <div className="smp-cmp-lbl">{label}</div>
+//                 {list.map((h, i) => (
+//                   <div key={h.id} className={`smp-cmp-val${i === bestIdx ? ' best' : ''}`}>{fmt(h)}</div>
+//                 ))}
+//               </div>
+//             );
+//           })}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+// // ════════════════════════════════════════════════════════════
+// //  Toast hook
+// // ════════════════════════════════════════════════════════════
+// function useToast() {
+//   const [toasts, setToasts] = useState([]);
+//   const add = useCallback((msg, type = 'inf') => {
+//     const id = Date.now();
+//     setToasts(t => [...t, { id, msg, type }]);
+//     setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 3500);
+//   }, []);
+//   return { toasts, toast: add };
+// }
+
+// // ════════════════════════════════════════════════════════════
+// //  MAIN PAGE
+// // ════════════════════════════════════════════════════════════
+// export default function SearchMapPage() {
+//   const { toasts, toast } = useToast();
+
+//   // Data
+//   const [housings, setHousings] = useState([]);
+//   const [filtered, setFiltered] = useState([]);
+//   const [loading, setLoading] = useState(true);
+
+//   // UI state
+//   const [view, setView] = useState('map'); // map | split | list
+//   const [filtersOpen, setFiltersOpen] = useState(false);
+//   const [selectedHousing, setSelectedHousing] = useState(null);
+//   const [favorites, setFavorites] = useState(new Set());
+//   const [compareList, setCompareList] = useState([]);
+//   const [showCompare, setShowCompare] = useState(false);
+
+//   // Map
+//   const [userLoc, setUserLoc] = useState(null);
+//   const [route, setRoute] = useState(null);
+
+//   // Itinerary
+//   const [itinOpen, setItinOpen] = useState(false);
+//   const [itinStatus, setItinStatus] = useState('');
+//   const [itinDist, setItinDist] = useState('');
+//   const [itinTime, setItinTime] = useState('');
+//   const [itinDest, setItinDest] = useState('');
+//   const [itinProgress, setItinProgress] = useState(0);
+//   const [transportMode, setTransportMode] = useState('driving');
+
+//   // Filters
+//   const [filters, setFilters] = useState({
+//     search: '', category: '', city: '', status: '', maxPrice: 1000000, rooms: 0,
+//   });
+//   const [sort, setSort] = useState('recent');
+
+//   // ── Fetch housings from Django API ─────────────────────────
+//   useEffect(() => {
+//     setLoading(true);
+//     apiFetch('/housings/?is_visible=true&page_size=100')
+//       .then(data => {
+//         const list = data.results || data;
+//         setHousings(list);
+//         setFiltered(list);
+//       })
+//       .catch(() => toast('Erreur de chargement des logements', 'err'))
+//       .finally(() => setLoading(false));
+//   }, []);
+
+//   // ── Apply filters + sort ───────────────────────────────────
+//   useEffect(() => {
+//     let result = [...housings];
+
+//     // Search
+//     if (filters.search) {
+//       const q = filters.search.toLowerCase();
+//       result = result.filter(h =>
+//         [h.title, h.description, h.city_name, h.district_name, h.category]
+//           .some(s => s?.toLowerCase().includes(q))
+//       );
+//     }
+//     if (filters.category) result = result.filter(h => h.category === filters.category);
+//     if (filters.city) result = result.filter(h => h.city_name === filters.city || h.city === filters.city);
+//     if (filters.status) result = result.filter(h => h.status === filters.status);
+//     result = result.filter(h => h.price <= filters.maxPrice);
+//     if (filters.rooms > 0) result = result.filter(h => h.rooms >= filters.rooms);
+
+//     // Sort
+//     result.sort((a, b) => {
+//       if (sort === 'price_asc') return a.price - b.price;
+//       if (sort === 'price_desc') return b.price - a.price;
+//       if (sort === 'popular') return (b.views_count || 0) - (a.views_count || 0);
+//       if (sort === 'area') return b.area - a.area;
+//       if (sort === 'distance' && userLoc)
+//         return haversine(userLoc.lat, userLoc.lng, a.latitude, a.longitude)
+//              - haversine(userLoc.lat, userLoc.lng, b.latitude, b.longitude);
+//       return new Date(b.created_at) - new Date(a.created_at);
+//     });
+
+//     setFiltered(result);
+//   }, [filters, sort, housings, userLoc]);
+
+//   // ── Locate user ────────────────────────────────────────────
+//   const locateMe = useCallback(() => {
+//     navigator.geolocation.getCurrentPosition(
+//       pos => {
+//         setUserLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+//         toast('📍 Position détectée', 'ok');
+//       },
+//       () => toast('Position non accessible', 'err')
+//     );
+//   }, [toast]);
+
+//   // ── Itinerary ──────────────────────────────────────────────
+//   const startItinerary = useCallback(async (h) => {
+//     setItinOpen(true);
+//     setItinDist('');
+//     setItinTime('');
+//     setItinDest('');
+//     setItinProgress(0);
+//     setItinStatus('<i class="fas fa-location-crosshairs fa-spin"></i> Détection de votre position…');
+
+//     const doCalc = async (loc) => {
+//       setItinProgress(55);
+//       setItinStatus('<i class="fas fa-route fa-spin"></i> Calcul de l\'itinéraire…');
+//       try {
+//         const url = `https://router.project-osrm.org/route/v1/driving/${loc.lng},${loc.lat};${h.longitude},${h.latitude}?overview=full&geometries=geojson`;
+//         const resp = await fetch(url);
+//         const data = await resp.json();
+//         if (data.routes?.[0]) {
+//           const rt = data.routes[0];
+//           const coords = rt.geometry.coordinates.map(([ln, lt]) => [lt, ln]);
+//           setRoute(coords);
+//           const km = (rt.distance / 1000).toFixed(1);
+//           const mins = Math.round(rt.duration / 60);
+//           setItinDist(km + ' km');
+//           setItinTime(mins < 60 ? mins + ' min' : Math.floor(mins / 60) + 'h ' + (mins % 60) + 'min');
+//           setItinDest(`${h.district_name}, ${h.city_name}`);
+//           setItinProgress(100);
+//           setItinStatus(`<i class="fas fa-check-circle" style="color:var(--acc)"></i> Itinéraire calculé vers <b>${h.district_name}, ${h.city_name}</b>`);
+//         } else throw new Error('no route');
+//       } catch {
+//         // Straight line fallback
+//         setRoute([[loc.lat, loc.lng], [h.latitude, h.longitude]]);
+//         const d = haversine(loc.lat, loc.lng, h.latitude, h.longitude);
+//         setItinDist(d.toFixed(1) + ' km (approx.)');
+//         setItinTime(Math.round((d / 40) * 60) + ' min (approx.)');
+//         setItinDest(`${h.district_name}, ${h.city_name}`);
+//         setItinProgress(100);
+//         setItinStatus('<i class="fas fa-triangle-exclamation" style="color:var(--gold)"></i> Distance à vol d\'oiseau utilisée');
+//       }
+//     };
+
+//     if (userLoc) { doCalc(userLoc); return; }
+
+//     navigator.geolocation.getCurrentPosition(
+//       async pos => {
+//         const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+//         setUserLoc(loc);
+//         setItinProgress(35);
+//         doCalc(loc);
+//       },
+//       () => {
+//         // Fallback: use center of Yaoundé
+//         const loc = { lat: 3.848, lng: 11.502 };
+//         setUserLoc(loc);
+//         setItinProgress(25);
+//         setItinStatus('<i class="fas fa-circle-info" style="color:var(--blue)"></i> Position approx. utilisée (accès refusé)');
+//         doCalc(loc);
+//       }
+//     );
+//   }, [userLoc]);
+
+//   const closeItin = () => {
+//     setItinOpen(false);
+//     setRoute(null);
+//     setItinProgress(0);
+//   };
+
+//   // ── Favorites ──────────────────────────────────────────────
+//   const toggleFav = (id) => {
+//     setFavorites(prev => {
+//       const next = new Set(prev);
+//       if (next.has(id)) { next.delete(id); toast('Retiré des favoris', 'inf'); }
+//       else { next.add(id); toast('❤️ Ajouté aux favoris', 'ok'); }
+//       return next;
+//     });
+//   };
+
+//   // ── Compare ────────────────────────────────────────────────
+//   const toggleCompare = (h) => {
+//     setCompareList(prev => {
+//       if (prev.find(x => x.id === h.id)) return prev.filter(x => x.id !== h.id);
+//       if (prev.length >= 3) { toast('Maximum 3 logements à comparer', 'err'); return prev; }
+//       toast(`Ajouté à la comparaison: ${h.title}`, 'ok');
+//       return [...prev, h];
+//     });
+//   };
+
+//   // ── Filter helpers ─────────────────────────────────────────
+//   const setFilt = (key, val) => setFilters(f => ({ ...f, [key]: val }));
+//   const resetFilters = () => {
+//     setFilters({ search: '', category: '', city: '', status: '', maxPrice: 1000000, rooms: 0 });
+//     toast('Filtres réinitialisés', 'inf');
+//   };
+
+//   const activeFilterCount = Object.entries(filters).filter(([k, v]) =>
+//     (k === 'maxPrice' && v < 1000000) || (k === 'rooms' && v > 0) || (k !== 'maxPrice' && k !== 'rooms' && v)
+//   ).length;
+
+//   // ── Stats ──────────────────────────────────────────────────
+//   const avg = filtered.length ? Math.round(filtered.reduce((s, h) => s + h.price, 0) / filtered.length) : 0;
+//   const min = filtered.length ? Math.min(...filtered.map(h => h.price)) : 0;
+
+//   const cities = [...new Set(housings.map(h => h.city_name || h.city).filter(Boolean))];
+//   const categories = ['Studio', 'Chambre', 'Appartement', 'Maison', 'Villa'];
+
+//   // ── Map center ─────────────────────────────────────────────
+//   const mapCenter = [3.848, 11.502];
+
+//   return (
+//     <div className="smp-layout">
+//       {/* ═══════════════ SIDEBAR ═══════════════ */}
+//       <aside className={`smp-sidebar${view === 'list' ? ' full-w' : ''}`}>
+//         {/* Logo */}
+//         <div className="smp-sb-head">
+//           <div className="smp-logo">
+//             <div className="smp-logo-mark"><i className="fas fa-house-chimney" /></div>
+//             <div>
+//               <div className="smp-logo-name">HabitatCam</div>
+//               <div className="smp-logo-sub">Trouvez votre logement idéal</div>
+//             </div>
+//           </div>
+
+//           {/* Search */}
+//           <div className="smp-search-wrap">
+//             <i className="fas fa-magnifying-glass smp-search-ico" />
+//             <input
+//               className="smp-search-inp"
+//               placeholder="Bastos, villa, 300k, 3 chambres…"
+//               value={filters.search}
+//               onChange={e => setFilt('search', e.target.value)}
+//             />
+//             {filters.search && (
+//               <button className="smp-ico-btn" onClick={() => setFilt('search', '')} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)' }}>
+//                 <i className="fas fa-xmark" />
+//               </button>
+//             )}
+//           </div>
+
+//           {/* View toggle */}
+//           <div className="smp-view-toggle">
+//             {[['map', 'fa-map', 'Carte'], ['split', 'fa-table-columns', 'Mixte'], ['list', 'fa-list', 'Liste']].map(([v, ico, lbl]) => (
+//               <button key={v} className={`smp-view-btn${view === v ? ' active' : ''}`} onClick={() => setView(v)}>
+//                 <i className={`fas ${ico}`} /> {lbl}
+//               </button>
+//             ))}
+//           </div>
+//         </div>
+
+//         {/* Filters */}
+//         <div className="smp-filt-sec">
+//           <button className="smp-filt-toggle" onClick={() => setFiltersOpen(o => !o)}>
+//             <span>
+//               <i className="fas fa-sliders" style={{ marginRight: 7, color: 'var(--acc)' }} />
+//               Filtres avancés
+//               {activeFilterCount > 0 && <span className="smp-filt-badge">{activeFilterCount}</span>}
+//             </span>
+//             <i className="fas fa-chevron-down" style={{ fontSize: 11, transform: filtersOpen ? 'rotate(180deg)' : 'none', transition: '.2s' }} />
+//           </button>
+
+//           {filtersOpen && (
+//             <div className="smp-filt-inner">
+//               {/* Category */}
+//               <div className="smp-filt-grp">
+//                 <span className="smp-filt-lbl">Catégorie</span>
+//                 <div className="smp-chips">
+//                   <button className={`smp-chip${!filters.category ? ' active' : ''}`} onClick={() => setFilt('category', '')}>Tout</button>
+//                   {categories.map(c => (
+//                     <button key={c} className={`smp-chip${filters.category === c ? ' active' : ''}`} onClick={() => setFilt('category', c)}>{c}</button>
+//                   ))}
+//                 </div>
+//               </div>
+
+//               {/* City */}
+//               <div className="smp-filt-grp">
+//                 <span className="smp-filt-lbl">Ville</span>
+//                 <div className="smp-chips">
+//                   <button className={`smp-chip${!filters.city ? ' active' : ''}`} onClick={() => setFilt('city', '')}>Toutes</button>
+//                   {cities.map(c => (
+//                     <button key={c} className={`smp-chip${filters.city === c ? ' active' : ''}`} onClick={() => setFilt('city', c)}>{c}</button>
+//                   ))}
+//                 </div>
+//               </div>
+
+//               {/* Price */}
+//               <div className="smp-filt-grp">
+//                 <span className="smp-filt-lbl">
+//                   Budget max — <b style={{ color: 'var(--gold)' }}>{filters.maxPrice.toLocaleString('fr-FR')} FCFA</b>
+//                 </span>
+//                 <input
+//                   type="range" min={0} max={1000000} step={10000}
+//                   value={filters.maxPrice}
+//                   onChange={e => setFilt('maxPrice', +e.target.value)}
+//                   style={{ width: '100%', accentColor: 'var(--acc)' }}
+//                 />
+//               </div>
+
+//               {/* Rooms */}
+//               <div className="smp-filt-grp">
+//                 <span className="smp-filt-lbl">Chambres minimum</span>
+//                 <div className="smp-rooms-row">
+//                   {[0, 1, 2, 3, 4].map(n => (
+//                     <button key={n} className={`smp-room-btn${filters.rooms === n ? ' active' : ''}`} onClick={() => setFilt('rooms', n)}>
+//                       {n === 0 ? 'Tout' : n + '+'}
+//                     </button>
+//                   ))}
+//                 </div>
+//               </div>
+
+//               {/* Status */}
+//               <div className="smp-filt-grp">
+//                 <span className="smp-filt-lbl">Statut</span>
+//                 <div className="smp-chips">
+//                   {[['', 'Tout'], ['disponible', 'Disponible'], ['reserve', 'Réservé']].map(([v, l]) => (
+//                     <button key={v} className={`smp-chip${filters.status === v ? ' active' : ''}`} onClick={() => setFilt('status', v)}>{l}</button>
+//                   ))}
+//                 </div>
+//               </div>
+
+//               <button className="smp-reset-btn" onClick={resetFilters}>
+//                 <i className="fas fa-rotate-left" style={{ marginRight: 6 }} />Réinitialiser les filtres
+//               </button>
+//             </div>
+//           )}
+//         </div>
+
+//         {/* Results header */}
+//         <div className="smp-res-head">
+//           <div className="smp-res-count"><b>{filtered.length}</b> logements</div>
+//           <select className="smp-sort-sel" value={sort} onChange={e => setSort(e.target.value)}>
+//             <option value="recent">Plus récents</option>
+//             <option value="price_asc">Prix ↑</option>
+//             <option value="price_desc">Prix ↓</option>
+//             <option value="popular">Populaires</option>
+//             <option value="area">Superficie</option>
+//             <option value="distance">Proximité</option>
+//           </select>
+//         </div>
+
+//         {/* Cards */}
+//         {(view === 'split' || view === 'list') && (
+//           <div className="smp-cards-list">
+//             {loading ? (
+//               <div className="smp-empty"><div className="smp-spinner" /></div>
+//             ) : !filtered.length ? (
+//               <div className="smp-empty">
+//                 <i className="fas fa-house-circle-exclamation" />
+//                 <p>Aucun logement trouvé.<br />Essayez d'élargir les filtres.</p>
+//               </div>
+//             ) : filtered.map(h => (
+//               <HousingCard
+//                 key={h.id}
+//                 h={h}
+//                 selected={selectedHousing?.id === h.id}
+//                 onSelect={setSelectedHousing}
+//                 onToggleFav={toggleFav}
+//                 isFav={favorites.has(h.id)}
+//                 onToggleCompare={toggleCompare}
+//                 inCompare={compareList.some(x => x.id === h.id)}
+//                 userLoc={userLoc}
+//               />
+//             ))}
+//           </div>
+//         )}
+//       </aside>
+
+//       {/* ═══════════════ MAP ═══════════════ */}
+//       {view !== 'list' && (
+//         <main className="smp-map-area">
+//           {/* Stats bar */}
+//           <div className="smp-map-stats">
+//             <div><div className="smp-stat-n">{filtered.length}</div><div className="smp-stat-l">logements</div></div>
+//             <div className="smp-stat-sep" />
+//             <div><div className="smp-stat-v">{avg.toLocaleString('fr-FR')}</div><div className="smp-stat-l">prix moyen</div></div>
+//             <div className="smp-stat-sep" />
+//             <div><div className="smp-stat-v" style={{ color: 'var(--gold)' }}>{min.toLocaleString('fr-FR')}</div><div className="smp-stat-l">min FCFA</div></div>
+//           </div>
+
+//           {/* Map controls */}
+//           <div className="smp-map-ctrls">
+//             <button className="smp-mc-btn" title="Ma position" onClick={locateMe}><i className="fas fa-location-crosshairs" /></button>
+//           </div>
+
+//           <MapContainer center={mapCenter} zoom={13} style={{ width: '100%', height: '100%' }} zoomControl={false} attributionControl>
+//             <TileLayer
+//               url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+//               attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>'
+//               subdomains="abcd"
+//               maxZoom={20}
+//             />
+//             <MapController
+//               housings={filtered}
+//               selectedId={selectedHousing?.id}
+//               onSelectHousing={h => setSelectedHousing(h)}
+//               userLoc={userLoc}
+//               route={route}
+//             />
+//           </MapContainer>
+
+//           {/* Detail panel */}
+//           {selectedHousing && (
+//             <DetailPanel
+//               housing={selectedHousing}
+//               onClose={() => setSelectedHousing(null)}
+//               onStartItin={startItinerary}
+//               isFav={favorites.has(selectedHousing.id)}
+//               onToggleFav={toggleFav}
+//               inCompare={compareList.some(x => x.id === selectedHousing.id)}
+//               onToggleCompare={toggleCompare}
+//             />
+//           )}
+
+//           {/* Itinerary panel */}
+//           <ItineraryPanel
+//             open={itinOpen}
+//             status={itinStatus}
+//             distance={itinDist}
+//             duration={itinTime}
+//             destination={itinDest}
+//             onClose={closeItin}
+//             transportMode={transportMode}
+//             onSetTransport={setTransportMode}
+//             progress={itinProgress}
+//           />
+
+//           {/* Compare strip */}
+//           {compareList.length > 0 && (
+//             <div className="smp-cmp-strip">
+//               <i className="fas fa-scale-balanced" style={{ color: 'var(--blue)', flexShrink: 0 }} />
+//               <div className="smp-cmp-items">
+//                 {compareList.map(h => (
+//                   <div key={h.id} className="smp-cmp-item">
+//                     <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{h.title}</span>
+//                     <button onClick={() => toggleCompare(h)}><i className="fas fa-xmark" /></button>
+//                   </div>
+//                 ))}
+//               </div>
+//               <button className="smp-cmp-launch-btn" onClick={() => setShowCompare(true)}>
+//                 <i className="fas fa-chart-bar" style={{ marginRight: 5 }} />Comparer
+//               </button>
+//             </div>
+//           )}
+//         </main>
+//       )}
+
+//       {/* Compare modal */}
+//       {showCompare && (
+//         <CompareModal
+//           list={compareList}
+//           onClose={() => setShowCompare(false)}
+//           onRemove={id => setCompareList(p => p.filter(x => x.id !== id))}
+//         />
+//       )}
+
+//       {/* Toasts */}
+//       <div className="smp-toast-wrap">
+//         {toasts.map(t => (
+//           <div key={t.id} className={`smp-toast ${t.type}`}>
+//             <i className={`fas ${t.type === 'ok' ? 'fa-circle-check' : t.type === 'err' ? 'fa-circle-exclamation' : 'fa-circle-info'}`}
+//               style={{ color: t.type === 'ok' ? 'var(--acc)' : t.type === 'err' ? 'var(--red)' : 'var(--blue)', flexShrink: 0 }} />
+//             <span>{t.msg}</span>
+//           </div>
+//         ))}
+//       </div>
+//     </div>
+//   );
+// }
+
+
+
+
+
+// src/pages/SearchPage.jsx — VERSION FUSIONNÉE
 // ============================================================
-// 📁 src/pages/SearchMapPage.jsx
-// Dépendances npm :
-//   npm install leaflet react-leaflet leaflet.markercluster
-//   npm install @react-leaflet/core
-// CSS global (index.css / App.css) :
+// Fusionne :
+//   • Votre SearchPage (NLP, filtres, vocal, near me) ← inchangé
+//   • SearchMapPage   (carte Leaflet, itinéraire, comparaison)
+//
+// npm install leaflet react-leaflet leaflet.markercluster
+//
+// Dans main.jsx / index.css (une seule fois) :
 //   import 'leaflet/dist/leaflet.css';
 //   import 'leaflet.markercluster/dist/MarkerCluster.css';
 //   import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 // ============================================================
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useLocation, useNavigate }  from 'react-router-dom';
+import { Loader, MapPin, TrendingUp, Sparkles, Map, List, Columns } from 'lucide-react';
 import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet.markercluster';
-import './SearchMapPage.css';
 
-// ─── API BASE ────────────────────────────────────────────────
-const API = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
-const LANG = localStorage.getItem('lang') || 'fr';
+import { useTheme }       from '../contexts/ThemeContext';
+import searchService      from '../services/searchService';
+import api                from '../services/api';
 
-async function apiFetch(path, opts = {}) {
-  const token = localStorage.getItem('access_token');
-  const res = await fetch(`${API}${path}`, {
-    ...opts,
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Language': LANG,
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...opts.headers,
+import SearchBar    from '../components/Search/SearchBar';
+import FilterPanel  from '../components/Search/FilterPanel';
+import NearMeButton from '../components/Search/NearMeButton';
+import VoiceSearch  from '../components/Search/VoiceSearch';
+import HousingList  from '../components/housing/HousingList';
+
+import './SearchPage.css';
+// import './SearchPageMap.css';  // ← nouveau fichier CSS carte
+
+// ─── TRADUCTIONS ─────────────────────────────────────────────
+const T = {
+  fr: {
+    title:       'Rechercher un logement',
+    subtitle:    'Trouvez le logement idéal au Cameroun',
+    results:     'résultat(s)',
+    loading:     'Recherche en cours…',
+    retry:       'Réessayer',
+    no_result:   'Aucun résultat',
+    no_sub:      "Essayez d'ajuster vos critères",
+    reset:       'Réinitialiser',
+    b_nearby:    'Autour de votre position',
+    b_nlp:       'Recherche intelligente',
+    b_voice:     'Recherche vocale',
+    b_filters:   'filtre(s) actif(s)',
+    suggestions: 'Suggestions :',
+    error:       'Erreur de recherche. Veuillez réessayer.',
+    view_list:   'Liste',
+    view_map:    'Carte',
+    view_split:  'Mixte',
+    on_map:      'logement(s) sur la carte',
+    avg_price:   'Prix moyen',
+    min_price:   'À partir de',
+    detail_title: 'Détails du logement',
+    feat_labels: {
+      wifi:'WiFi', parking:'Parking', gardien:'Gardien',
+      climatisation:'Climatisation', eau:'Eau 24h', electricite:'Électricité',
+      piscine:'Piscine', jardin:'Jardin', balcon:'Balcon/Terrasse',
+      cuisine:'Cuisine équipée', ascenseur:'Ascenseur', vue:'Vue panoramique',
     },
-  });
-  if (!res.ok) throw new Error(await res.text());
-  return res.json();
-}
-
-// ─── FEATURE META ──────────────────────────────────────────
-const FEAT = {
-  wifi: { icon: 'fa-wifi', label: 'WiFi' },
-  parking: { icon: 'fa-car', label: 'Parking' },
-  gardien: { icon: 'fa-shield-halved', label: 'Gardien' },
-  climatisation: { icon: 'fa-snowflake', label: 'Climatisation' },
-  eau: { icon: 'fa-droplet', label: 'Eau 24h' },
-  electricite: { icon: 'fa-bolt', label: 'Électricité' },
-  piscine: { icon: 'fa-person-swimming', label: 'Piscine' },
-  jardin: { icon: 'fa-leaf', label: 'Jardin' },
-  balcon: { icon: 'fa-door-open', label: 'Balcon/Terrasse' },
-  cuisine: { icon: 'fa-utensils', label: 'Cuisine équipée' },
-  ascenseur: { icon: 'fa-elevator', label: 'Ascenseur' },
-  vue: { icon: 'fa-binoculars', label: 'Vue panoramique' },
+    itin_title:  'Itinéraire',
+    itin_start:  "Détection de votre position…",
+    itin_calc:   "Calcul de l'itinéraire…",
+    itin_ok:     'Itinéraire calculé vers',
+    itin_approx: "Distance à vol d'oiseau utilisée",
+    itin_denied: 'Position approx. utilisée (accès refusé)',
+    transport:   ['Voiture','Pied','Vélo'],
+    distance:    'Distance',
+    duration:    'Durée estimée',
+    destination: 'Destination',
+    compare:     'Comparer',
+    compare_max: 'Maximum 3 logements à comparer',
+    fav_add:     'Ajouté aux favoris',
+    fav_rm:      'Retiré des favoris',
+    plan_visit:  'Planifier une visite',
+    contact:     'Contacter',
+    cmp_launch:  'Comparer',
+    cmp_title:   'Comparaison',
+    close:       'Fermer',
+  },
+  en: {
+    title:       'Find housing',
+    subtitle:    'Find your ideal home in Cameroon',
+    results:     'result(s)',
+    loading:     'Searching…',
+    retry:       'Retry',
+    no_result:   'No results found',
+    no_sub:      'Try adjusting your criteria',
+    reset:       'Reset',
+    b_nearby:    'Near your location',
+    b_nlp:       'Smart search',
+    b_voice:     'Voice search',
+    b_filters:   'active filter(s)',
+    suggestions: 'Suggestions:',
+    error:       'Search error. Please try again.',
+    view_list:   'List',
+    view_map:    'Map',
+    view_split:  'Split',
+    on_map:      'listing(s) on map',
+    avg_price:   'Avg price',
+    min_price:   'From',
+    detail_title: 'Property details',
+    feat_labels: {
+      wifi:'WiFi', parking:'Parking', gardien:'Security',
+      climatisation:'A/C', eau:'Water 24h', electricite:'Electricity',
+      piscine:'Pool', jardin:'Garden', balcon:'Balcony/Terrace',
+      cuisine:'Fitted kitchen', ascenseur:'Elevator', vue:'Panoramic view',
+    },
+    itin_title:  'Itinerary',
+    itin_start:  'Detecting your location…',
+    itin_calc:   'Calculating itinerary…',
+    itin_ok:     'Itinerary calculated to',
+    itin_approx: 'Straight-line distance used',
+    itin_denied: 'Approx. location used (access denied)',
+    transport:   ['Car','Walking','Cycling'],
+    distance:    'Distance',
+    duration:    'Est. time',
+    destination: 'Destination',
+    compare:     'Compare',
+    compare_max: 'Max 3 properties to compare',
+    fav_add:     'Added to favourites',
+    fav_rm:      'Removed from favourites',
+    plan_visit:  'Schedule visit',
+    contact:     'Contact',
+    cmp_launch:  'Compare',
+    cmp_title:   'Comparison',
+    close:       'Close',
+  },
 };
 
-// ─── HAVERSINE ─────────────────────────────────────────────
+// ─── UTILS ───────────────────────────────────────────────────
 function haversine(la1, lo1, la2, lo2) {
   const R = 6371, d2r = Math.PI / 180;
   const dLa = (la2 - la1) * d2r, dLo = (lo2 - lo1) * d2r;
-  const a = Math.sin(dLa / 2) ** 2 + Math.cos(la1 * d2r) * Math.cos(la2 * d2r) * Math.sin(dLo / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const a = Math.sin(dLa/2)**2 + Math.cos(la1*d2r)*Math.cos(la2*d2r)*Math.sin(dLo/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-// ─── FORMAT PRICE ──────────────────────────────────────────
 function fmtPrice(p) {
-  return p >= 1_000_000
-    ? (p / 1_000_000).toFixed(1) + 'M'
-    : Math.round(p / 1000) + 'k';
+  return p >= 1_000_000 ? (p/1_000_000).toFixed(1)+'M' : Math.round(p/1000)+'k';
 }
 
-// ════════════════════════════════════════════════════════════
-//  MapController — gère markers, clusters, routes
-// ════════════════════════════════════════════════════════════
-function MapController({ housings, selectedId, onSelectHousing, userLoc, route }) {
-  const map = useMap();
-  const clusterRef = useRef(null);
-  const routeRef = useRef(null);
-  const userMarkerRef = useRef(null);
+// ─── STATUS HELPERS ───────────────────────────────────────────
+const STATUS_MAP = {
+  disponible: { cls: 'sp-badge-dispo', label: { fr: 'Disponible', en: 'Available' } },
+  reserve:    { cls: 'sp-badge-res',   label: { fr: 'Réservé',    en: 'Reserved'  } },
+  occupe:     { cls: 'sp-badge-occ',   label: { fr: 'Occupé',     en: 'Occupied'  } },
+};
 
-  // Init cluster group once
+// ════════════════════════════════════════════════════════════
+// MapController — interne, gère markers/clusters/route
+// ════════════════════════════════════════════════════════════
+function MapController({ housings, selectedId, onSelect, userLoc, route }) {
+  const map         = useMap();
+  const clusterRef  = useRef(null);
+  const routeRef    = useRef(null);
+  const userMkRef   = useRef(null);
+
+  // Cluster group (une seule fois)
   useEffect(() => {
     const cluster = L.markerClusterGroup({
       maxClusterRadius: 60,
-      iconCreateFunction: (c) =>
-        L.divIcon({
-          html: `<div class="smp-cluster">${c.getChildCount()}</div>`,
-          className: '',
-          iconSize: [36, 36],
-        }),
+      iconCreateFunction: c => L.divIcon({
+        html: `<div class="sp-mk-cluster">${c.getChildCount()}</div>`,
+        className: '', iconSize: [36, 36],
+      }),
     });
     map.addLayer(cluster);
     clusterRef.current = cluster;
     return () => map.removeLayer(cluster);
   }, [map]);
 
-  // Render markers when housings or selectedId change
+  // Markers
   useEffect(() => {
     if (!clusterRef.current) return;
     clusterRef.current.clearLayers();
-
-    housings.forEach((h) => {
+    housings.forEach(h => {
       if (!h.latitude || !h.longitude) return;
-      const isSelected = h.id === selectedId;
+      const sel  = h.id === selectedId;
       const icon = L.divIcon({
-        html: `<div class="smp-marker${isSelected ? ' selected' : ''}" id="mk${h.id}">${fmtPrice(h.price)} FCFA</div>`,
-        className: '',
-        iconSize: null,
-        iconAnchor: [44, 14],
+        html: `<div class="sp-mk${sel ? ' sp-mk--sel' : ''}">${fmtPrice(h.price)} FCFA</div>`,
+        className: '', iconSize: null, iconAnchor: [44, 14],
       });
-      const marker = L.marker([h.latitude, h.longitude], { icon });
-      marker.on('click', () => onSelectHousing(h));
-      clusterRef.current.addLayer(marker);
+      const m = L.marker([h.latitude, h.longitude], { icon });
+      m.on('click', () => onSelect(h));
+      clusterRef.current.addLayer(m);
     });
-  }, [housings, selectedId, onSelectHousing]);
+  }, [housings, selectedId, onSelect]);
 
-  // Draw route
+  // Route
   useEffect(() => {
     if (routeRef.current) { map.removeLayer(routeRef.current); routeRef.current = null; }
     if (!route?.length) return;
-    const poly = L.polyline(route, { color: '#F59E0B', weight: 5, opacity: 0.85, dashArray: '10,5' });
-    poly.addTo(map);
-    routeRef.current = poly;
+    const poly = L.polyline(route, { color: '#F59E0B', weight: 5, opacity: .85, dashArray: '10,5' });
+    poly.addTo(map); routeRef.current = poly;
     map.fitBounds(poly.getBounds(), { padding: [60, 60] });
   }, [route, map]);
 
-  // User location marker
+  // User marker
   useEffect(() => {
-    if (userMarkerRef.current) { map.removeLayer(userMarkerRef.current); userMarkerRef.current = null; }
+    if (userMkRef.current) { map.removeLayer(userMkRef.current); userMkRef.current = null; }
     if (!userLoc) return;
-    const m = L.marker([userLoc.lat, userLoc.lng], {
-      icon: L.divIcon({ html: '<div class="smp-user-dot"></div>', className: '', iconSize: [14, 14] }),
+    userMkRef.current = L.marker([userLoc.lat, userLoc.lng], {
+      icon: L.divIcon({ html: '<div class="sp-user-dot"></div>', className: '', iconSize: [14, 14] }),
     }).addTo(map).bindTooltip('📍 Vous êtes ici');
-    userMarkerRef.current = m;
   }, [userLoc, map]);
 
   return null;
 }
 
 // ════════════════════════════════════════════════════════════
-//  HousingCard
+// DetailPanel
 // ════════════════════════════════════════════════════════════
-function HousingCard({ h, selected, onSelect, onToggleFav, isFav, onToggleCompare, inCompare, userLoc }) {
-  const STATUS = { disponible: ['s-dispo', 'Disponible'], reserve: ['s-res', 'Réservé'], occupe: ['s-occ', 'Occupé'] };
-  const [scls, slabel] = STATUS[h.status] || STATUS.disponible;
-  const dist = userLoc ? haversine(userLoc.lat, userLoc.lng, h.latitude, h.longitude).toFixed(1) : null;
-
-  const mainImg = h.images?.find(i => i.is_main) || h.images?.[0];
+function DetailPanel({ h, t, lang, onClose, onItin, isFav, onFav, inCmp, onCmp, onVisit }) {
+  const st   = STATUS_MAP[h.status] || STATUS_MAP.disponible;
+  const img  = h.images?.find(i => i.is_main) || h.images?.[0];
+  const init = (h.owner_name || '?').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 
   return (
-    <div className={`smp-card${selected ? ' selected' : ''}`} onClick={() => onSelect(h)}>
-      <div className="smp-card-img">
-        {mainImg
-          ? <img src={mainImg.image} alt={h.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          : <span className="smp-card-emoji">{h.category === 'Villa' ? '🏡' : h.category === 'Studio' ? '🏠' : h.category === 'Chambre' ? '🛏️' : '🏢'}</span>
-        }
-        <div className="smp-card-ov" />
-        <span className={`smp-status ${scls}`}>{slabel}</span>
-        <button className={`smp-fav${isFav ? ' liked' : ''}`} onClick={e => { e.stopPropagation(); onToggleFav(h.id); }} title="Favoris">
-          <i className="fas fa-heart" />
-        </button>
-        <button className={`smp-cmp${inCompare ? ' active' : ''}`} onClick={e => { e.stopPropagation(); onToggleCompare(h); }} title="Comparer">
-          <i className="fas fa-scale-balanced" />
-        </button>
+    <div className="sp-dp">
+      <div className="sp-dp-head">
+        <span className="sp-dp-label"><i className="fas fa-house-chimney" /> {t.detail_title}</span>
+        <button className="sp-dp-close" onClick={onClose} title={t.close}><i className="fas fa-xmark" /></button>
       </div>
-      <div className="smp-card-body">
-        <div className="smp-price">{h.price.toLocaleString('fr-FR')} <span>FCFA/mois</span></div>
-        <div className="smp-title">{h.title}</div>
-        <div className="smp-loc">
-          <i className="fas fa-location-dot" />
-          {h.district_name || h.district}, {h.city_name || h.city}
-          {dist && <span className="smp-dist"> · {dist} km</span>}
-        </div>
-        <div className="smp-meta">
-          <span><i className="fas fa-bed" /> {h.rooms}ch</span>
-          <span><i className="fas fa-bath" /> {h.bathrooms}sdb</span>
-          <span><i className="fas fa-ruler-combined" /> {h.area}m²</span>
-          <span style={{ marginLeft: 'auto' }}><i className="fas fa-eye" /> {h.views_count || 0}</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ════════════════════════════════════════════════════════════
-//  DetailPanel
-// ════════════════════════════════════════════════════════════
-function DetailPanel({ housing, onClose, onStartItin, isFav, onToggleFav, inCompare, onToggleCompare }) {
-  if (!housing) return null;
-  const STATUS = { disponible: ['s-dispo', 'Disponible'], reserve: ['s-res', 'Réservé'], occupe: ['s-occ', 'Occupé'] };
-  const [scls, slabel] = STATUS[housing.status] || STATUS.disponible;
-  const mainImg = housing.images?.find(i => i.is_main) || housing.images?.[0];
-  const initials = housing.owner_name?.split(' ').map(n => n[0]).join('').slice(0, 2) || '?';
-
-  return (
-    <div className="smp-detail-panel open">
-      <div className="smp-dp-head">
-        <span className="smp-dp-title"><i className="fas fa-house-chimney" /> Détails</span>
-        <button className="smp-close-btn" onClick={onClose}><i className="fas fa-xmark" /></button>
-      </div>
-      <div className="smp-dp-body">
+      <div className="sp-dp-body">
         {/* Image */}
-        <div className="smp-dp-img">
-          {mainImg
-            ? <img src={mainImg.image} alt={housing.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            : <span style={{ fontSize: 65 }}>{housing.category === 'Villa' ? '🏡' : '🏢'}</span>
+        <div className="sp-dp-img">
+          {img
+            ? <img src={img.image} alt={h.title} />
+            : <span className="sp-dp-emoji">{h.category === 'Villa' ? '🏡' : h.category === 'Studio' ? '🏠' : '🏢'}</span>
           }
-          <div className="smp-dp-img-ov" />
-          <div className="smp-dp-price-badge">
-            {housing.price.toLocaleString('fr-FR')} FCFA<span>/mois</span>
-          </div>
-          <span className={`smp-status ${scls}`} style={{ position: 'absolute', top: 12, right: 12 }}>{slabel}</span>
+          <div className="sp-dp-img-ov" />
+          <div className="sp-dp-price">{h.price?.toLocaleString('fr-FR')} FCFA<span>/mois</span></div>
+          <span className={`sp-mk-status ${st.cls}`}>{st.label[lang]}</span>
         </div>
 
-        {/* Info */}
-        <div className="smp-dp-info">
-          <h2 className="smp-dp-h1">{housing.title}</h2>
-          <p className="smp-dp-loc"><i className="fas fa-location-dot" /> {housing.district_name}, {housing.city_name}</p>
+        <div className="sp-dp-info">
+          <h2 className="sp-dp-h1">{h.title}</h2>
+          <p className="sp-dp-loc"><i className="fas fa-location-dot" /> {h.district_name}, {h.city_name}</p>
 
-          <div className="smp-dp-stats">
-            {[
-              { v: housing.rooms, l: 'Chambre(s)' },
-              { v: housing.bathrooms, l: 'Salle(s) de bain' },
-              { v: `${housing.area}m²`, l: 'Superficie' },
-            ].map(({ v, l }) => (
-              <div className="smp-dp-stat" key={l}>
-                <div className="smp-dp-stat-v">{v}</div>
-                <div className="smp-dp-stat-l">{l}</div>
+          <div className="sp-dp-stats">
+            {[{v:h.rooms,l:'Chambres'},{v:h.bathrooms,l:'Salles de bain'},{v:`${h.area}m²`,l:'Surface'}].map(({v,l})=>(
+              <div key={l} className="sp-dp-stat"><div className="sp-dp-stat-v">{v}</div><div className="sp-dp-stat-l">{l}</div></div>
+            ))}
+          </div>
+
+          {(h.features||[]).length > 0 && (
+            <>
+              <span className="sp-dp-sect">Équipements</span>
+              <div className="sp-dp-feats">
+                {(h.features||[]).map(f=>(
+                  <span key={f} className="sp-dp-feat"><i className={`fas ${FEAT_ICON[f]||'fa-check'}`}/>{t.feat_labels[f]||f}</span>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          )}
 
-          <span className="smp-sect-lbl">Équipements</span>
-          <div className="smp-feats">
-            {(housing.features || []).map(f => (
-              <span className="smp-feat-tag" key={f}>
-                <i className={`fas ${FEAT[f]?.icon || 'fa-check'}`} />
-                {FEAT[f]?.label || f}
-              </span>
-            ))}
-          </div>
+          {h.description && (
+            <>
+              <span className="sp-dp-sect">Description</span>
+              <p className="sp-dp-desc">{h.description}</p>
+            </>
+          )}
 
-          <span className="smp-sect-lbl">Description</span>
-          <p className="smp-desc">{housing.description}</p>
-
-          <div className="smp-dp-meta-row">
-            <span><i className="fas fa-eye" /> {housing.views_count || 0} vues</span>
-            <span><i className="fas fa-heart" style={{ color: 'var(--red)' }} /> {housing.likes_count || 0} likes</span>
-            <span style={{ marginLeft: 'auto' }}><i className="fas fa-calendar" /> {housing.created_at?.slice(0, 10)}</span>
+          <div className="sp-dp-meta">
+            <span><i className="fas fa-eye"/> {h.views_count||0}</span>
+            <span><i className="fas fa-heart" style={{color:'#F85149'}}/> {h.likes_count||0}</span>
+            <span style={{marginLeft:'auto'}}>{h.created_at?.slice(0,10)}</span>
           </div>
         </div>
 
         {/* Owner */}
-        <div className="smp-owner-card">
-          <div className="smp-owner-av">{initials}</div>
-          <div>
-            <div className="smp-owner-n">{housing.owner_name}</div>
-            <div className="smp-owner-r"><i className="fas fa-phone" /> {housing.owner_phone}</div>
+        {h.owner_name && (
+          <div className="sp-dp-owner">
+            <div className="sp-dp-av">{init}</div>
+            <div>
+              <div className="sp-dp-owner-n">{h.owner_name}</div>
+              {h.owner_phone && <div className="sp-dp-owner-r"><i className="fas fa-phone"/> {h.owner_phone}</div>}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Actions */}
-        <div className="smp-actions">
-          <button className={`smp-act-btn${isFav ? ' active' : ''}`} onClick={() => onToggleFav(housing.id)}>
-            <i className="fas fa-heart" style={{ color: 'var(--red)' }} /> {isFav ? 'Retiré' : 'Favoris'}
+        <div className="sp-dp-actions">
+          <button className={`sp-dp-btn${isFav?' sp-dp-btn--active':''}`} onClick={()=>onFav(h.id)}>
+            <i className="fas fa-heart" style={{color:'#F85149'}}/> {isFav ? 'Retiré' : 'Favoris'}
           </button>
-          <button className={`smp-act-btn${inCompare ? ' active' : ''}`} onClick={() => onToggleCompare(housing)}>
-            <i className="fas fa-scale-balanced" style={{ color: 'var(--blue)' }} /> Comparer
+          <button className={`sp-dp-btn${inCmp?' sp-dp-btn--active':''}`} onClick={()=>onCmp(h)}>
+            <i className="fas fa-scale-balanced" style={{color:'#58A6FF'}}/> {t.compare}
           </button>
-          <button className="smp-act-btn smp-itin-btn" onClick={() => onStartItin(housing)}>
-            <i className="fas fa-route" /> Calculer l'itinéraire
+          <button className="sp-dp-btn sp-dp-btn--itin" onClick={()=>onItin(h)}>
+            <i className="fas fa-route"/> Calculer l'itinéraire
           </button>
-          <button className="smp-act-btn smp-primary-btn" onClick={() => alert(`Demande de visite pour : ${housing.title}`)}>
-            <i className="fas fa-calendar-plus" /> Planifier une visite
+          <button className="sp-dp-btn sp-dp-btn--primary" onClick={()=>onVisit(h)}>
+            <i className="fas fa-calendar-plus"/> {t.plan_visit}
           </button>
         </div>
       </div>
@@ -274,103 +1165,92 @@ function DetailPanel({ housing, onClose, onStartItin, isFav, onToggleFav, inComp
   );
 }
 
+const FEAT_ICON = {
+  wifi:'fa-wifi', parking:'fa-car', gardien:'fa-shield-halved',
+  climatisation:'fa-snowflake', eau:'fa-droplet', electricite:'fa-bolt',
+  piscine:'fa-person-swimming', jardin:'fa-leaf', balcon:'fa-door-open',
+  cuisine:'fa-utensils', ascenseur:'fa-elevator', vue:'fa-binoculars',
+};
+
 // ════════════════════════════════════════════════════════════
-//  ItineraryPanel
+// ItineraryPanel
 // ════════════════════════════════════════════════════════════
-function ItineraryPanel({ open, status, distance, duration, destination, onClose, transportMode, onSetTransport, progress }) {
-  if (!open) return null;
+function ItineraryPanel({ t, lang, status, dist, time, dest, progress, transport, onTransport, onClose }) {
+  const modes = [
+    { k:'driving', ico:'fa-car',            lbl: t.transport[0] },
+    { k:'foot',    ico:'fa-person-walking', lbl: t.transport[1] },
+    { k:'bike',    ico:'fa-bicycle',        lbl: t.transport[2] },
+  ];
   return (
-    <div className="smp-itin-panel">
-      <div className="smp-itin-inner">
-        <div className="smp-itin-hd">
-          <span className="smp-itin-title"><i className="fas fa-route" /> Itinéraire</span>
-          <button className="smp-close-btn" onClick={onClose}><i className="fas fa-xmark" /></button>
+    <div className="sp-itin">
+      <div className="sp-itin-inner">
+        <div className="sp-itin-hd">
+          <span className="sp-itin-title"><i className="fas fa-route"/> {t.itin_title}</span>
+          <button className="sp-dp-close" onClick={onClose}><i className="fas fa-xmark"/></button>
         </div>
-        <div className="smp-trans-modes">
-          {[
-            { mode: 'driving', icon: 'fa-car', label: 'Voiture' },
-            { mode: 'foot', icon: 'fa-person-walking', label: 'Pied' },
-            { mode: 'bike', icon: 'fa-bicycle', label: 'Vélo' },
-          ].map(({ mode, icon, label }) => (
-            <button
-              key={mode}
-              className={`smp-trans-btn${transportMode === mode ? ' active' : ''}`}
-              onClick={() => onSetTransport(mode)}
-            >
-              <i className={`fas ${icon}`} /> {label}
+        <div className="sp-itin-modes">
+          {modes.map(m=>(
+            <button key={m.k} className={`sp-itin-mode${transport===m.k?' sp-itin-mode--active':''}`} onClick={()=>onTransport(m.k)}>
+              <i className={`fas ${m.ico}`}/> {m.lbl}
             </button>
           ))}
         </div>
-        <div className="smp-itin-prog"><div className="smp-itin-prog-fill" style={{ width: `${progress}%` }} /></div>
-        {distance && (
-          <div className="smp-itin-stats">
-            {[
-              { ico: 'fa-road', v: distance, l: 'Distance' },
-              { ico: 'fa-clock', v: duration, l: 'Durée estimée' },
-              { ico: 'fa-location-dot', v: destination, l: 'Destination' },
-            ].map(({ ico, v, l }) => (
-              <div className="smp-itin-s" key={l}>
-                <div className="smp-itin-ico"><i className={`fas ${ico}`} /></div>
-                <div><div className="smp-itin-sv">{v}</div><div className="smp-itin-sl">{l}</div></div>
+        <div className="sp-itin-bar"><div className="sp-itin-bar-fill" style={{width:`${progress}%`}}/></div>
+        {dist && (
+          <div className="sp-itin-stats">
+            {[{ico:'fa-road',v:dist,l:t.distance},{ico:'fa-clock',v:time,l:t.duration},{ico:'fa-location-dot',v:dest,l:t.destination}].map(({ico,v,l})=>(
+              <div key={l} className="sp-itin-s">
+                <div className="sp-itin-ico"><i className={`fas ${ico}`}/></div>
+                <div><div className="sp-itin-sv">{v}</div><div className="sp-itin-sl">{l}</div></div>
               </div>
             ))}
           </div>
         )}
-        <p className="smp-itin-status" dangerouslySetInnerHTML={{ __html: status }} />
+        <p className="sp-itin-status" dangerouslySetInnerHTML={{__html:status}}/>
       </div>
     </div>
   );
 }
 
 // ════════════════════════════════════════════════════════════
-//  CompareModal
+// CompareModal
 // ════════════════════════════════════════════════════════════
-function CompareModal({ list, onClose, onRemove }) {
-  if (!list.length) return null;
+function CompareModal({ list, t, lang, onClose, onRemove }) {
   const rows = [
-    { label: 'Prix/mois', fmt: h => h.price.toLocaleString('fr-FR') + ' FCFA', valFn: h => h.price, lowBest: true },
-    { label: 'Catégorie', fmt: h => h.category },
-    { label: 'Ville · Quartier', fmt: h => `${h.city_name} · ${h.district_name}` },
-    { label: 'Chambres', fmt: h => h.rooms + '', valFn: h => h.rooms },
-    { label: 'Salles de bain', fmt: h => h.bathrooms + '', valFn: h => h.bathrooms },
-    { label: 'Superficie', fmt: h => h.area + 'm²', valFn: h => h.area },
-    { label: 'Statut', fmt: h => h.status === 'disponible' ? '✅ Dispo' : h.status === 'reserve' ? '⏳ Réservé' : '❌ Occupé' },
-    { label: 'Vues', fmt: h => (h.views_count || 0).toLocaleString(), valFn: h => h.views_count || 0 },
+    { label:'Prix/mois',   fmt:h=>h.price?.toLocaleString('fr-FR')+' FCFA', valFn:h=>h.price, lowBest:true },
+    { label:'Catégorie',   fmt:h=>h.category_name||h.category||'—' },
+    { label:'Ville',       fmt:h=>`${h.city_name} · ${h.district_name}` },
+    { label:'Chambres',    fmt:h=>String(h.rooms||'—'),    valFn:h=>h.rooms||0 },
+    { label:'SDB',         fmt:h=>String(h.bathrooms||'—'),valFn:h=>h.bathrooms||0 },
+    { label:'Surface',     fmt:h=>(h.area||0)+'m²',        valFn:h=>h.area||0 },
+    { label:'Statut',      fmt:h=>STATUS_MAP[h.status]?.label[lang]||h.status },
+    { label:'Vues',        fmt:h=>(h.views_count||0).toLocaleString(), valFn:h=>h.views_count||0 },
   ];
-
   return (
-    <div className="smp-modal-bg" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="smp-modal-box">
-        <div className="smp-modal-head">
-          <h2><i className="fas fa-scale-balanced" style={{ color: 'var(--blue)', marginRight: 8 }} />Comparaison</h2>
-          <button className="smp-close-btn" onClick={onClose}><i className="fas fa-xmark" /></button>
+    <div className="sp-cmp-modal" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="sp-cmp-box">
+        <div className="sp-cmp-hd">
+          <h2><i className="fas fa-scale-balanced" style={{color:'#58A6FF',marginRight:8}}/>{t.cmp_title}</h2>
+          <button className="sp-dp-close" onClick={onClose}><i className="fas fa-xmark"/></button>
         </div>
-        <div className="smp-cmp-table">
-          {/* Header */}
-          <div className="smp-cmp-row" style={{ borderBottom: '2px solid var(--sb3)' }}>
-            <div className="smp-cmp-lbl" />
-            {list.map(h => (
-              <div key={h.id} className="smp-cmp-th">
-                <div>{h.title}</div>
-                <button onClick={() => onRemove(h.id)} style={{ background: 'none', border: 'none', color: 'var(--t2)', cursor: 'pointer', fontSize: 12 }}>
-                  <i className="fas fa-xmark" /> Retirer
-                </button>
+        <div className="sp-cmp-table">
+          <div className="sp-cmp-row sp-cmp-head-row">
+            <div/>
+            {list.map(h=>(
+              <div key={h.id} className="sp-cmp-th">
+                <span>{h.title}</span>
+                <button onClick={()=>onRemove(h.id)}><i className="fas fa-xmark"/> Retirer</button>
               </div>
             ))}
           </div>
-          {/* Rows */}
-          {rows.map(({ label, fmt, valFn, lowBest }) => {
-            let bestIdx = -1;
-            if (valFn) {
-              const vals = list.map(valFn);
-              const best = lowBest ? Math.min(...vals) : Math.max(...vals);
-              bestIdx = vals.indexOf(best);
-            }
+          {rows.map(({label,fmt,valFn,lowBest})=>{
+            let bestIdx=-1;
+            if(valFn){const vals=list.map(valFn);const best=lowBest?Math.min(...vals):Math.max(...vals);bestIdx=vals.indexOf(best);}
             return (
-              <div className="smp-cmp-row" key={label}>
-                <div className="smp-cmp-lbl">{label}</div>
-                {list.map((h, i) => (
-                  <div key={h.id} className={`smp-cmp-val${i === bestIdx ? ' best' : ''}`}>{fmt(h)}</div>
+              <div key={label} className="sp-cmp-row">
+                <div className="sp-cmp-lbl">{label}</div>
+                {list.map((h,i)=>(
+                  <div key={h.id} className={`sp-cmp-val${i===bestIdx?' sp-cmp-val--best':''}`}>{fmt(h)}</div>
                 ))}
               </div>
             );
@@ -382,475 +1262,505 @@ function CompareModal({ list, onClose, onRemove }) {
 }
 
 // ════════════════════════════════════════════════════════════
-//  Toast hook
+// Mini HousingCard pour vue Mixte (split)
 // ════════════════════════════════════════════════════════════
-function useToast() {
-  const [toasts, setToasts] = useState([]);
-  const add = useCallback((msg, type = 'inf') => {
-    const id = Date.now();
-    setToasts(t => [...t, { id, msg, type }]);
-    setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 3500);
-  }, []);
-  return { toasts, toast: add };
+function MiniCard({ h, selected, onSelect, isFav, onFav, lang }) {
+  const st  = STATUS_MAP[h.status] || STATUS_MAP.disponible;
+  const img = h.images?.find(i=>i.is_main)||h.images?.[0];
+  return (
+    <div className={`sp-mini-card${selected?' sp-mini-card--sel':''}`} onClick={()=>onSelect(h)}>
+      <div className="sp-mini-img">
+        {img ? <img src={img.image} alt={h.title}/> : <span>{h.category==='Villa'?'🏡':'🏢'}</span>}
+        <span className={`sp-mk-status ${st.cls}`}>{st.label[lang]}</span>
+        <button className={`sp-mini-fav${isFav?' sp-mini-fav--liked':''}`} onClick={e=>{e.stopPropagation();onFav(h.id);}}>
+          <i className="fas fa-heart"/>
+        </button>
+      </div>
+      <div className="sp-mini-body">
+        <div className="sp-mini-price">{h.price?.toLocaleString('fr-FR')} <span>FCFA</span></div>
+        <div className="sp-mini-title">{h.title}</div>
+        <div className="sp-mini-loc"><i className="fas fa-location-dot"/>{h.district_name}, {h.city_name}</div>
+        <div className="sp-mini-meta">
+          <span><i className="fas fa-bed"/>{h.rooms}</span>
+          <span><i className="fas fa-bath"/>{h.bathrooms}</span>
+          <span><i className="fas fa-ruler-combined"/>{h.area}m²</span>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // ════════════════════════════════════════════════════════════
-//  MAIN PAGE
+// MAIN PAGE — SearchPage fusionnée
 // ════════════════════════════════════════════════════════════
-export default function SearchMapPage() {
-  const { toasts, toast } = useToast();
+const SearchPage = () => {
+  const location     = useLocation();
+  const navigate     = useNavigate();
+  const { language } = useTheme();
+  const t            = T[language] || T.fr;
 
-  // Data
-  const [housings, setHousings] = useState([]);
-  const [filtered, setFiltered] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // ── Données & états existants ─────────────────────────────
+  const [housings,      setHousings]      = useState([]);
+  const [loading,       setLoading]       = useState(false);
+  const [error,         setError]         = useState(null);
+  const [count,         setCount]         = useState(null);
+  const [suggestions,   setSuggestions]   = useState([]);
+  const [nlpSummary,    setNlpSummary]    = useState('');
+  const [mode,          setMode]          = useState('default');
+  const [userLocation,  setUserLocation]  = useState(null);
+  const [activeFilters, setActiveFilters] = useState({});
 
-  // UI state
-  const [view, setView] = useState('map'); // map | split | list
-  const [filtersOpen, setFiltersOpen] = useState(false);
+  // ── Vue : 'list' | 'map' | 'split' ───────────────────────
+  const [viewMode, setViewMode] = useState('list');
+
+  // ── Carte ─────────────────────────────────────────────────
   const [selectedHousing, setSelectedHousing] = useState(null);
-  const [favorites, setFavorites] = useState(new Set());
-  const [compareList, setCompareList] = useState([]);
-  const [showCompare, setShowCompare] = useState(false);
+  const [route,           setRoute]           = useState(null);
+  const [favorites,       setFavorites]       = useState(new Set());
+  const [compareList,     setCompareList]     = useState([]);
+  const [showCompare,     setShowCompare]     = useState(false);
 
-  // Map
-  const [userLoc, setUserLoc] = useState(null);
-  const [route, setRoute] = useState(null);
-
-  // Itinerary
-  const [itinOpen, setItinOpen] = useState(false);
+  // ── Itinéraire ────────────────────────────────────────────
+  const [itinOpen,   setItinOpen]   = useState(false);
   const [itinStatus, setItinStatus] = useState('');
-  const [itinDist, setItinDist] = useState('');
-  const [itinTime, setItinTime] = useState('');
-  const [itinDest, setItinDest] = useState('');
-  const [itinProgress, setItinProgress] = useState(0);
-  const [transportMode, setTransportMode] = useState('driving');
+  const [itinDist,   setItinDist]   = useState('');
+  const [itinTime,   setItinTime]   = useState('');
+  const [itinDest,   setItinDest]   = useState('');
+  const [itinProg,   setItinProg]   = useState(0);
+  const [transport,  setTransport]  = useState('driving');
 
-  // Filters
-  const [filters, setFilters] = useState({
-    search: '', category: '', city: '', status: '', maxPrice: 1000000, rooms: 0,
-  });
-  const [sort, setSort] = useState('recent');
-
-  // ── Fetch housings from Django API ─────────────────────────
-  useEffect(() => {
-    setLoading(true);
-    apiFetch('/housings/?is_visible=true&page_size=100')
-      .then(data => {
-        const list = data.results || data;
-        setHousings(list);
-        setFiltered(list);
-      })
-      .catch(() => toast('Erreur de chargement des logements', 'err'))
-      .finally(() => setLoading(false));
+  // ── Toast ─────────────────────────────────────────────────
+  const [toasts, setToasts] = useState([]);
+  const addToast = useCallback((msg, type='inf') => {
+    const id = Date.now();
+    setToasts(p => [...p, {id, msg, type}]);
+    setTimeout(() => setToasts(p => p.filter(x=>x.id!==id)), 3500);
   }, []);
 
-  // ── Apply filters + sort ───────────────────────────────────
+  // ── Stats carte ───────────────────────────────────────────
+  const mapHousings = housings.filter(h => h.latitude && h.longitude);
+  const avg = mapHousings.length ? Math.round(mapHousings.reduce((s,h)=>s+h.price,0)/mapHousings.length) : 0;
+  const min = mapHousings.length ? Math.min(...mapHousings.map(h=>h.price)) : 0;
+
+  // ════════════════════════════════════════════════════════
+  // LOGIQUE DE RECHERCHE (inchangée depuis votre SearchPage)
+  // ════════════════════════════════════════════════════════
+
   useEffect(() => {
-    let result = [...housings];
+    const params = new URLSearchParams(location.search);
+    const query  = params.get('query');
+    if (query) { setMode('nlp'); doNlp(query, null); }
+    else        { doDefault(); }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [language]);
 
-    // Search
-    if (filters.search) {
-      const q = filters.search.toLowerCase();
-      result = result.filter(h =>
-        [h.title, h.description, h.city_name, h.district_name, h.category]
-          .some(s => s?.toLowerCase().includes(q))
-      );
-    }
-    if (filters.category) result = result.filter(h => h.category === filters.category);
-    if (filters.city) result = result.filter(h => h.city_name === filters.city || h.city === filters.city);
-    if (filters.status) result = result.filter(h => h.status === filters.status);
-    result = result.filter(h => h.price <= filters.maxPrice);
-    if (filters.rooms > 0) result = result.filter(h => h.rooms >= filters.rooms);
+  const startSearch = () => { setLoading(true); setError(null); setSuggestions([]); };
+  const setResults  = (list, total) => { setHousings(list); setCount(total!==undefined?total:list.length); };
+  const onSearchErr = e => { console.error(e); setError(t.error); setHousings([]); setCount(0); };
+  const toList      = d => Array.isArray(d)?d:(d?.results||[]);
 
-    // Sort
-    result.sort((a, b) => {
-      if (sort === 'price_asc') return a.price - b.price;
-      if (sort === 'price_desc') return b.price - a.price;
-      if (sort === 'popular') return (b.views_count || 0) - (a.views_count || 0);
-      if (sort === 'area') return b.area - a.area;
-      if (sort === 'distance' && userLoc)
-        return haversine(userLoc.lat, userLoc.lng, a.latitude, a.longitude)
-             - haversine(userLoc.lat, userLoc.lng, b.latitude, b.longitude);
-      return new Date(b.created_at) - new Date(a.created_at);
-    });
-
-    setFiltered(result);
-  }, [filters, sort, housings, userLoc]);
-
-  // ── Locate user ────────────────────────────────────────────
-  const locateMe = useCallback(() => {
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        setUserLoc({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        toast('📍 Position détectée', 'ok');
-      },
-      () => toast('Position non accessible', 'err')
-    );
-  }, [toast]);
-
-  // ── Itinerary ──────────────────────────────────────────────
-  const startItinerary = useCallback(async (h) => {
-    setItinOpen(true);
-    setItinDist('');
-    setItinTime('');
-    setItinDest('');
-    setItinProgress(0);
-    setItinStatus('<i class="fas fa-location-crosshairs fa-spin"></i> Détection de votre position…');
-
-    const doCalc = async (loc) => {
-      setItinProgress(55);
-      setItinStatus('<i class="fas fa-route fa-spin"></i> Calcul de l\'itinéraire…');
-      try {
-        const url = `https://router.project-osrm.org/route/v1/driving/${loc.lng},${loc.lat};${h.longitude},${h.latitude}?overview=full&geometries=geojson`;
-        const resp = await fetch(url);
-        const data = await resp.json();
-        if (data.routes?.[0]) {
-          const rt = data.routes[0];
-          const coords = rt.geometry.coordinates.map(([ln, lt]) => [lt, ln]);
-          setRoute(coords);
-          const km = (rt.distance / 1000).toFixed(1);
-          const mins = Math.round(rt.duration / 60);
-          setItinDist(km + ' km');
-          setItinTime(mins < 60 ? mins + ' min' : Math.floor(mins / 60) + 'h ' + (mins % 60) + 'min');
-          setItinDest(`${h.district_name}, ${h.city_name}`);
-          setItinProgress(100);
-          setItinStatus(`<i class="fas fa-check-circle" style="color:var(--acc)"></i> Itinéraire calculé vers <b>${h.district_name}, ${h.city_name}</b>`);
-        } else throw new Error('no route');
-      } catch {
-        // Straight line fallback
-        setRoute([[loc.lat, loc.lng], [h.latitude, h.longitude]]);
-        const d = haversine(loc.lat, loc.lng, h.latitude, h.longitude);
-        setItinDist(d.toFixed(1) + ' km (approx.)');
-        setItinTime(Math.round((d / 40) * 60) + ' min (approx.)');
-        setItinDest(`${h.district_name}, ${h.city_name}`);
-        setItinProgress(100);
-        setItinStatus('<i class="fas fa-triangle-exclamation" style="color:var(--gold)"></i> Distance à vol d\'oiseau utilisée');
-      }
-    };
-
-    if (userLoc) { doCalc(userLoc); return; }
-
-    navigator.geolocation.getCurrentPosition(
-      async pos => {
-        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        setUserLoc(loc);
-        setItinProgress(35);
-        doCalc(loc);
-      },
-      () => {
-        // Fallback: use center of Yaoundé
-        const loc = { lat: 3.848, lng: 11.502 };
-        setUserLoc(loc);
-        setItinProgress(25);
-        setItinStatus('<i class="fas fa-circle-info" style="color:var(--blue)"></i> Position approx. utilisée (accès refusé)');
-        doCalc(loc);
-      }
-    );
-  }, [userLoc]);
-
-  const closeItin = () => {
-    setItinOpen(false);
-    setRoute(null);
-    setItinProgress(0);
+  const doDefault = async () => {
+    startSearch(); setNlpSummary('');
+    try {
+      const res = await api.get('/housings/', { params: { status:'disponible', ordering:'-created_at' } });
+      setResults(toList(res.data), res.data?.count);
+    } catch(e) { onSearchErr(e); }
+    finally { setLoading(false); }
   };
 
-  // ── Favorites ──────────────────────────────────────────────
+  const doNlp = async (query, coords) => {
+    if (!query?.trim()) { doDefault(); return; }
+    startSearch();
+    try {
+      const payload = { query: query.trim(), language };
+      if (coords) { payload.user_lat=coords.lat; payload.user_lng=coords.lng; }
+      const data = await searchService.nlpSearch(payload);
+      setResults(data.results||[], data.count);
+      setNlpSummary(data.criteria_summary||'');
+      setSuggestions(data.suggestions||[]);
+    } catch(e) { onSearchErr(e); }
+    finally { setLoading(false); }
+  };
+
+  const doFilters = async (filters) => {
+    startSearch(); setNlpSummary('');
+    try {
+      const params = {};
+      Object.entries(filters).forEach(([k,v])=>{ if(v!==''&&v!=null) params[k]=v; });
+      if (!params.status) params.status='disponible';
+      const res = await api.get('/housings/', { params });
+      setResults(toList(res.data), res.data?.count);
+    } catch(e) { onSearchErr(e); }
+    finally { setLoading(false); }
+  };
+
+  const doNearby = async (coords) => {
+    startSearch(); setNlpSummary('');
+    try {
+      const data = await searchService.nlpSearch({
+        query: language==='fr' ? 'logement disponible' : 'available housing',
+        language, user_lat: coords.lat, user_lng: coords.lng,
+      });
+      setResults(data.results||[], data.count);
+    } catch(e) { onSearchErr(e); }
+    finally { setLoading(false); }
+  };
+
+  // ── Handlers UI (inchangés) ───────────────────────────────
+  const handleSearch = ({ query }) => {
+    setMode('nlp'); setActiveFilters({});
+    navigate(`/search?query=${encodeURIComponent(query)}`, { replace:true });
+    doNlp(query, userLocation);
+  };
+
+  const handleVoiceTranscript = (transcript) => {
+    setMode('voice'); setActiveFilters({});
+    doNlp(transcript, userLocation);
+  };
+
+  const handleFilters = (newFilters) => {
+    setActiveFilters(newFilters); setMode('filters'); setNlpSummary('');
+    doFilters(newFilters);
+  };
+
+  const handleNearby = (coords) => {
+    setUserLocation(coords); setMode('nearby'); setActiveFilters({});
+    doNearby(coords);
+    if(viewMode==='list') setViewMode('map'); // auto-switch carte si près de moi
+  };
+
+  const handleSuggestion = (text) => { setMode('nlp'); doNlp(text, null); };
+
+  const handleClearNLP = () => {
+    setNlpSummary(''); setActiveFilters({}); setMode('default');
+    setUserLocation(null); navigate('/search', { replace:true }); doDefault();
+  };
+
+  const handleReset = () => {
+    setActiveFilters({}); setNlpSummary(''); setUserLocation(null);
+    setMode('default'); setSuggestions([]);
+    navigate('/search', { replace:true }); doDefault();
+  };
+
+  // ════════════════════════════════════════════════════════
+  // LOGIQUE CARTE
+  // ════════════════════════════════════════════════════════
+
+  // ── Sélection sur carte ───────────────────────────────────
+  const handleSelectOnMap = useCallback((h) => {
+    setSelectedHousing(h);
+  }, []);
+
+  // ── Favoris ───────────────────────────────────────────────
   const toggleFav = (id) => {
     setFavorites(prev => {
       const next = new Set(prev);
-      if (next.has(id)) { next.delete(id); toast('Retiré des favoris', 'inf'); }
-      else { next.add(id); toast('❤️ Ajouté aux favoris', 'ok'); }
+      if(next.has(id)){ next.delete(id); addToast(t.fav_rm,'inf'); }
+      else            { next.add(id);    addToast('❤️ '+t.fav_add,'ok'); }
       return next;
     });
   };
 
-  // ── Compare ────────────────────────────────────────────────
+  // ── Comparaison ───────────────────────────────────────────
   const toggleCompare = (h) => {
     setCompareList(prev => {
-      if (prev.find(x => x.id === h.id)) return prev.filter(x => x.id !== h.id);
-      if (prev.length >= 3) { toast('Maximum 3 logements à comparer', 'err'); return prev; }
-      toast(`Ajouté à la comparaison: ${h.title}`, 'ok');
+      if(prev.find(x=>x.id===h.id)) return prev.filter(x=>x.id!==h.id);
+      if(prev.length>=3){ addToast(t.compare_max,'err'); return prev; }
+      addToast('📊 '+h.title,'ok');
       return [...prev, h];
     });
   };
 
-  // ── Filter helpers ─────────────────────────────────────────
-  const setFilt = (key, val) => setFilters(f => ({ ...f, [key]: val }));
-  const resetFilters = () => {
-    setFilters({ search: '', category: '', city: '', status: '', maxPrice: 1000000, rooms: 0 });
-    toast('Filtres réinitialisés', 'inf');
+  // ── Itinéraire ────────────────────────────────────────────
+  const startItin = useCallback(async (h) => {
+    setItinOpen(true); setItinDist(''); setItinTime(''); setItinDest(''); setItinProg(0);
+    setItinStatus(`<i class="fas fa-location-crosshairs fa-spin"></i> ${t.itin_start}`);
+
+    const calcRoute = async (loc) => {
+      setItinProg(55);
+      setItinStatus(`<i class="fas fa-route fa-spin"></i> ${t.itin_calc}`);
+      try {
+        const url = `https://router.project-osrm.org/route/v1/driving/${loc.lng},${loc.lat};${h.longitude},${h.latitude}?overview=full&geometries=geojson`;
+        const resp = await fetch(url);
+        const data = await resp.json();
+        if(data.routes?.[0]){
+          const rt = data.routes[0];
+          setRoute(rt.geometry.coordinates.map(([ln,lt])=>[lt,ln]));
+          const km   = (rt.distance/1000).toFixed(1);
+          const mins = Math.round(rt.duration/60);
+          setItinDist(km+' km');
+          setItinTime(mins<60 ? mins+' min' : Math.floor(mins/60)+'h '+(mins%60)+'min');
+          setItinDest(`${h.district_name}, ${h.city_name}`);
+          setItinProg(100);
+          setItinStatus(`<i class="fas fa-check-circle" style="color:#10B981"></i> ${t.itin_ok} <b>${h.district_name}, ${h.city_name}</b>`);
+        } else throw new Error('no route');
+      } catch {
+        setRoute([[loc.lat,loc.lng],[h.latitude,h.longitude]]);
+        const d = haversine(loc.lat,loc.lng,h.latitude,h.longitude);
+        setItinDist(d.toFixed(1)+' km'); setItinTime(Math.round((d/40)*60)+' min');
+        setItinDest(`${h.district_name}, ${h.city_name}`);
+        setItinProg(100);
+        setItinStatus(`<i class="fas fa-triangle-exclamation" style="color:#F59E0B"></i> ${t.itin_approx}`);
+      }
+    };
+
+    if(userLocation){ calcRoute(userLocation); return; }
+
+    navigator.geolocation.getCurrentPosition(
+      async pos => {
+        const loc = { lat:pos.coords.latitude, lng:pos.coords.longitude };
+        setUserLocation(loc); setItinProg(35); calcRoute(loc);
+      },
+      () => {
+        const loc = { lat:3.848, lng:11.502 };
+        setUserLocation(loc);
+        setItinStatus(`<i class="fas fa-circle-info" style="color:#58A6FF"></i> ${t.itin_denied}`);
+        setItinProg(30); calcRoute(loc);
+      }
+    );
+  }, [userLocation, t]);
+
+  const closeItin = () => { setItinOpen(false); setRoute(null); setItinProg(0); };
+
+  // ── Planifier visite (redirige vers la page visite) ───────
+  const handleVisit = (h) => {
+    navigate(`/housings/${h.id}?action=visit`);
   };
 
-  const activeFilterCount = Object.entries(filters).filter(([k, v]) =>
-    (k === 'maxPrice' && v < 1000000) || (k === 'rooms' && v > 0) || (k !== 'maxPrice' && k !== 'rooms' && v)
-  ).length;
-
-  // ── Stats ──────────────────────────────────────────────────
-  const avg = filtered.length ? Math.round(filtered.reduce((s, h) => s + h.price, 0) / filtered.length) : 0;
-  const min = filtered.length ? Math.min(...filtered.map(h => h.price)) : 0;
-
-  const cities = [...new Set(housings.map(h => h.city_name || h.city).filter(Boolean))];
-  const categories = ['Studio', 'Chambre', 'Appartement', 'Maison', 'Villa'];
-
-  // ── Map center ─────────────────────────────────────────────
-  const mapCenter = [3.848, 11.502];
+  // ────────────────────────────────────────────────────────
+  const filterCount = Object.values(activeFilters).filter(v=>v!==''&&v!=null).length;
+  const isNlpMode   = mode==='nlp'||mode==='voice';
 
   return (
-    <div className="smp-layout">
-      {/* ═══════════════ SIDEBAR ═══════════════ */}
-      <aside className={`smp-sidebar${view === 'list' ? ' full-w' : ''}`}>
-        {/* Logo */}
-        <div className="smp-sb-head">
-          <div className="smp-logo">
-            <div className="smp-logo-mark"><i className="fas fa-house-chimney" /></div>
-            <div>
-              <div className="smp-logo-name">HabitatCam</div>
-              <div className="smp-logo-sub">Trouvez votre logement idéal</div>
+    <div className="search-page">
+
+      {/* ══ EN-TÊTE ══════════════════════════════════════════ */}
+      <div className="sp-header">
+        <div className="container">
+          <div className="sp-header-text">
+            <h1 className="sp-title">{t.title}</h1>
+            <p className="sp-subtitle">{t.subtitle}</p>
+          </div>
+
+          <div className="sp-controls">
+            <SearchBar
+              onSearch={handleSearch}
+              loading={loading}
+              criteriaSummary={nlpSummary}
+              onClearNLP={handleClearNLP}
+              language={language}
+            />
+            <div className="sp-actions">
+              <VoiceSearch
+                onTranscript={handleVoiceTranscript}
+                onError={msg=>setError(msg)}
+                language={language}
+              />
+              <NearMeButton
+                onLocationFound={handleNearby}
+                onError={msg=>setError(msg)}
+                language={language}
+              />
+              <FilterPanel
+                onApplyFilters={handleFilters}
+                initialFilters={activeFilters}
+                language={language}
+              />
             </div>
           </div>
 
-          {/* Search */}
-          <div className="smp-search-wrap">
-            <i className="fas fa-magnifying-glass smp-search-ico" />
-            <input
-              className="smp-search-inp"
-              placeholder="Bastos, villa, 300k, 3 chambres…"
-              value={filters.search}
-              onChange={e => setFilt('search', e.target.value)}
-            />
-            {filters.search && (
-              <button className="smp-ico-btn" onClick={() => setFilt('search', '')} style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)' }}>
-                <i className="fas fa-xmark" />
+          {/* Badges mode */}
+          {mode!=='default' && (
+            <div className="sp-badges">
+              {mode==='nearby'  && <span className="sp-badge sp-badge--nearby"><MapPin size={12}/> {t.b_nearby}</span>}
+              {isNlpMode        && <span className="sp-badge sp-badge--nlp"><Sparkles size={12}/>{mode==='voice'?t.b_voice:t.b_nlp}</span>}
+              {mode==='filters' && filterCount>0 && <span className="sp-badge sp-badge--filters">{filterCount} {t.b_filters}</span>}
+            </div>
+          )}
+
+          {/* ── Toggle vue Liste / Carte / Mixte ── */}
+          <div className="sp-view-toggle">
+            {[
+              { k:'list',  ico:<List  size={14}/>, lbl:t.view_list  },
+              { k:'map',   ico:<Map   size={14}/>, lbl:t.view_map   },
+              { k:'split', ico:<Columns size={14}/>, lbl:t.view_split },
+            ].map(({k,ico,lbl})=>(
+              <button
+                key={k}
+                className={`sp-view-btn${viewMode===k?' sp-view-btn--active':''}`}
+                onClick={()=>setViewMode(k)}
+              >
+                {ico} {lbl}
               </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ══ VUE LISTE ════════════════════════════════════════ */}
+      {viewMode==='list' && (
+        <div className="container sp-content">
+          {!loading && count!==null && (
+            <div className="sp-toolbar">
+              <span className="sp-count"><strong>{count}</strong> {t.results}</span>
+            </div>
+          )}
+          {loading && <div className="sp-loading"><Loader className="sp-spinner" size={36}/><p>{t.loading}</p></div>}
+          {!loading && error  && <div className="sp-error"><p>{error}</p><button className="sp-retry" onClick={handleReset}>{t.retry}</button></div>}
+          {!loading && !error && housings.length>0 && <HousingList housings={housings}/>}
+          {!loading && !error && housings.length===0 && count!==null && (
+            <div className="sp-empty">
+              <TrendingUp size={48} className="sp-empty-icon"/>
+              <h3>{t.no_result}</h3><p>{t.no_sub}</p>
+              {suggestions.length>0 && (
+                <div className="sp-suggestions">
+                  <p>{t.suggestions}</p>
+                  <div className="sp-chips">{suggestions.map((s,i)=><button key={i} className="sp-chip" onClick={()=>handleSuggestion(s)}>{s}</button>)}</div>
+                </div>
+              )}
+              <button className="sp-reset" onClick={handleReset}>{t.reset}</button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ══ VUE CARTE / MIXTE ════════════════════════════════ */}
+      {viewMode!=='list' && (
+        <div className={`sp-map-layout${viewMode==='split'?' sp-map-layout--split':''}`}>
+
+          {/* Colonne liste (mode split uniquement) */}
+          {viewMode==='split' && (
+            <div className="sp-map-list-col">
+              {loading && <div className="sp-map-loading"><Loader className="sp-spinner" size={28}/></div>}
+              {!loading && mapHousings.length===0 && (
+                <div className="sp-map-empty"><TrendingUp size={32}/><p>{t.no_result}</p></div>
+              )}
+              {!loading && mapHousings.map(h=>(
+                <MiniCard
+                  key={h.id} h={h}
+                  selected={selectedHousing?.id===h.id}
+                  onSelect={setSelectedHousing}
+                  isFav={favorites.has(h.id)}
+                  onFav={toggleFav}
+                  lang={language}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Zone carte */}
+          <div className="sp-map-col">
+
+            {/* Barre stats */}
+            <div className="sp-map-stats">
+              <div><div className="sp-map-stat-n">{mapHousings.length}</div><div className="sp-map-stat-l">{t.on_map}</div></div>
+              <div className="sp-map-stat-sep"/>
+              <div><div className="sp-map-stat-v">{avg.toLocaleString('fr-FR')}</div><div className="sp-map-stat-l">{t.avg_price}</div></div>
+              <div className="sp-map-stat-sep"/>
+              <div><div className="sp-map-stat-v" style={{color:'#F59E0B'}}>{min.toLocaleString('fr-FR')}</div><div className="sp-map-stat-l">{t.min_price}</div></div>
+            </div>
+
+            {/* Bouton ma position */}
+            <button className="sp-map-locate-btn" title="Ma position" onClick={()=>{
+              navigator.geolocation.getCurrentPosition(pos=>{
+                const loc={lat:pos.coords.latitude,lng:pos.coords.longitude};
+                setUserLocation(loc); addToast('📍 Position détectée','ok');
+              }, ()=>addToast('Position non accessible','err'));
+            }}>
+              <i className="fas fa-location-crosshairs"/>
+            </button>
+
+            {/* Leaflet Map */}
+            <MapContainer
+              center={[3.848, 11.502]}
+              zoom={13}
+              style={{ width:'100%', height:'100%' }}
+              zoomControl={false}
+              attributionControl
+            >
+              <TileLayer
+                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                attribution='© <a href="https://www.openstreetmap.org/copyright">OSM</a> © <a href="https://carto.com/">CARTO</a>'
+                subdomains="abcd"
+                maxZoom={20}
+              />
+              <MapController
+                housings={mapHousings}
+                selectedId={selectedHousing?.id}
+                onSelect={handleSelectOnMap}
+                userLoc={userLocation}
+                route={route}
+              />
+            </MapContainer>
+
+            {/* Detail panel */}
+            {selectedHousing && (
+              <DetailPanel
+                h={selectedHousing}
+                t={t}
+                lang={language}
+                onClose={()=>setSelectedHousing(null)}
+                onItin={startItin}
+                isFav={favorites.has(selectedHousing.id)}
+                onFav={toggleFav}
+                inCmp={compareList.some(x=>x.id===selectedHousing.id)}
+                onCmp={toggleCompare}
+                onVisit={handleVisit}
+              />
+            )}
+
+            {/* Itinéraire panel */}
+            {itinOpen && (
+              <ItineraryPanel
+                t={t} lang={language}
+                status={itinStatus} dist={itinDist} time={itinTime} dest={itinDest}
+                progress={itinProg} transport={transport}
+                onTransport={setTransport}
+                onClose={closeItin}
+              />
+            )}
+
+            {/* Compare strip */}
+            {compareList.length>0 && (
+              <div className="sp-cmp-strip">
+                <i className="fas fa-scale-balanced" style={{color:'#58A6FF',flexShrink:0}}/>
+                <div className="sp-cmp-strip-items">
+                  {compareList.map(h=>(
+                    <div key={h.id} className="sp-cmp-strip-item">
+                      <span>{h.title}</span>
+                      <button onClick={()=>toggleCompare(h)}><i className="fas fa-xmark"/></button>
+                    </div>
+                  ))}
+                </div>
+                <button className="sp-cmp-strip-btn" onClick={()=>setShowCompare(true)}>
+                  <i className="fas fa-chart-bar"/> {t.cmp_launch}
+                </button>
+              </div>
             )}
           </div>
-
-          {/* View toggle */}
-          <div className="smp-view-toggle">
-            {[['map', 'fa-map', 'Carte'], ['split', 'fa-table-columns', 'Mixte'], ['list', 'fa-list', 'Liste']].map(([v, ico, lbl]) => (
-              <button key={v} className={`smp-view-btn${view === v ? ' active' : ''}`} onClick={() => setView(v)}>
-                <i className={`fas ${ico}`} /> {lbl}
-              </button>
-            ))}
-          </div>
         </div>
-
-        {/* Filters */}
-        <div className="smp-filt-sec">
-          <button className="smp-filt-toggle" onClick={() => setFiltersOpen(o => !o)}>
-            <span>
-              <i className="fas fa-sliders" style={{ marginRight: 7, color: 'var(--acc)' }} />
-              Filtres avancés
-              {activeFilterCount > 0 && <span className="smp-filt-badge">{activeFilterCount}</span>}
-            </span>
-            <i className="fas fa-chevron-down" style={{ fontSize: 11, transform: filtersOpen ? 'rotate(180deg)' : 'none', transition: '.2s' }} />
-          </button>
-
-          {filtersOpen && (
-            <div className="smp-filt-inner">
-              {/* Category */}
-              <div className="smp-filt-grp">
-                <span className="smp-filt-lbl">Catégorie</span>
-                <div className="smp-chips">
-                  <button className={`smp-chip${!filters.category ? ' active' : ''}`} onClick={() => setFilt('category', '')}>Tout</button>
-                  {categories.map(c => (
-                    <button key={c} className={`smp-chip${filters.category === c ? ' active' : ''}`} onClick={() => setFilt('category', c)}>{c}</button>
-                  ))}
-                </div>
-              </div>
-
-              {/* City */}
-              <div className="smp-filt-grp">
-                <span className="smp-filt-lbl">Ville</span>
-                <div className="smp-chips">
-                  <button className={`smp-chip${!filters.city ? ' active' : ''}`} onClick={() => setFilt('city', '')}>Toutes</button>
-                  {cities.map(c => (
-                    <button key={c} className={`smp-chip${filters.city === c ? ' active' : ''}`} onClick={() => setFilt('city', c)}>{c}</button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Price */}
-              <div className="smp-filt-grp">
-                <span className="smp-filt-lbl">
-                  Budget max — <b style={{ color: 'var(--gold)' }}>{filters.maxPrice.toLocaleString('fr-FR')} FCFA</b>
-                </span>
-                <input
-                  type="range" min={0} max={1000000} step={10000}
-                  value={filters.maxPrice}
-                  onChange={e => setFilt('maxPrice', +e.target.value)}
-                  style={{ width: '100%', accentColor: 'var(--acc)' }}
-                />
-              </div>
-
-              {/* Rooms */}
-              <div className="smp-filt-grp">
-                <span className="smp-filt-lbl">Chambres minimum</span>
-                <div className="smp-rooms-row">
-                  {[0, 1, 2, 3, 4].map(n => (
-                    <button key={n} className={`smp-room-btn${filters.rooms === n ? ' active' : ''}`} onClick={() => setFilt('rooms', n)}>
-                      {n === 0 ? 'Tout' : n + '+'}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Status */}
-              <div className="smp-filt-grp">
-                <span className="smp-filt-lbl">Statut</span>
-                <div className="smp-chips">
-                  {[['', 'Tout'], ['disponible', 'Disponible'], ['reserve', 'Réservé']].map(([v, l]) => (
-                    <button key={v} className={`smp-chip${filters.status === v ? ' active' : ''}`} onClick={() => setFilt('status', v)}>{l}</button>
-                  ))}
-                </div>
-              </div>
-
-              <button className="smp-reset-btn" onClick={resetFilters}>
-                <i className="fas fa-rotate-left" style={{ marginRight: 6 }} />Réinitialiser les filtres
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Results header */}
-        <div className="smp-res-head">
-          <div className="smp-res-count"><b>{filtered.length}</b> logements</div>
-          <select className="smp-sort-sel" value={sort} onChange={e => setSort(e.target.value)}>
-            <option value="recent">Plus récents</option>
-            <option value="price_asc">Prix ↑</option>
-            <option value="price_desc">Prix ↓</option>
-            <option value="popular">Populaires</option>
-            <option value="area">Superficie</option>
-            <option value="distance">Proximité</option>
-          </select>
-        </div>
-
-        {/* Cards */}
-        {(view === 'split' || view === 'list') && (
-          <div className="smp-cards-list">
-            {loading ? (
-              <div className="smp-empty"><div className="smp-spinner" /></div>
-            ) : !filtered.length ? (
-              <div className="smp-empty">
-                <i className="fas fa-house-circle-exclamation" />
-                <p>Aucun logement trouvé.<br />Essayez d'élargir les filtres.</p>
-              </div>
-            ) : filtered.map(h => (
-              <HousingCard
-                key={h.id}
-                h={h}
-                selected={selectedHousing?.id === h.id}
-                onSelect={setSelectedHousing}
-                onToggleFav={toggleFav}
-                isFav={favorites.has(h.id)}
-                onToggleCompare={toggleCompare}
-                inCompare={compareList.some(x => x.id === h.id)}
-                userLoc={userLoc}
-              />
-            ))}
-          </div>
-        )}
-      </aside>
-
-      {/* ═══════════════ MAP ═══════════════ */}
-      {view !== 'list' && (
-        <main className="smp-map-area">
-          {/* Stats bar */}
-          <div className="smp-map-stats">
-            <div><div className="smp-stat-n">{filtered.length}</div><div className="smp-stat-l">logements</div></div>
-            <div className="smp-stat-sep" />
-            <div><div className="smp-stat-v">{avg.toLocaleString('fr-FR')}</div><div className="smp-stat-l">prix moyen</div></div>
-            <div className="smp-stat-sep" />
-            <div><div className="smp-stat-v" style={{ color: 'var(--gold)' }}>{min.toLocaleString('fr-FR')}</div><div className="smp-stat-l">min FCFA</div></div>
-          </div>
-
-          {/* Map controls */}
-          <div className="smp-map-ctrls">
-            <button className="smp-mc-btn" title="Ma position" onClick={locateMe}><i className="fas fa-location-crosshairs" /></button>
-          </div>
-
-          <MapContainer center={mapCenter} zoom={13} style={{ width: '100%', height: '100%' }} zoomControl={false} attributionControl>
-            <TileLayer
-              url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-              attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>'
-              subdomains="abcd"
-              maxZoom={20}
-            />
-            <MapController
-              housings={filtered}
-              selectedId={selectedHousing?.id}
-              onSelectHousing={h => setSelectedHousing(h)}
-              userLoc={userLoc}
-              route={route}
-            />
-          </MapContainer>
-
-          {/* Detail panel */}
-          {selectedHousing && (
-            <DetailPanel
-              housing={selectedHousing}
-              onClose={() => setSelectedHousing(null)}
-              onStartItin={startItinerary}
-              isFav={favorites.has(selectedHousing.id)}
-              onToggleFav={toggleFav}
-              inCompare={compareList.some(x => x.id === selectedHousing.id)}
-              onToggleCompare={toggleCompare}
-            />
-          )}
-
-          {/* Itinerary panel */}
-          <ItineraryPanel
-            open={itinOpen}
-            status={itinStatus}
-            distance={itinDist}
-            duration={itinTime}
-            destination={itinDest}
-            onClose={closeItin}
-            transportMode={transportMode}
-            onSetTransport={setTransportMode}
-            progress={itinProgress}
-          />
-
-          {/* Compare strip */}
-          {compareList.length > 0 && (
-            <div className="smp-cmp-strip">
-              <i className="fas fa-scale-balanced" style={{ color: 'var(--blue)', flexShrink: 0 }} />
-              <div className="smp-cmp-items">
-                {compareList.map(h => (
-                  <div key={h.id} className="smp-cmp-item">
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{h.title}</span>
-                    <button onClick={() => toggleCompare(h)}><i className="fas fa-xmark" /></button>
-                  </div>
-                ))}
-              </div>
-              <button className="smp-cmp-launch-btn" onClick={() => setShowCompare(true)}>
-                <i className="fas fa-chart-bar" style={{ marginRight: 5 }} />Comparer
-              </button>
-            </div>
-          )}
-        </main>
       )}
 
       {/* Compare modal */}
       {showCompare && (
         <CompareModal
-          list={compareList}
-          onClose={() => setShowCompare(false)}
-          onRemove={id => setCompareList(p => p.filter(x => x.id !== id))}
+          list={compareList} t={t} lang={language}
+          onClose={()=>setShowCompare(false)}
+          onRemove={id=>setCompareList(p=>p.filter(x=>x.id!==id))}
         />
       )}
 
       {/* Toasts */}
-      <div className="smp-toast-wrap">
-        {toasts.map(t => (
-          <div key={t.id} className={`smp-toast ${t.type}`}>
-            <i className={`fas ${t.type === 'ok' ? 'fa-circle-check' : t.type === 'err' ? 'fa-circle-exclamation' : 'fa-circle-info'}`}
-              style={{ color: t.type === 'ok' ? 'var(--acc)' : t.type === 'err' ? 'var(--red)' : 'var(--blue)', flexShrink: 0 }} />
-            <span>{t.msg}</span>
+      <div className="sp-toast-wrap">
+        {toasts.map(({id,msg,type})=>(
+          <div key={id} className={`sp-toast sp-toast--${type}`}>
+            <i className={`fas ${type==='ok'?'fa-circle-check':type==='err'?'fa-circle-exclamation':'fa-circle-info'}`}/>
+            <span>{msg}</span>
           </div>
         ))}
       </div>
     </div>
   );
-}
+};
+
+export default SearchPage;

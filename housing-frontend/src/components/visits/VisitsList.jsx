@@ -410,6 +410,546 @@
 // export default VisitsList;
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import React, { useState, useEffect } from "react";
+// import { useNavigate } from "react-router-dom";
+// import "./VisitsList.css";
+// import { useTheme } from '../../contexts/ThemeContext';
+
+// /* ================= API ================= */
+
+// const fetchVisits = async () => {
+//   const token = localStorage.getItem("access_token");
+
+//   const response = await fetch("http://localhost:8000/api/visits/", {
+//     headers: { Authorization: `Bearer ${token}` }
+//   });
+
+//   if (!response.ok) throw new Error("Erreur chargement visites");
+
+//   return response.json();
+// };
+// const confirmVisit = async (id) => {
+//   const token = localStorage.getItem("access_token");
+
+//   const response = await fetch(
+//     `http://localhost:8000/api/visits/${id}/confirm/`,
+//     {
+//       method: "POST",
+//       headers: { Authorization: `Bearer ${token}` }
+//     }
+//   );
+
+//   if (!response.ok) throw new Error("Erreur confirmation");
+
+//   return response.json();
+// };
+
+// const refuseVisit = async (id, message = "") => {
+//   const token = localStorage.getItem("access_token");
+
+//   const response = await fetch(
+//     `http://localhost:8000/api/visits/${id}/refuse/`,
+//     {
+//       method: "POST",
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//         "Content-Type": "application/json"
+//       },
+//       body: JSON.stringify({ message })
+//     }
+//   );
+
+//   if (!response.ok) throw new Error("Erreur refus");
+
+//   return response.json();
+// };
+
+// const cancelVisit = async (id) => {
+//   const token = localStorage.getItem("access_token");
+
+//   const response = await fetch(
+//     `http://localhost:8000/api/visits/${id}/`,
+//     {
+//       method: "DELETE",
+//       headers: { Authorization: `Bearer ${token}` }
+//     }
+//   );
+
+//   if (!response.ok) throw new Error("Erreur annulation");
+// };
+
+// /* ================= COMPONENT ================= */
+
+// const VisitsList = ({ userRole = "locataire" }) => {
+
+//   const [visits, setVisits] = useState([]);
+//   const [loading, setLoading] = useState(true);
+
+//   const [filter, setFilter] = useState("all");
+
+//   const [error, setError] = useState("");
+//   const [success, setSuccess] = useState("");
+
+//   const [showRefuseModal, setShowRefuseModal] = useState(false);
+//   const [selectedVisit, setSelectedVisit] = useState(null);
+//   const [refuseMessage, setRefuseMessage] = useState("");
+//   const { t, language, theme } = useTheme();
+
+//   const navigate = useNavigate();
+
+//   /* ================= LOAD VISITS ================= */
+
+//   useEffect(() => {
+//     loadVisits();
+//   }, []);
+
+//   const loadVisits = async () => {
+//     try {
+//       setLoading(true);
+//       setError("");
+
+//       const data = await fetchVisits();
+
+//       setVisits(Array.isArray(data) ? data : data.results || []);
+
+//     } catch {
+//       setError("Erreur chargement visites");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   /* ================= ACTIONS ================= */
+
+//   const handleConfirm = async (id) => {
+//     try {
+//       await confirmVisit(id);
+//       setSuccess("Visite confirmée");
+//       loadVisits();
+//     } catch {
+//       setError("Erreur confirmation");
+//     }
+//   };
+
+//   const handleCancel = async (id) => {
+
+//     if (!window.confirm("Annuler cette visite ?")) return;
+
+//     try {
+//       await cancelVisit(id);
+//       setSuccess("Visite annulée");
+//       loadVisits();
+//     } catch {
+//       setError("Erreur annulation");
+//     }
+//   };
+
+//   const handleRefuseClick = (visit) => {
+//     setSelectedVisit(visit);
+//     setShowRefuseModal(true);
+//   };
+
+//   const handleRefuseSubmit = async () => {
+
+//     try {
+//       await refuseVisit(selectedVisit.id, refuseMessage);
+
+//       setShowRefuseModal(false);
+//       setRefuseMessage("");
+
+//       setSuccess("Visite refusée");
+
+//       loadVisits();
+
+//     } catch {
+//       setError("Erreur refus");
+//     }
+//   };
+
+//   /* ================= STATUS ================= */
+
+//   const getStatusBadge = (status) => {
+
+//     const badges = {
+//       attente: { text: "En attente", class: "status-waiting" },
+//       confirme: { text: "Confirmée", class: "status-confirmed" },
+//       refuse: { text: "Refusée", class: "status-refused" },
+//       annule: { text: "Annulée", class: "status-cancelled" }
+//     };
+
+//     return badges[status] || badges.attente;
+//   };
+
+//   /* ================= DATES ================= */
+
+//   const isUpcoming = (visit) => {
+//     const visitDate = new Date(`${visit.date}T${visit.time}`);
+//     return visitDate > new Date();
+//   };
+
+//   const isPast = (visit) => {
+//     const visitDate = new Date(`${visit.date}T${visit.time}`);
+//     return visitDate < new Date();
+//   };
+
+//   /* ================= FILTER ================= */
+
+//   const filteredVisits = visits.filter((visit) => {
+
+//     if (filter === "waiting") return visit.status === "attente";
+
+//     if (filter === "confirmed") return visit.status === "confirme";
+
+//     if (filter === "refused") return visit.status === "refuse";
+
+//     if (filter === "cancelled") return visit.status === "annule";
+
+//     if (filter === "upcoming") return isUpcoming(visit);
+
+//     if (filter === "past") return isPast(visit);
+
+//     return true;
+//   });
+
+//   /* ================= STATS ================= */
+
+//   const stats = {
+
+//     total: visits.length,
+
+//     waiting: visits.filter(v => v.status === "attente").length,
+
+//     confirmed: visits.filter(v => v.status === "confirme").length,
+
+//     refused: visits.filter(v => v.status === "refuse").length,
+
+//     cancelled: visits.filter(v => v.status === "annule").length,
+
+//     upcoming: visits.filter(v => isUpcoming(v)).length,
+
+//     past: visits.filter(v => isPast(v)).length
+//   };
+
+//   /* ================= LOADING ================= */
+
+//   if (loading) {
+
+//     return (
+//       <div className="visits-loading">
+//         <div className="spinner"></div>
+//         <p>{t('visits_loading')}</p>
+//       </div>
+//     );
+//   }
+
+//   /* ================= RENDER ================= */
+
+//   return (
+
+//     <div className="visits-container">
+
+//       <div className="visits-header">
+
+//         {/* <h2>
+//           {userRole === "proprietaire"
+//             ? "Demandes de Visites"
+//             : "Mes Visites"}
+//         </h2> */}
+//         <h2>
+//   {userRole === "proprietaire" ? t('visits_title_owner') : t("visits_title_tenant")}
+// </h2>
+
+//       </div>
+
+//       {/* ================= STATS ================= */}
+
+//       <div className="visits-stats">
+
+//         <div className="stat-card" onClick={() => setFilter("all")}>
+//           <div className="stat-number">{stats.total}</div>
+// <div className="stat-label">{t("visits_stats_total")}</div>
+//         </div>
+
+//         <div className="stat-card orange" onClick={() => setFilter("waiting")}>
+//           <div className="stat-number">{stats.waiting}</div>
+// <div className="stat-label">{t("visits_stats_waiting")}</div>
+//         </div>
+
+//         <div className="stat-card green" onClick={() => setFilter("confirmed")}>
+//           <div className="stat-number">{stats.confirmed}</div>
+// <div className="stat-label">{t("visits_stats_confirmed")}</div>
+//         </div>
+
+//         <div className="stat-card red" onClick={() => setFilter("refused")}>
+//           <div className="stat-number">{stats.refused}</div>
+// <div className="stat-label">{t("visits_stats_refused")}</div>
+//         </div>
+
+//         <div className="stat-card gray" onClick={() => setFilter("cancelled")}>
+//           <div className="stat-number">{stats.cancelled}</div>
+// <div className="stat-label">{t("visits_stats_cancelled")}</div>
+//         </div>
+
+//         <div className="stat-card blue" onClick={() => setFilter("upcoming")}>
+//           <div className="stat-number">{stats.upcoming}</div>
+// <div className="stat-label">{t("visits_stats_upcoming")}</div>        </div>
+
+//       </div>
+
+//       {/* ================= FILTERS ================= */}
+
+//       <div className="visits-filters">
+
+//         <button
+//           className={`filter-btn ${filter === "all" ? "active" : ""}`}
+//           onClick={() => setFilter("all")}
+//         >
+//           {t("visits_filter_all")}
+//         </button>
+
+//         <button
+//           className={`filter-btn ${filter === "waiting" ? "active" : ""}`}
+//           onClick={() => setFilter("waiting")}
+//         >
+//           {t("visits_filter_waiting")} 
+//         </button>
+
+//         <button
+//           className={`filter-btn ${filter === "confirmed" ? "active" : ""}`}
+//           onClick={() => setFilter("confirmed")}
+//         >
+//           {t("visits_filter_confirmed")}
+//         </button>
+
+//         <button
+//           className={`filter-btn ${filter === "refused" ? "active" : ""}`}
+//           onClick={() => setFilter("refused")}
+//         >
+//           {t("visits_filter_refused")}
+//         </button>
+
+//         <button
+//           className={`filter-btn ${filter === "cancelled" ? "active" : ""}`}
+//           onClick={() => setFilter("cancelled")}
+//         >
+//           {t("visits_filter_cancelled")}
+//         </button>
+
+//         <button
+//           className={`filter-btn ${filter === "upcoming" ? "active" : ""}`}
+//           onClick={() => setFilter("upcoming")}
+//         >
+//         {t("visits_filter_upcoming")}
+//         </button>
+
+//         <button
+//           className={`filter-btn ${filter === "past" ? "active" : ""}`}
+//           onClick={() => setFilter("past")}
+//         >
+//           {t("visits_filter_past")}
+//         </button>
+
+//       </div>
+
+//       {/* ================= ALERTS ================= */}
+
+//       {error && <div className="alert alert-error">{error}</div>}
+
+//       {success && <div className="alert alert-success">{success}</div>}
+
+//       {/* ================= LIST ================= */}
+
+//       <div className="visits-list">
+
+//         {filteredVisits.length === 0 ? (
+
+//           <div className="empty-visits">
+//             <p>{t("visits_empty")}</p>
+//           </div>
+
+//         ) : (
+
+//           filteredVisits.map((visit) => (
+
+//             <div key={visit.id} className="visit-card">
+
+//               <div className="visit-image">
+
+//                 <img
+//                   src={visit.housing_image || "/placeholder.jpg"}
+//                   alt={visit.housing_title}
+//                 />
+
+//                 <span
+//                   className={`visit-status-badge ${getStatusBadge(visit.status).class}`}
+//                 >
+//                   {getStatusBadge(visit.status).text}
+//                 </span>
+
+//               </div>
+
+//               <div className="visit-content">
+
+//                 <h3>{visit.housing_title}</h3>
+
+//                 <p>
+//                   {userRole === "locataire"
+//                     ? `${t("visits_label_owner")}: ${visit.owner_name}`
+//                     : `${t("visits_label_tenant")}: ${visit.locataire_name}`}
+//                 </p>
+
+
+
+//                 <p> <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+// //                       <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+// //                       <line x1="16" y1="2" x2="16" y2="6"></line>
+// //                       <line x1="8" y1="2" x2="8" y2="6"></line>
+// //                       <line x1="3" y1="10" x2="21" y2="10"></line>
+// //                     </svg>{new Date(visit.date).toLocaleDateString("fr-FR")}</p>
+
+//                 <p>  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+// //                       <circle cx="12" cy="12" r="10"></circle>
+// //                       <polyline points="12 6 12 12 16 14"></polyline>
+// //                     </svg>{visit.time}</p>
+
+
+
+//                 <div className="visit-actions">
+
+//                   {userRole === "proprietaire" &&
+//                     visit.status === "attente" && (
+//                       <>
+//                         <button
+//                           className="btn btn-success btn-sm"
+//                           onClick={() => handleConfirm(visit.id)}
+//                         >
+//                           {t("visits_label_confirm")}
+//                         </button>
+
+//                         <button
+//                           className="btn btn-danger btn-sm"
+//                           onClick={() => handleRefuseClick(visit)}
+//                         >
+//                           {t("visits_label_refuse")}
+//                         </button>
+//                       </>
+//                     )}
+
+//                   {userRole === "locataire" &&
+//                     visit.status === "attente" && (
+//                       <button
+//                         className="btn btn-outline btn-sm"
+//                         onClick={() => handleCancel(visit.id)}
+//                       >
+//                         {t("visits_label_cancel")}
+//                       </button>
+//                     )}
+
+//                   <button
+//                     className="btn btn-outline btn-sm"
+//                     onClick={() => navigate(`/housing/${visit.housing}`)}
+//                   >
+//                     {t("visits_label_view_housing")}
+//                   </button>
+
+//                 </div>
+
+//               </div>
+
+//             </div>
+
+//           ))
+//         )}
+
+//       </div>
+
+//       {/* ================= MODAL REFUS ================= */}
+
+//       {showRefuseModal && (
+
+//         <div className="modal-overlay">
+
+//           <div className="modal-content">
+
+//             <h3>{t("visits_modal_title")}</h3>
+
+//             <textarea
+//               value={refuseMessage}
+//               onChange={(e) => setRefuseMessage(e.target.value)}
+//               placeholder={t("visits_modal_placeholder")}
+//             />
+
+//             <button onClick={handleRefuseSubmit}>
+//               {t("visits_modal_submit")}
+//             </button>
+
+//             <button onClick={() => setShowRefuseModal(false)}>
+//               {t("visits_modal_cancel")}
+//             </button>
+
+//           </div>
+
+//         </div>
+
+//       )}
+
+//     </div>
+//   );
+// };
+
+// export default VisitsList;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// src/components/visits/VisitsList.jsx
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./VisitsList.css";
@@ -419,18 +959,22 @@ import { useTheme } from '../../contexts/ThemeContext';
 
 const fetchVisits = async () => {
   const token = localStorage.getItem("access_token");
+  const currentLang = localStorage.getItem('language') || 'fr';
 
   const response = await fetch("http://localhost:8000/api/visits/", {
-    headers: { Authorization: `Bearer ${token}` }
+    headers: { 
+      Authorization: `Bearer ${token}`,
+      'X-Language': currentLang,
+      'Accept-Language': currentLang
+    }
   });
 
   if (!response.ok) throw new Error("Erreur chargement visites");
-
   return response.json();
 };
+
 const confirmVisit = async (id) => {
   const token = localStorage.getItem("access_token");
-
   const response = await fetch(
     `http://localhost:8000/api/visits/${id}/confirm/`,
     {
@@ -440,13 +984,11 @@ const confirmVisit = async (id) => {
   );
 
   if (!response.ok) throw new Error("Erreur confirmation");
-
   return response.json();
 };
 
 const refuseVisit = async (id, message = "") => {
   const token = localStorage.getItem("access_token");
-
   const response = await fetch(
     `http://localhost:8000/api/visits/${id}/refuse/`,
     {
@@ -460,13 +1002,11 @@ const refuseVisit = async (id, message = "") => {
   );
 
   if (!response.ok) throw new Error("Erreur refus");
-
   return response.json();
 };
 
 const cancelVisit = async (id) => {
   const token = localStorage.getItem("access_token");
-
   const response = await fetch(
     `http://localhost:8000/api/visits/${id}/`,
     {
@@ -481,23 +1021,17 @@ const cancelVisit = async (id) => {
 /* ================= COMPONENT ================= */
 
 const VisitsList = ({ userRole = "locataire" }) => {
-
   const [visits, setVisits] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [filter, setFilter] = useState("all");
-
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
   const [showRefuseModal, setShowRefuseModal] = useState(false);
   const [selectedVisit, setSelectedVisit] = useState(null);
   const [refuseMessage, setRefuseMessage] = useState("");
-  const { t, language, theme } = useTheme();
-
+  
+  const { t, language } = useTheme();
   const navigate = useNavigate();
-
-  /* ================= LOAD VISITS ================= */
 
   useEffect(() => {
     loadVisits();
@@ -507,40 +1041,37 @@ const VisitsList = ({ userRole = "locataire" }) => {
     try {
       setLoading(true);
       setError("");
-
       const data = await fetchVisits();
-
       setVisits(Array.isArray(data) ? data : data.results || []);
-
     } catch {
-      setError("Erreur chargement visites");
+      setError(language === 'fr' ? "Erreur lors du chargement des visites" : "Error loading visits");
     } finally {
       setLoading(false);
     }
   };
 
-  /* ================= ACTIONS ================= */
-
   const handleConfirm = async (id) => {
     try {
       await confirmVisit(id);
-      setSuccess("Visite confirmée");
+      setSuccess(language === 'fr' ? "Visite confirmée" : "Visit confirmed");
       loadVisits();
+      setTimeout(() => setSuccess(""), 4000);
     } catch {
-      setError("Erreur confirmation");
+      setError(language === 'fr' ? "Erreur confirmation" : "Confirmation error");
     }
   };
 
   const handleCancel = async (id) => {
-
-    if (!window.confirm("Annuler cette visite ?")) return;
+    const confirmMsg = language === 'fr' ? "Annuler cette visite ?" : "Cancel this visit?";
+    if (!window.confirm(confirmMsg)) return;
 
     try {
       await cancelVisit(id);
-      setSuccess("Visite annulée");
+      setSuccess(language === 'fr' ? "Visite annulée" : "Visit cancelled");
       loadVisits();
+      setTimeout(() => setSuccess(""), 4000);
     } catch {
-      setError("Erreur annulation");
+      setError(language === 'fr' ? "Erreur annulation" : "Cancellation error");
     }
   };
 
@@ -550,37 +1081,27 @@ const VisitsList = ({ userRole = "locataire" }) => {
   };
 
   const handleRefuseSubmit = async () => {
-
     try {
       await refuseVisit(selectedVisit.id, refuseMessage);
-
       setShowRefuseModal(false);
       setRefuseMessage("");
-
-      setSuccess("Visite refusée");
-
+      setSuccess(language === 'fr' ? "Visite refusée" : "Visit refused");
       loadVisits();
-
+      setTimeout(() => setSuccess(""), 4000);
     } catch {
-      setError("Erreur refus");
+      setError(language === 'fr' ? "Erreur refus" : "Error refusing visit");
     }
   };
 
-  /* ================= STATUS ================= */
-
   const getStatusBadge = (status) => {
-
     const badges = {
-      attente: { text: "En attente", class: "status-waiting" },
-      confirme: { text: "Confirmée", class: "status-confirmed" },
-      refuse: { text: "Refusée", class: "status-refused" },
-      annule: { text: "Annulée", class: "status-cancelled" }
+      attente: { text: language === 'fr' ? "En attente" : "Pending", class: "status-waiting" },
+      confirme: { text: language === 'fr' ? "Confirmée" : "Confirmed", class: "status-confirmed" },
+      refuse: { text: language === 'fr' ? "Refusée" : "Refused", class: "status-refused" },
+      annule: { text: language === 'fr' ? "Annulée" : "Cancelled", class: "status-cancelled" }
     };
-
     return badges[status] || badges.attente;
   };
-
-  /* ================= DATES ================= */
 
   const isUpcoming = (visit) => {
     const visitDate = new Date(`${visit.date}T${visit.time}`);
@@ -592,307 +1113,233 @@ const VisitsList = ({ userRole = "locataire" }) => {
     return visitDate < new Date();
   };
 
-  /* ================= FILTER ================= */
-
   const filteredVisits = visits.filter((visit) => {
-
     if (filter === "waiting") return visit.status === "attente";
-
     if (filter === "confirmed") return visit.status === "confirme";
-
     if (filter === "refused") return visit.status === "refuse";
-
     if (filter === "cancelled") return visit.status === "annule";
-
     if (filter === "upcoming") return isUpcoming(visit);
-
     if (filter === "past") return isPast(visit);
-
     return true;
   });
 
-  /* ================= STATS ================= */
-
   const stats = {
-
     total: visits.length,
-
     waiting: visits.filter(v => v.status === "attente").length,
-
     confirmed: visits.filter(v => v.status === "confirme").length,
-
     refused: visits.filter(v => v.status === "refuse").length,
-
     cancelled: visits.filter(v => v.status === "annule").length,
-
     upcoming: visits.filter(v => isUpcoming(v)).length,
-
-    past: visits.filter(v => isPast(v)).length
   };
 
-  /* ================= LOADING ================= */
-
   if (loading) {
-
     return (
       <div className="visits-loading">
         <div className="spinner"></div>
-        <p>{t('visits_loading')}</p>
+        <p>{t('visits_loading') || (language === 'fr' ? 'Chargement...' : 'Loading...')}</p>
       </div>
     );
   }
 
-  /* ================= RENDER ================= */
-
   return (
-
     <div className="visits-container">
-
       <div className="visits-header">
-
-        {/* <h2>
-          {userRole === "proprietaire"
-            ? "Demandes de Visites"
-            : "Mes Visites"}
-        </h2> */}
         <h2>
-  {userRole === "proprietaire" ? t('visits_title_owner') : t("visits_title_tenant")}
-</h2>
-
+          {userRole === "proprietaire" 
+            ? (t('visits_title_owner') || "Demandes de Visites") 
+            : (t("visits_title_tenant") || "Mes Visites")}
+        </h2>
       </div>
 
-      {/* ================= STATS ================= */}
-
+      {/* ================= STATS (Correction layout & overflows) ================= */}
       <div className="visits-stats">
-
-        <div className="stat-card" onClick={() => setFilter("all")}>
+        <div className={`stat-card ${filter === "all" ? "active-stat" : ""}`} onClick={() => setFilter("all")}>
           <div className="stat-number">{stats.total}</div>
-<div className="stat-label">{t("visits_stats_total")}</div>
+          <div className="stat-label">{t("visits_stats_total") || "Total"}</div>
         </div>
 
-        <div className="stat-card orange" onClick={() => setFilter("waiting")}>
+        <div className={`stat-card orange ${filter === "waiting" ? "active-stat" : ""}`} onClick={() => setFilter("waiting")}>
           <div className="stat-number">{stats.waiting}</div>
-<div className="stat-label">{t("visits_stats_waiting")}</div>
+          <div className="stat-label">{t("visits_stats_waiting") || (language === 'fr' ? "En attente" : "Pending")}</div>
         </div>
 
-        <div className="stat-card green" onClick={() => setFilter("confirmed")}>
+        <div className={`stat-card green ${filter === "confirmed" ? "active-stat" : ""}`} onClick={() => setFilter("confirmed")}>
           <div className="stat-number">{stats.confirmed}</div>
-<div className="stat-label">{t("visits_stats_confirmed")}</div>
+          <div className="stat-label">{t("visits_stats_confirmed") || (language === 'fr' ? "Confirmées" : "Confirmed")}</div>
         </div>
 
-        <div className="stat-card red" onClick={() => setFilter("refused")}>
+        <div className={`stat-card red ${filter === "refused" ? "active-stat" : ""}`} onClick={() => setFilter("refused")}>
           <div className="stat-number">{stats.refused}</div>
-<div className="stat-label">{t("visits_stats_refused")}</div>
+          <div className="stat-label">{t("visits_stats_refused") || (language === 'fr' ? "Refusées" : "Refused")}</div>
         </div>
 
-        <div className="stat-card gray" onClick={() => setFilter("cancelled")}>
+        <div className={`stat-card gray ${filter === "cancelled" ? "active-stat" : ""}`} onClick={() => setFilter("cancelled")}>
           <div className="stat-number">{stats.cancelled}</div>
-<div className="stat-label">{t("visits_stats_cancelled")}</div>
+          <div className="stat-label">{t("visits_stats_cancelled") || (language === 'fr' ? "Annulées" : "Cancelled")}</div>
         </div>
 
-        <div className="stat-card blue" onClick={() => setFilter("upcoming")}>
+        <div className={`stat-card blue ${filter === "upcoming" ? "active-stat" : ""}`} onClick={() => setFilter("upcoming")}>
           <div className="stat-number">{stats.upcoming}</div>
-<div className="stat-label">{t("visits_stats_upcoming")}</div>        </div>
-
+          <div className="stat-label">{t("visits_stats_upcoming") || (language === 'fr' ? "À venir" : "Upcoming")}</div>
+        </div>
       </div>
 
-      {/* ================= FILTERS ================= */}
-
+      {/* ================= FILTERS BUTTONS ================= */}
       <div className="visits-filters">
-
-        <button
-          className={`filter-btn ${filter === "all" ? "active" : ""}`}
-          onClick={() => setFilter("all")}
-        >
-          {t("visits_filter_all")}
+        <button className={`filter-btn ${filter === "all" ? "active" : ""}`} onClick={() => setFilter("all")}>
+          {t("visits_filter_all") || "Toutes"}
         </button>
-
-        <button
-          className={`filter-btn ${filter === "waiting" ? "active" : ""}`}
-          onClick={() => setFilter("waiting")}
-        >
-          {t("visits_filter_waiting")} 
+        <button className={`filter-btn ${filter === "waiting" ? "active" : ""}`} onClick={() => setFilter("waiting")}>
+          {t("visits_filter_waiting") || (language === 'fr' ? "En attente" : "Pending")}
         </button>
-
-        <button
-          className={`filter-btn ${filter === "confirmed" ? "active" : ""}`}
-          onClick={() => setFilter("confirmed")}
-        >
-          {t("visits_filter_confirmed")}
+        <button className={`filter-btn ${filter === "confirmed" ? "active" : ""}`} onClick={() => setFilter("confirmed")}>
+          {t("visits_filter_confirmed") || (language === 'fr' ? "Confirmées" : "Confirmed")}
         </button>
-
-        <button
-          className={`filter-btn ${filter === "refused" ? "active" : ""}`}
-          onClick={() => setFilter("refused")}
-        >
-          {t("visits_filter_refused")}
+        <button className={`filter-btn ${filter === "refused" ? "active" : ""}`} onClick={() => setFilter("refused")}>
+          {t("visits_filter_refused") || (language === 'fr' ? "Refusées" : "Refused")}
         </button>
-
-        <button
-          className={`filter-btn ${filter === "cancelled" ? "active" : ""}`}
-          onClick={() => setFilter("cancelled")}
-        >
-          {t("visits_filter_cancelled")}
+        <button className={`filter-btn ${filter === "cancelled" ? "active" : ""}`} onClick={() => setFilter("cancelled")}>
+          {t("visits_filter_cancelled") || (language === 'fr' ? "Annulées" : "Cancelled")}
         </button>
-
-        <button
-          className={`filter-btn ${filter === "upcoming" ? "active" : ""}`}
-          onClick={() => setFilter("upcoming")}
-        >
-        {t("visits_filter_upcoming")}
-        </button>
-
-        <button
-          className={`filter-btn ${filter === "past" ? "active" : ""}`}
-          onClick={() => setFilter("past")}
-        >
-          {t("visits_filter_past")}
-        </button>
-
       </div>
-
-      {/* ================= ALERTS ================= */}
 
       {error && <div className="alert alert-error">{error}</div>}
-
       {success && <div className="alert alert-success">{success}</div>}
 
       {/* ================= LIST ================= */}
-
       <div className="visits-list">
-
         {filteredVisits.length === 0 ? (
-
           <div className="empty-visits">
-            <p>{t("visits_empty")}</p>
+            <p>{t("visits_empty") || "Aucune visite à afficher."}</p>
           </div>
-
         ) : (
+          filteredVisits.map((visit) => {
+            // Résolution du problème d'affichage Web vs Mobile pour le texte
+            const messageContenu = visit.message || visit.booking_message || visit.description;
 
-          filteredVisits.map((visit) => (
+            return (
+              <div key={visit.id} className="visit-card">
+                <div className="visit-image">
+                  <img
+                    src={visit.housing_image || "/placeholder.jpg"}
+                    alt={visit.housing_title}
+                    onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=400&q=80"; }}
+                  />
+                  <span className={`visit-status-badge ${getStatusBadge(visit.status).class}`}>
+                    {getStatusBadge(visit.status).text}
+                  </span>
+                </div>
 
-            <div key={visit.id} className="visit-card">
+                <div className="visit-content">
+                  <div className="visit-card-header">
+                    <h3>{visit.housing_title}</h3>
+                    <p className="user-role-name">
+                      <strong>
+                        {userRole === "locataire"
+                          ? `${t("visits_label_owner") || "Propriétaire"}: `
+                          : `${t("visits_label_tenant") || "Locataire"}: `}
+                      </strong>
+                      {userRole === "locataire" ? visit.owner_name : visit.locataire_name}
+                    </p>
+                  </div>
 
-              <div className="visit-image">
+                  <div className="visit-info">
+                    <div className="info-item">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                      </svg>
+                      <span>{new Date(visit.date).toLocaleDateString(language === 'fr' ? "fr-FR" : "en-US")}</span>
+                    </div>
 
-                <img
-                  src={visit.housing_image || "/placeholder.jpg"}
-                  alt={visit.housing_title}
-                />
+                    <div className="info-item">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 16 14"></polyline>
+                      </svg>
+                      <span>{visit.time}</span>
+                    </div>
+                  </div>
 
-                <span
-                  className={`visit-status-badge ${getStatusBadge(visit.status).class}`}
-                >
-                  {getStatusBadge(visit.status).text}
-                </span>
+                  {/* Wrapper sécurisé contre les chaînes infinies de caractères */}
+                  {messageContenu && (
+                    <div className="visit-message">
+                      <strong>{language === 'fr' ? "Message de réservation" : "Reservation Message"}</strong>
+                      <p className="break-word-content">{messageContenu}</p>
+                    </div>
+                  )}
 
-              </div>
+                  {visit.refusal_message && (
+                    <div className="visit-response">
+                      <strong>{language === 'fr' ? "Raison du refus" : "Reason for refusal"}</strong>
+                      <p className="break-word-content">{visit.refusal_message}</p>
+                    </div>
+                  )}
 
-              <div className="visit-content">
-
-                <h3>{visit.housing_title}</h3>
-
-                <p>
-                  {userRole === "locataire"
-                    ? `${t("visits_label_owner")}: ${visit.owner_name}`
-                    : `${t("visits_label_tenant")}: ${visit.locataire_name}`}
-                </p>
-
-
-
-                <p> <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-//                       <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-//                       <line x1="16" y1="2" x2="16" y2="6"></line>
-//                       <line x1="8" y1="2" x2="8" y2="6"></line>
-//                       <line x1="3" y1="10" x2="21" y2="10"></line>
-//                     </svg>{new Date(visit.date).toLocaleDateString("fr-FR")}</p>
-
-                <p>  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-//                       <circle cx="12" cy="12" r="10"></circle>
-//                       <polyline points="12 6 12 12 16 14"></polyline>
-//                     </svg>{visit.time}</p>
-
-
-
-                <div className="visit-actions">
-
-                  {userRole === "proprietaire" &&
-                    visit.status === "attente" && (
+                  <div className="visit-actions">
+                    {userRole === "proprietaire" && visit.status === "attente" && (
                       <>
-                        <button
-                          className="btn btn-success btn-sm"
-                          onClick={() => handleConfirm(visit.id)}
-                        >
-                          {t("visits_label_confirm")}
+                        <button className="btn btn-success btn-sm" onClick={() => handleConfirm(visit.id)}>
+                          {t("visits_label_confirm") || "Confirmer"}
                         </button>
-
-                        <button
-                          className="btn btn-danger btn-sm"
-                          onClick={() => handleRefuseClick(visit)}
-                        >
-                          {t("visits_label_refuse")}
+                        <button className="btn btn-danger btn-sm" onClick={() => handleRefuseClick(visit)}>
+                          {t("visits_label_refuse") || "Refuser"}
                         </button>
                       </>
                     )}
 
-                  {userRole === "locataire" &&
-                    visit.status === "attente" && (
-                      <button
-                        className="btn btn-outline btn-sm"
-                        onClick={() => handleCancel(visit.id)}
-                      >
-                        {t("visits_label_cancel")}
+                    {userRole === "locataire" && visit.status === "attente" && (
+                      <button className="btn btn-outline btn-sm danger-outline" onClick={() => handleCancel(visit.id)}>
+                        {t("visits_label_cancel") || "Annuler la demande"}
                       </button>
                     )}
 
-                  <button
-                    className="btn btn-outline btn-sm"
-                    onClick={() => navigate(`/housing/${visit.housing}`)}
-                  >
-                    {t("visits_label_view_housing")}
-                  </button>
-
+                    <button className="btn btn-outline btn-sm main-outline" onClick={() => navigate(`/housing/${visit.housing}`)}>
+                      {t("visits_label_view_housing") || (language === 'fr' ? "Voir le logement" : "View Property")}
+                    </button>
+                  </div>
                 </div>
-
               </div>
-
-            </div>
-
-          ))
+            );
+          })
         )}
-
       </div>
 
       {/* ================= MODAL REFUS ================= */}
-
       {showRefuseModal && (
-
-        <div className="modal-overlay">
-
-          <div className="modal-content">
-
-            <h3>{t("visits_modal_title")}</h3>
-
-            <textarea
-              value={refuseMessage}
-              onChange={(e) => setRefuseMessage(e.target.value)}
-              placeholder={t("visits_modal_placeholder")}
-            />
-
-            <button onClick={handleRefuseSubmit}>
-              {t("visits_modal_submit")}
-            </button>
-
-            <button onClick={() => setShowRefuseModal(false)}>
-              {t("visits_modal_cancel")}
-            </button>
-
+        <div className="modal-overlay" onClick={() => setShowRefuseModal(false)}>
+          <div className="modal-content visit-refuse-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>{t("visits_modal_title") || (language === 'fr' ? "Refuser la visite" : "Refuse Visit")}</h3>
+              <button className="close-btn" onClick={() => setShowRefuseModal(false)}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+            <div className="modal-body">
+              <p>{language === 'fr' ? "Indiquez un motif de refus :" : "Provide a reason for refusal:"}</p>
+              <textarea
+                value={refuseMessage}
+                onChange={(e) => setRefuseMessage(e.target.value)}
+                placeholder={t("visits_modal_placeholder") || "Optionnel..."}
+                rows="4"
+              />
+            </div>
+            <div className="modal-actions">
+              <button className="btn btn-outline" onClick={() => setShowRefuseModal(false)}>
+                {t("visits_modal_cancel") || "Annuler"}
+              </button>
+              <button className="btn btn-danger" onClick={handleRefuseSubmit}>
+                {t("visits_modal_submit") || "Confirmer le refus"}
+              </button>
+            </div>
           </div>
-
         </div>
-
       )}
-
     </div>
   );
 };
