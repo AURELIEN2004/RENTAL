@@ -292,8 +292,14 @@
   background: var(--sp-border);
   flex-shrink: 0;
 }
-.sp-dp-img img { width: 100%; height: 100%; object-fit: cover; }
-.sp-dp-emoji   { font-size: 65px; }
+.sp-dp-img img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.sp-dp-emoji   { font-size: 65px; position: relative; z-index: 0; }
 .sp-dp-img-ov  {
   position: absolute; inset: 0;
   background: linear-gradient(to bottom, rgba(0,0,0,.05) 30%, rgba(13,17,23,.85));
@@ -583,52 +589,220 @@
 .sp-toast .fa-circle-exclamation{ color: var(--sp-red); flex-shrink: 0; }
 .sp-toast .fa-circle-info       { color: var(--sp-blue); flex-shrink: 0; }
 
-/* ─── RESPONSIVE ─────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   MAP CARD OVERLAY — remplace DetailPanel
+   Aperçu identique à la vue Liste (utilise HousingCard)
+   ══════════════════════════════════════════════════════════ */
+
+.sp-map-overlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 370px;
+  height: 100%;
+  background: var(--sp-bg);
+  border-left: 1px solid var(--sp-border);
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  animation: sp-slideInRight .28s cubic-bezier(.4,0,.2,1);
+  overflow: hidden;
+}
+@keyframes sp-slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+/* ── En-tête overlay ─────────────────────────────────────── */
+.sp-map-overlay-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--sp-border);
+  flex-shrink: 0;
+  background: var(--sp-bg2);
+}
+.sp-map-overlay-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--sp-t2);
+}
+.sp-map-overlay-close {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--sp-border);
+  border-radius: 7px;
+  background: transparent;
+  color: var(--sp-t2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  transition: var(--sp-tr);
+}
+.sp-map-overlay-close:hover {
+  border-color: var(--sp-red);
+  color: var(--sp-red);
+  background: rgba(248,81,73,.08);
+}
+
+/* ── Carte logement (zone scrollable) ────────────────────── */
+.sp-map-overlay-card {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+}
+.sp-map-overlay-card::-webkit-scrollbar { width: 3px; }
+.sp-map-overlay-card::-webkit-scrollbar-thumb {
+  background: var(--sp-border2);
+  border-radius: 2px;
+}
+
+/* ── Forcer HousingCard en mode colonne dans l'overlay ───── */
+.sp-map-overlay-card .housing-card {
+  display: block;
+  width: 100%;
+}
+
+/* ── Boutons extra sous la carte ─────────────────────────── */
+.sp-map-overlay-actions {
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid var(--sp-border);
+  flex-shrink: 0;
+  background: var(--sp-bg);
+}
+
+.sp-ov-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 11px;
+  border-radius: 9px;
+  border: none;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--sp-tr);
+  width: 100%;
+}
+.sp-ov-btn--itin {
+  background: rgba(245,158,11,.15);
+  border: 1px solid #F59E0B;
+  color: #F59E0B;
+}
+.sp-ov-btn--itin:hover {
+  background: rgba(245,158,11,.28);
+}
+.sp-ov-btn--visit {
+  background: var(--sp-acc);
+  border: 1px solid var(--sp-acc);
+  color: #fff;
+}
+.sp-ov-btn--visit:hover {
+  background: #059669;
+}
+
+/* ══════════════════════════════════════════════════════════
+   VUE MIXTE (SPLIT) — Colonne liste avec HousingCard
+   ══════════════════════════════════════════════════════════ */
+
+/* Override colonne liste : scroll vertical, HousingCard pleine largeur */
+.sp-map-layout--split .sp-map-list-col {
+  width: 380px;
+  min-width: 380px;
+  background: var(--sp-bg);
+  border-right: 1px solid var(--sp-border);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.sp-map-layout--split .sp-map-list-col::-webkit-scrollbar { width: 3px; }
+.sp-map-layout--split .sp-map-list-col::-webkit-scrollbar-thumb {
+  background: var(--sp-border2);
+  border-radius: 2px;
+}
+
+/* Wrapper pour chaque carte dans split view */
+.sp-split-card-wrap {
+  margin-bottom: 10px;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: var(--sp-tr);
+  cursor: pointer;
+}
+.sp-split-card-wrap:hover {
+  transform: translateY(-2px);
+}
+/* Carte sélectionnée (celle dont le marker est actif sur la carte) */
+.sp-split-card-wrap--sel {
+  outline: 2px solid var(--sp-acc);
+  outline-offset: 0px;
+  box-shadow: 0 0 0 4px var(--sp-acc2);
+}
+/* HousingCard pleine largeur dans la colonne */
+.sp-split-card-wrap .housing-card {
+  width: 100%;
+  margin: 0;
+}
+
+/* ── Responsive split ──────────────────────────────────────── */
 @media (max-width: 900px) {
   .sp-map-layout--split .sp-map-list-col {
-    width: 280px;
-    min-width: 280px;
+    width: 320px;
+    min-width: 320px;
   }
+  .sp-map-overlay { width: 320px; }
 }
 
 @media (max-width: 700px) {
-  .sp-map-layout {
-    flex-direction: column;
-    height: calc(100vh - 160px);
-  }
+  .sp-map-layout { flex-direction: column; height: calc(100vh - 160px); }
+
   .sp-map-layout--split .sp-map-list-col {
     width: 100%;
     min-width: 100%;
-    height: 40%;
+    height: 45%;
     border-right: none;
     border-bottom: 1px solid var(--sp-border);
     flex-direction: row;
     overflow-x: auto;
     overflow-y: hidden;
     padding: 8px;
+    gap: 8px;
   }
-  .sp-map-col { height: 60%; }
-  .sp-dp {
+  /* Cartes en mode horizontal sur mobile */
+  .sp-map-layout--split .sp-split-card-wrap {
+    min-width: 260px;
+    max-width: 260px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+  .sp-map-col { height: 55%; }
+
+  /* Overlay en bas sur mobile */
+  .sp-map-overlay {
     width: 100%;
-    top: auto; bottom: 0;
-    height: 80%;
+    top: auto;
+    bottom: 0;
+    height: 75%;
     border-left: none;
     border-top: 1px solid var(--sp-border);
-    animation: sp-slideUp .32s cubic-bezier(.4,0,.2,1);
+    animation: sp-slideUp .28s cubic-bezier(.4,0,.2,1);
   }
-  .sp-cmp-row { grid-template-columns: 100px repeat(2, 1fr); }
+
+  .sp-cmp-row { grid-template-columns: 100px repeat(2,1fr); }
   .sp-view-toggle { width: 100%; }
-  .sp-view-btn    { flex: 1; justify-content: center; }
+  .sp-view-btn { flex: 1; justify-content: center; }
 }
-
-
-
-/* ============================================================
-   AJOUTS SearchPageMap.css
-   Collez ces styles À LA FIN de votre SearchPageMap.css
-   ============================================================ */
-
-/* ─── Bouton "Voir plus" dans le header du panneau ──────── */
 .sp-dp-see-more {
   display: flex;
   align-items: center;
@@ -675,73 +849,84 @@
   grid-column: span 2;
 }
 .sp-dp-btn--details:hover {
-  background: rgba(16,185,129,.25);
+  background: rgba(16,185,129,.28);
   color: var(--sp-acc);
   border-color: var(--sp-acc);
 }
 
-/* ─── Correction grid actions (5 boutons) ────────────────── */
-/* Favoris + Comparer sur une ligne, puis les 3 grands dessous */
+/* ─── Feature tag "voir plus" ────────────────────────────── */
+.sp-dp-feat--more {
+  color: var(--sp-acc);
+  border-color: var(--sp-acc);
+  background: var(--sp-acc2);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* ─── Bouton détail dans MiniCard ────────────────────────── */
+.sp-mini-detail-btn {
+  margin-left: auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  background: var(--sp-acc2);
+  border: 1px solid var(--sp-acc);
+  color: var(--sp-acc);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  transition: var(--sp-tr);
+  flex-shrink: 0;
+}
+.sp-mini-detail-btn:hover { background: rgba(16,185,129,.3); }
+
+/* ─── Fix boutons actions (5 boutons) ────────────────────── */
 .sp-dp-actions {
   padding: 0 18px 18px;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 7px;
 }
-/* Les 3 boutons full-width */
 .sp-dp-btn--itin,
 .sp-dp-btn--details,
 .sp-dp-btn--primary { grid-column: span 2; }
 
-
-
-
-
-
-/*
-.sp-dp-see-more {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 10px;
-  background: var(--sp-acc2);
-  border: 1px solid var(--sp-acc);
-  border-radius: 6px;
-  color: var(--sp-acc);
-  font-size: 11px;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  transition: var(--sp-tr);
-}
-.sp-dp-see-more:hover {
-  background: rgba(16,185,129,.3);
+/* ─── Responsive ─────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .sp-map-layout--split .sp-map-list-col {
+    width: 280px;
+    min-width: 280px;
+  }
 }
 
-.sp-dp-click-hint {
-  position: absolute;
-  bottom: 50px;
-  right: 12px;
-  background: rgba(0,0,0,.6);
-  color: rgba(255,255,255,.8);
-  font-size: 10px;
-  padding: 4px 8px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  z-index: 2;
-  pointer-events: none;
+@media (max-width: 700px) {
+  .sp-map-layout {
+    flex-direction: column;
+    height: calc(100vh - 160px);
+  }
+  .sp-map-layout--split .sp-map-list-col {
+    width: 100%;
+    min-width: 100%;
+    height: 40%;
+    border-right: none;
+    border-bottom: 1px solid var(--sp-border);
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 8px;
+  }
+  .sp-map-col { height: 60%; }
+  .sp-dp {
+    width: 100%;
+    top: auto; bottom: 0;
+    height: 80%;
+    border-left: none;
+    border-top: 1px solid var(--sp-border);
+    animation: sp-slideUp .32s cubic-bezier(.4,0,.2,1);
+  }
+  .sp-cmp-row { grid-template-columns: 100px repeat(2, 1fr); }
+  .sp-view-toggle { width: 100%; }
+  .sp-view-btn    { flex: 1; justify-content: center; }
 }
-
-.sp-dp-btn--details {
-  border-color: var(--sp-acc);
-  color: var(--sp-acc);
-  background: var(--sp-acc2);
-  grid-column: span 2;
-}
-.sp-dp-btn--details:hover {
-  background: rgba(16,185,129,.25);
-  color: var(--sp-acc);
-}
-*/
