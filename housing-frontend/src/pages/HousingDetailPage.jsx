@@ -507,6 +507,12 @@
 //   }, [housing, searchParams]); // eslint-disable-line
 
 //   const loadHousingDetail = async () => {
+// const response = await fetch(`/api/housings/${id}?lang=${language}`);
+// if (!response.ok) {
+//   throw new Error('Network response was not ok');
+// }
+// const housingData = await response.json();
+// setHousing(housingData);
 //     setLoading(true);
 //     try {
 //       const data = await housingService.getHousing(id);

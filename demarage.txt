@@ -1,0 +1,6 @@
+cd housing-backend  
+.\venv\Scripts\Activate
+ python manage.py runserver
+
+cd housing-frontend 
+npm run dev  
