@@ -1192,14 +1192,41 @@ const HousingDetailPage = () => {
   };
 
   // ── Contact ───────────────────────────────────────────────
+  // const handleContactOwner = async () => {
+  //   if (!user) { toast.error(t('loginRequired') || 'Connectez-vous'); navigate('/login'); return; }
+  //   try {
+  //     await housingService.startConversation(id);
+  //     navigate('/dashboard/messages');
+  //     toast.success(t('conversationStarted') || 'Conversation démarrée');
+  //   } catch { toast.error('Erreur'); }
+  // };
   const handleContactOwner = async () => {
-    if (!user) { toast.error(t('loginRequired') || 'Connectez-vous'); navigate('/login'); return; }
-    try {
+  if (!user) {
+    navigate('/login');
+    return;
+  }
+
+  try {
+    console.log("Début création conversation");
+
+    const conversation =
       await housingService.startConversation(id);
-      navigate('/dashboard/messages');
-      toast.success(t('conversationStarted') || 'Conversation démarrée');
-    } catch { toast.error('Erreur'); }
-  };
+
+    console.log(
+      "Conversation créée :",
+      conversation
+    );
+
+    console.log(
+      "Redirection vers dashboard messages"
+    );
+
+    navigate('/dashboard?tab=messages');
+
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   // ── Visite ────────────────────────────────────────────────
   const handlePlanVisit = async (e) => {

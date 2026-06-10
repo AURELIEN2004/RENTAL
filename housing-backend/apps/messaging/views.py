@@ -34,6 +34,8 @@ class ConversationViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['post'])
     def start(self, request):
         """Démarrer une conversation sur un logement"""
+        # print("USER =", request.user)
+        # print("DATA =", request.data)
         housing_id = request.data.get('housing_id')
         
         if not housing_id:

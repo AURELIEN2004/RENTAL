@@ -709,6 +709,24 @@
 
 // export default ProprietaireDashboard;
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // src/components/dashboard/ProprietaireDashboard.jsx
 // ============================================================
 // Refactorisé pour utiliser DashboardShell (sidebar drawer mobile)
