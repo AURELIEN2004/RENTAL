@@ -189,6 +189,18 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
 // src/pages/Home.jsx — VERSION CORRIGÉE
 // Fix 1 : déduplication (un logement ne peut apparaître qu'une fois)
 // Fix 2 : limite stricte à 3 suggestions
