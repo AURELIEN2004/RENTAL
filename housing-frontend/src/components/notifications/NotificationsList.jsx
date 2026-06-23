@@ -1180,6 +1180,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './NotificationsList.css';
 import { useTheme } from '../../contexts/ThemeContext';
+import { FaEye, FaTrashAlt } from 'react-icons/fa';
 
 const API_BASE = 'http://localhost:8000/api';
 
@@ -1521,7 +1522,7 @@ const NotificationsList = ({ compact = false }) => {
                     <span className="notification-time">
                       {formatTime(notification.created_at)}
                     </span>
-                    <div className="notification-actions">
+                    {/* <div className="notification-actions">
                       {notification.link && (
                         <button
                           className="notification-link"
@@ -1542,7 +1543,32 @@ const NotificationsList = ({ compact = false }) => {
                       >
                         ✕
                       </button>
-                    </div>
+                    </div> */}
+                             <div className="notification-actions">
+  {notification.link && (
+    <button
+      className="notification-link"
+      onClick={(e) => {
+        e.stopPropagation();
+        handleViewNotification(notification);
+      }}
+    >
+      <FaEye />
+      <span>{t('notif_view')}</span>
+    </button>
+  )}
+
+  <button
+    className="notification-delete"
+    onClick={(e) => {
+      e.stopPropagation();
+      handleDeleteNotification(notification.id);
+    }}
+    aria-label="Delete notification"
+  >
+    <FaTrashAlt />
+  </button>
+</div>
                   </div>
                 </div>
 

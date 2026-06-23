@@ -755,22 +755,33 @@
   margin: 0;
 }
 
-/* ── Responsive split ──────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════
+   RESPONSIVE — Vue Carte / Mixte (split)
+   ══════════════════════════════════════════════════════════ */
+
+/* ── Tablette ── */
 @media (max-width: 900px) {
   .sp-map-layout--split .sp-map-list-col {
-    width: 320px;
-    min-width: 320px;
+    width: 300px;
+    min-width: 300px;
   }
   .sp-map-overlay { width: 320px; }
+  .sp-map-stats { font-size: 0.85rem; }
 }
 
+/* ── Mobile : la carte passe en colonne (liste au-dessus, carte en dessous) ── */
 @media (max-width: 700px) {
-  .sp-map-layout { flex-direction: column; height: calc(100vh - 160px); }
+  .sp-map-layout {
+    flex-direction: column;
+    height: calc(100vh - 220px);
+    min-height: 420px;
+  }
 
+  /* Colonne liste devient une bande horizontale scrollable en haut */
   .sp-map-layout--split .sp-map-list-col {
     width: 100%;
     min-width: 100%;
-    height: 45%;
+    height: 42%;
     border-right: none;
     border-bottom: 1px solid var(--sp-border);
     flex-direction: row;
@@ -778,30 +789,95 @@
     overflow-y: hidden;
     padding: 8px;
     gap: 8px;
+    -webkit-overflow-scrolling: touch;
   }
-  /* Cartes en mode horizontal sur mobile */
+  .sp-map-layout--split .sp-map-list-col::-webkit-scrollbar { height: 3px; width: auto; }
+
+  /* Cards en mode horizontal (carrousel) sur mobile */
   .sp-map-layout--split .sp-split-card-wrap {
-    min-width: 260px;
-    max-width: 260px;
+    min-width: 250px;
+    max-width: 250px;
     margin-bottom: 0;
     flex-shrink: 0;
   }
-  .sp-map-col { height: 55%; }
+  .sp-split-card-wrap .housing-card { height: 100%; }
 
-  /* Overlay en bas sur mobile */
+  /* Carte occupe le reste de l'espace */
+  .sp-map-col { height: 58%; }
+
+  /* Stats au-dessus de la carte : compactes */
+  .sp-map-stats {
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    padding: 8px 12px;
+    font-size: 0.78rem;
+  }
+
+  /* Bouton géolocalisation plus petit et bien positionné */
+  .sp-map-locate-btn {
+    width: 38px;
+    height: 38px;
+    bottom: 12px;
+    right: 12px;
+  }
+
+  /* Overlay (aperçu logement) : remonte du bas en plein écran sur mobile */
   .sp-map-overlay {
     width: 100%;
     top: auto;
     bottom: 0;
-    height: 75%;
+    height: 78%;
     border-left: none;
     border-top: 1px solid var(--sp-border);
+    border-radius: 16px 16px 0 0;
     animation: sp-slideUp .28s cubic-bezier(.4,0,.2,1);
   }
+  .sp-map-overlay-head { padding: 12px 14px; }
+  .sp-map-overlay-title { font-size: 12px; }
+  .sp-map-overlay-head-actions { gap: 6px; }
+  .sp-map-overlay-hide span,
+  .sp-map-overlay-hide { font-size: 11px; padding: 6px 8px; }
+  .sp-map-overlay-actions { padding: 10px 12px 12px; }
+  .sp-ov-btn { font-size: 12px; padding: 10px; }
 
+  /* Bouton flottant de réouverture de l'aperçu : repositionné pour mobile */
+  .sp-map-overlay-reopen {
+    top: auto;
+    bottom: 14px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    font-size: 12px;
+    padding: 8px 16px;
+  }
+
+  /* Itinéraire en plein écran bas sur mobile */
+  .sp-itin { width: 100%; left: 0; right: 0; }
+
+  /* Comparaison : colonnes resserrées */
   .sp-cmp-row { grid-template-columns: 100px repeat(2,1fr); }
+
+  /* Toggle de vue (Liste/Carte/Mixte) pleine largeur, boutons centrés */
   .sp-view-toggle { width: 100%; }
   .sp-view-btn { flex: 1; justify-content: center; }
+
+  /* Toasts adaptés à la largeur de l'écran */
+  .sp-toast-wrap { left: 12px; right: 12px; width: auto; }
+  .sp-toast { width: 100%; }
+
+  /* Bandeau de comparaison flottant : compact */
+  .sp-cmp-strip { flex-wrap: wrap; padding: 10px 12px; gap: 8px; }
+  .sp-cmp-strip-btn { font-size: 12px; padding: 7px 12px; }
+}
+
+/* ── Très petit mobile ── */
+@media (max-width: 380px) {
+  .sp-map-layout--split .sp-split-card-wrap {
+    min-width: 220px;
+    max-width: 220px;
+  }
+  .sp-map-stats { font-size: 0.72rem; gap: 6px 10px; }
+  .sp-map-overlay-hide span { display: none; } /* garde juste l'icône */
 }
 .sp-dp-see-more {
   display: flex;
@@ -894,39 +970,99 @@
 .sp-dp-btn--primary { grid-column: span 2; }
 
 /* ─── Responsive ─────────────────────────────────────────── */
-@media (max-width: 900px) {
-  .sp-map-layout--split .sp-map-list-col {
-    width: 280px;
-    min-width: 280px;
-  }
+
+/* ══════════════════════════════════════════════════════════
+   HOVER SYNC — Marker survolé depuis la liste (et vice versa)
+   ══════════════════════════════════════════════════════════ */
+
+/* Marker en état hover (survolé depuis la carte ou depuis la liste) */
+.sp-mk--hover {
+  background: var(--sp-gold) !important;
+  transform: scale(1.18) !important;
+  box-shadow: 0 4px 18px rgba(245,158,11,.55) !important;
+  z-index: 1000 !important;
+  border-color: #fff !important;
 }
 
-@media (max-width: 700px) {
-  .sp-map-layout {
-    flex-direction: column;
-    height: calc(100vh - 160px);
-  }
-  .sp-map-layout--split .sp-map-list-col {
-    width: 100%;
-    min-width: 100%;
-    height: 40%;
-    border-right: none;
-    border-bottom: 1px solid var(--sp-border);
-    flex-direction: row;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 8px;
-  }
-  .sp-map-col { height: 60%; }
-  .sp-dp {
-    width: 100%;
-    top: auto; bottom: 0;
-    height: 80%;
-    border-left: none;
-    border-top: 1px solid var(--sp-border);
-    animation: sp-slideUp .32s cubic-bezier(.4,0,.2,1);
-  }
-  .sp-cmp-row { grid-template-columns: 100px repeat(2, 1fr); }
-  .sp-view-toggle { width: 100%; }
-  .sp-view-btn    { flex: 1; justify-content: center; }
+/* Card dans la colonne split survolée (hover depuis la liste → marker) */
+.sp-split-card-wrap--hovered {
+  outline: 2px solid var(--sp-gold);
+  outline-offset: 0px;
+  box-shadow: 0 0 0 4px rgba(245,158,11,.18);
+  transform: translateY(-2px);
+  transition: all .18s ease;
 }
+
+/* Tooltip discret sur les markers au hover */
+.sp-mk--hover::after {
+  content: '👁 Voir';
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,.82);
+  color: #fff;
+  font-size: 10px;
+  padding: 3px 7px;
+  border-radius: 5px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* ══════════════════════════════════════════════════════════
+   OVERLAY — bouton masquer + bouton de réouverture flottant
+   ══════════════════════════════════════════════════════════ */
+
+.sp-map-overlay-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sp-map-overlay-hide {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  border: 1px solid var(--sp-border);
+  color: var(--sp-t2);
+  border-radius: 7px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--sp-tr);
+  white-space: nowrap;
+}
+.sp-map-overlay-hide:hover {
+  border-color: var(--sp-acc);
+  color: var(--sp-acc);
+  background: rgba(16,185,129,.08);
+}
+
+/* Bouton flottant pour ré-ouvrir l'aperçu quand il est masqué */
+.sp-map-overlay-reopen {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--sp-bg);
+  border: 1px solid var(--sp-border);
+  color: var(--sp-t1);
+  border-radius: 10px;
+  padding: 9px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,0,0,.25);
+  transition: var(--sp-tr);
+}
+.sp-map-overlay-reopen:hover {
+  border-color: var(--sp-acc);
+  color: var(--sp-acc);
+}
+
+/* Quand l'aperçu est masqué, la carte reprend toute la largeur (déjà le cas grâce à flex:1, on s'assure juste qu'il n'y a pas de résidu d'espace) */

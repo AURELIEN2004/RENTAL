@@ -154,6 +154,8 @@ dependencies:
 #   flutter_map: ^7.0.1
 #   latlong2: ^0.9.1
   speech_to_text: ^7.3.0
+  flutter_map: ^7.0.1
+  latlong2: ^0.9.1
   
   # Video
   video_player: ^2.8.2
