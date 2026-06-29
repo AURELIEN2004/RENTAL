@@ -1153,27 +1153,27 @@ const VisitsList = ({ userRole = "locataire" }) => {
 
       {/* ================= STATS (Correction layout & overflows) ================= */}
       <div className="visits-stats">
-        <div className={`stat-card ${filter === "all" ? "active-stat" : ""}`} onClick={() => setFilter("all")}>
+        <div className={`stat-card blue ${filter === "all" ? "active-stat" : ""}`} onClick={() => setFilter("all")}>
           <div className="stat-number">{stats.total}</div>
           <div className="stat-label">{t("visits_stats_total") || "Total"}</div>
         </div>
 
-        <div className={`stat-card orange ${filter === "waiting" ? "active-stat" : ""}`} onClick={() => setFilter("waiting")}>
+        <div className={`stat-card blue  ${filter === "waiting" ? "active-stat" : ""}`} onClick={() => setFilter("waiting")}>
           <div className="stat-number">{stats.waiting}</div>
           <div className="stat-label">{t("visits_stats_waiting") || (language === 'fr' ? "En attente" : "Pending")}</div>
         </div>
 
-        <div className={`stat-card green ${filter === "confirmed" ? "active-stat" : ""}`} onClick={() => setFilter("confirmed")}>
+        <div className={`stat-card blue  ${filter === "confirmed" ? "active-stat" : ""}`} onClick={() => setFilter("confirmed")}>
           <div className="stat-number">{stats.confirmed}</div>
           <div className="stat-label">{t("visits_stats_confirmed") || (language === 'fr' ? "Confirmées" : "Confirmed")}</div>
         </div>
 
-        <div className={`stat-card red ${filter === "refused" ? "active-stat" : ""}`} onClick={() => setFilter("refused")}>
+        <div className={`stat-card blue  ${filter === "refused" ? "active-stat" : ""}`} onClick={() => setFilter("refused")}>
           <div className="stat-number">{stats.refused}</div>
           <div className="stat-label">{t("visits_stats_refused") || (language === 'fr' ? "Refusées" : "Refused")}</div>
         </div>
 
-        <div className={`stat-card gray ${filter === "cancelled" ? "active-stat" : ""}`} onClick={() => setFilter("cancelled")}>
+        <div className={`stat-card blue ${filter === "cancelled" ? "active-stat" : ""}`} onClick={() => setFilter("cancelled")}>
           <div className="stat-number">{stats.cancelled}</div>
           <div className="stat-label">{t("visits_stats_cancelled") || (language === 'fr' ? "Annulées" : "Cancelled")}</div>
         </div>

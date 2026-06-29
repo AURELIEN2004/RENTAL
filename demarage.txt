@@ -4,3 +4,6 @@ cd housing-backend
 
 cd housing-frontend 
 npm run dev  
+
+cd housing_app 
+flutter run -d chrome

@@ -3,7 +3,7 @@
 .visits-container {
   background: var(--bg-primary, #111827); /* Valeur fallback sombre */
   border-radius: 16px;
-  padding: 24px;
+  padding: 14px;
   height: 100%;
 }
 
