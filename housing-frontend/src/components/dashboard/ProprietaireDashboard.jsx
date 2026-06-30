@@ -1080,4 +1080,4 @@ const ProprietaireDashboard = () => {
   );
 };
 
-export default ProprietaireDashboard;
+export default ProprietaireDashboard;   
