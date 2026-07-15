@@ -152,7 +152,7 @@ const Navbar = () => {
       <div className="navbar-container">
         {/* Logo */}
         <Link to="/" className="navbar-logo" onClick={() => setMobileMenuOpen(false)}>
-          <img src="/logo.png" alt="Logo" className="logo-img" />
+          {/* <img src="/logo.png" alt="Logo" className="logo-img" /> */}
           <span className="logo-text">
             Rent<span className="accent">AL</span>
           </span>

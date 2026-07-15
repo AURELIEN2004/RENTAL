@@ -98,12 +98,15 @@
   font-size:48px;
   font-weight:700;
   margin-bottom:15px;
+  color: #e5e7eb;
 }
 
 .hero-subtitle{
   font-size:18px;
   opacity:.9;
   margin-bottom:25px;
+    color: #e5e7eb;
+
 }
 
 .hero-actions{

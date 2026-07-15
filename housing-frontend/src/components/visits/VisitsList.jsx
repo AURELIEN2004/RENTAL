@@ -1151,7 +1151,7 @@ const VisitsList = ({ userRole = "locataire" }) => {
         </h2>
       </div>
 
-      {/* ================= STATS (Correction layout & overflows) ================= */}
+      {/* ================= STATS (Correction layout & overflows) =================
       <div className="visits-stats">
         <div className={`stat-card blue ${filter === "all" ? "active-stat" : ""}`} onClick={() => setFilter("all")}>
           <div className="stat-number">{stats.total}</div>
@@ -1182,7 +1182,7 @@ const VisitsList = ({ userRole = "locataire" }) => {
           <div className="stat-number">{stats.upcoming}</div>
           <div className="stat-label">{t("visits_stats_upcoming") || (language === 'fr' ? "À venir" : "Upcoming")}</div>
         </div>
-      </div>
+      </div> */}
 
       {/* ================= FILTERS BUTTONS ================= */}
       <div className="visits-filters">
