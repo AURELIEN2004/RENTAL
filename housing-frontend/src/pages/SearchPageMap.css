@@ -1,18 +1,6 @@
 /* ============================================================
    SearchPageMap.css
-   À importer dans SearchPage.jsx :
-     import './SearchPageMap.css';
-
-   Ce fichier contient UNIQUEMENT les nouveaux styles carte.
-   Votre SearchPage.css existant reste inchangé.
-
-   Pré-requis dans main.jsx / index.css (une seule fois) :
-     import 'leaflet/dist/leaflet.css';
-     import 'leaflet.markercluster/dist/MarkerCluster.css';
-     import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
-   ============================================================ */
-
-/* ─── TOKENS (synchronisés avec SearchPage.css) ─────────────
+ /* ─── TOKENS (synchronisés avec SearchPage.css) ─────────────
    Si votre SearchPage.css définit déjà ces variables,
    vous pouvez supprimer ce bloc :root             */
 :root {

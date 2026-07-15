@@ -3922,7 +3922,9 @@ const SearchPage = () => {
                   <div><div className="sp-map-stat-n">{mapHousings.length}</div><div className="sp-map-stat-l">{t.on_map}</div></div>
                 </div>
                 <MapContainer center={[3.848,11.502]} zoom={13} style={{width:'100%',height:'100%'}} zoomControl={false} attributionControl>
-                  <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                  {/* <TileLayer url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" */}
+                   <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+
                     attribution='© OSM © CARTO' subdomains="abcd" maxZoom={20}/>
                   <MapController housings={mapHousings} selectedId={selectedHousing?.id} hoveredId={hoveredId}
                     onSelect={handleSelectOnMap} onHover={handleHoverOnMap} userLoc={userLocation} route={route}/>
