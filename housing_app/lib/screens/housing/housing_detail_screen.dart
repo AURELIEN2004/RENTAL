@@ -2347,50 +2347,175 @@ class _HousingDetailScreenState extends State<HousingDetailScreen> {
     );
   }
 
-  // ── Équipements ───────────────────────────────────────────────────────────
-  Widget _buildEquipments(HousingModel h, bool isDark, AppL10n l10n) {
-    final textColor = isDark ? AppColors.textDark : AppColors.textLight;
-    final features  = (h.additionalFeatures ?? '')
-        .split(',')
-        .map((s) => s.trim())
-        .where((s) => s.isNotEmpty)
-        .toList();
-    if (features.isEmpty) return const SizedBox.shrink();
+  // // ── Équipements ───────────────────────────────────────────────────────────
+  // Widget _buildEquipments(HousingModel h, bool isDark, AppL10n l10n) {
+  //   final textColor = isDark ? AppColors.textDark : AppColors.textLight;
+  //   final features  = (h.additionalFeatures ?? '')
+  //       .split(',')
+  //       .map((s) => s.trim())
+  //       .where((s) => s.isNotEmpty)
+  //       .toList();
+  //   if (features.isEmpty) return const SizedBox.shrink();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // ✅ Traduit
-        Text(l10n.equipment,
-            style: TextStyle(
-                color: textColor, fontWeight: FontWeight.bold, fontSize: 16)),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 8, runSpacing: 8,
-          children: features
-              .map((f) => Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 7),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                          color: AppColors.primary.withOpacity(0.2)),
-                    ),
-                    child: Row(mainAxisSize: MainAxisSize.min, children: [
-                      const Icon(Icons.check_circle_outline_rounded,
-                          size: 14, color: AppColors.primary),
-                      const SizedBox(width: 5),
-                      Text(f,
-                          style: const TextStyle(
-                              color: AppColors.primary, fontSize: 12)),
-                    ]),
-                  ))
-              .toList(),
-        ),
-      ],
-    );
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.start,
+  //     children: [
+  //       // ✅ Traduit
+  //       Text(l10n.equipment,
+  //           style: TextStyle(
+  //               color: textColor, fontWeight: FontWeight.bold, fontSize: 16)),
+  //       const SizedBox(height: 12),
+  //       Wrap(
+  //         spacing: 8, runSpacing: 8,
+  //         children: features
+  //             .map((f) => Container(
+  //                   padding: const EdgeInsets.symmetric(
+  //                       horizontal: 14, vertical: 7),
+  //                   decoration: BoxDecoration(
+  //                     color: AppColors.primary.withOpacity(0.08),
+  //                     borderRadius: BorderRadius.circular(20),
+  //                     border: Border.all(
+  //                         color: AppColors.primary.withOpacity(0.2)),
+  //                   ),
+  //                   child: Row(mainAxisSize: MainAxisSize.min, children: [
+  //                     const Icon(Icons.check_circle_outline_rounded,
+  //                         size: 14, color: AppColors.primary),
+  //                     const SizedBox(width: 5),
+  //                     Text(f,
+  //                         style: const TextStyle(
+  //                             color: AppColors.primary, fontSize: 12)),
+  //                   ]),
+  //                 ))
+  //             .toList(),
+  //       ),
+  //     ],
+  //   );
+  // }
+  // ── Équipements ───────────────────────────────────────────────────────────
+Widget _buildEquipments(HousingModel h, bool isDark, AppL10n l10n) {
+
+  final textColor = isDark 
+      ? AppColors.textDark 
+      : AppColors.textLight;
+
+  final features = (h.additionalFeatures ?? '')
+      .split(',')
+      .map((s) => s.trim())
+      .where((s) => s.isNotEmpty)
+      .toList();
+
+
+  if (features.isEmpty) {
+    return const SizedBox.shrink();
   }
+
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+
+    children: [
+
+      Text(
+        l10n.equipment,
+        style: TextStyle(
+          color: textColor,
+          fontWeight: FontWeight.bold,
+          fontSize:16,
+        ),
+      ),
+
+
+      const SizedBox(height:12),
+
+
+      Wrap(
+        spacing:8,
+        runSpacing:8,
+
+
+        children: features.map((f)=>Container(
+
+          constraints: const BoxConstraints(
+            maxWidth: 300,
+          ),
+
+
+          padding: const EdgeInsets.symmetric(
+            horizontal:12,
+            vertical:8,
+          ),
+
+
+          decoration: BoxDecoration(
+
+            color:AppColors.primary.withOpacity(.08),
+
+            borderRadius:
+                BorderRadius.circular(20),
+
+            border:Border.all(
+              color:
+              AppColors.primary.withOpacity(.2),
+            ),
+          ),
+
+
+
+          child: Row(
+
+            mainAxisSize:MainAxisSize.min,
+
+            crossAxisAlignment:
+                CrossAxisAlignment.start,
+
+
+            children:[
+
+
+              const Icon(
+                Icons.check_circle_outline_rounded,
+                size:14,
+                color:AppColors.primary,
+              ),
+
+
+              const SizedBox(width:6),
+
+
+
+              Flexible(
+
+                child: Text(
+
+                  f,
+
+                  softWrap:true,
+
+                  overflow:
+                    TextOverflow.visible,
+
+
+                  style:
+                  const TextStyle(
+
+                    color:AppColors.primary,
+
+                    fontSize:12,
+
+                  ),
+                ),
+              )
+
+            ],
+          ),
+
+
+        )).toList(),
+      ),
+
+    ],
+  );
+}
 
   // ── Carte ─────────────────────────────────────────────────────────────────
   Widget _buildMapSection(HousingModel h, bool isDark, AppL10n l10n) {
