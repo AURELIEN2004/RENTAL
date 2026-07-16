@@ -259,3 +259,172 @@
     font-size: 0.95rem;
   }
 }
+
+
+
+
+/* ===========================================================
+   MES LOGEMENTS - VERSION COMPACTE & RESPONSIVE
+=========================================================== */
+
+/* Section */
+.dashboard-section{
+    padding:12px !important;
+    margin:0 !important;
+}
+
+/* Titre */
+.section-header-flex{
+    margin-bottom:10px;
+}
+
+/* Filtres */
+.housing-filter-header{
+    margin:8px 0 12px;
+}
+
+.category-filter-select{
+    min-width:180px;
+    max-width:240px;
+    padding:8px 12px;
+}
+
+/* Barre statistiques */
+.stats-bar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:14px;
+}
+
+.stat-item{
+    padding:10px;
+    min-width:90px;
+}
+
+/* ===========================================================
+   LISTE DES LOGEMENTS
+=========================================================== */
+
+.housing-list{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+    gap:14px;
+    margin:0;
+    padding:0;
+}
+
+/* Carte */
+.housing-item-owner{
+    margin:0;
+    padding:0;
+    display:flex;
+    flex-direction:column;
+}
+
+/* Boutons */
+.housing-actions{
+    display:flex;
+    gap:8px;
+    margin-top:8px;
+}
+
+.housing-actions .btn{
+    flex:1;
+    padding:8px;
+    font-size:.9rem;
+}
+
+/* ===========================================================
+   TABLETTE
+=========================================================== */
+
+@media (max-width:992px){
+
+    .dashboard-section{
+        padding:10px !important;
+    }
+
+    .housing-list{
+        grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+        gap:10px;
+    }
+
+    .stats-bar{
+        gap:6px;
+    }
+
+}
+
+/* ===========================================================
+   MOBILE
+=========================================================== */
+
+@media (max-width:768px){
+
+    .dashboard-section{
+        padding:8px !important;
+    }
+
+    .section-header-flex{
+        margin-bottom:8px;
+    }
+
+    .housing-filter-header{
+        margin-bottom:10px;
+    }
+
+    .category-filter-select{
+        width:100%;
+        max-width:100%;
+    }
+
+    .housing-list{
+        grid-template-columns:1fr;
+        gap:10px;
+    }
+
+    .housing-actions{
+        gap:6px;
+    }
+
+    .housing-actions .btn{
+        font-size:.85rem;
+        padding:8px;
+    }
+
+    .stats-bar{
+        display:grid;
+        grid-template-columns:repeat(2,1fr);
+        gap:8px;
+    }
+
+}
+
+/* ===========================================================
+   PETITS TELEPHONES
+=========================================================== */
+
+@media (max-width:480px){
+
+    .dashboard-section{
+        padding:6px !important;
+    }
+
+    .stats-bar{
+        grid-template-columns:1fr;
+    }
+
+    .stat-item{
+        padding:8px;
+    }
+
+    .housing-actions{
+        flex-direction:column;
+    }
+
+    .housing-actions .btn{
+        width:100%;
+    }
+
+}

@@ -442,3 +442,125 @@
     padding: 12px;
   }
 }
+
+/* ajout */
+
+/* ==========================================================
+   FIX CONFLIT AVEC ADMIN DASHBOARD
+========================================================== */
+
+.visibility-management .housings-list{
+    display:flex !important;
+    flex-direction:column !important;
+    gap:18px !important;
+}
+
+.visibility-management .housing-visibility-card{
+    display:grid !important;
+    grid-template-columns:180px 1fr auto !important;
+    align-items:stretch;
+}
+
+.visibility-management .housing-image{
+    width:180px;
+    height:145px;
+}
+
+.visibility-management .housing-controls{
+    display:flex !important;
+    flex-direction:row !important;
+    align-items:center;
+    justify-content:flex-start;
+    gap:20px;
+    padding:18px;
+    border-left:1px solid var(--border-color,#e5e7eb);
+}
+
+.visibility-management .control-item{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:6px;
+}
+
+.visibility-management .housing-info{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:8px;
+    padding:18px;
+}
+
+.visibility-management .housing-stats{
+    display:flex;
+    gap:18px;
+    margin-top:10px;
+}
+
+.visibility-management .housing-stats span{
+    display:flex;
+    align-items:center;
+    gap:6px;
+}
+
+.visibility-management .toggle-btn{
+    min-width:82px;
+    justify-content:center;
+}
+
+.visibility-management .status-select{
+    min-width:110px;
+}
+
+
+
+
+@media(max-width:992px){
+
+.visibility-management .housing-visibility-card{
+    grid-template-columns:160px 1fr;
+}
+
+.visibility-management .housing-controls{
+    grid-column:1/-1;
+    border-left:none;
+    border-top:1px solid var(--border-color,#e5e7eb);
+}
+
+}
+
+@media(max-width:768px){
+
+.visibility-management .housing-visibility-card{
+    grid-template-columns:1fr;
+}
+
+.visibility-management .housing-image{
+    width:100%;
+    height:220px;
+}
+
+.visibility-management .housing-controls{
+    flex-wrap:wrap;
+    gap:16px;
+}
+
+}
+
+@media(max-width:500px){
+
+.visibility-management .housing-controls{
+    flex-direction:column;
+    align-items:stretch;
+}
+
+.visibility-management .control-item{
+    width:100%;
+}
+
+.visibility-management .toggle-btn,
+.visibility-management .status-select{
+    width:100%;
+}
+
+}
